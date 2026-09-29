@@ -1,6 +1,6 @@
-# Duke project template
+# EduReserve project template
 
-This is a project template for a greenfield Java project. It's named after the Java mascot _Duke_. Given below are instructions on how to use it.
+This is a project template for a greenfield Java project. It's named EduReserve. Given below are instructions on how to use it.
 
 ## Setting up in Intellij
 
@@ -16,12 +16,11 @@ Prerequisites: JDK 25 (use the exact version), update Intellij to the most recen
    
    > Task :Duke.main()
    Hello from
-    ____        _
-   |  _ \ _   _| | _____ 
-   | | | | | | | |/ / _ \
-   | |_| | |_| |   <  __/
-   |____/ \__,_|_|\_\___|
-   
+    _____       _               ____                                                  
+   | ____|   __| |   _   _     |  _ \     ___     ___     ___    _ __   __   __   ___
+   |  _|    / _` |  | | | |    | |_) |   / _ \   / __|   / _ \  | '__|  \ \ / /  / _ \
+   | |___  | (_| |  | |_| |    |  _ <   |  __/   \__ \  |  __/  | |      \ V /  |  __/
+   |_____|  \__,_|   \__,_|    |_| \_\   \___|   |___/   \___|  |_|       \_/    \___|
    What is your name?
    ```
    Type some word and press enter to let the execution proceed to the end.
