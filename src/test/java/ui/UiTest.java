@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 
+import Tasks.Booking;
 import Tasks.BookingList;
 
 /**
@@ -70,6 +71,43 @@ class UiTest {
 
         assertTrue(new Ui(bookings).processCommand("BYE"));
         assertTrue(bookings.isEmpty());
+    }
+
+    @Test
+    void processCommand_cancelExistingBooking_removesIt() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
+        Ui ui = new Ui(bookings);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        PrintStream originalOutput = System.out;
+        try (PrintStream capturedOutput = new PrintStream(output, true, StandardCharsets.UTF_8)) {
+            System.setOut(capturedOutput);
+            assertFalse(ui.processCommand("cancel n/cs2113 midterm"));
+        } finally {
+            System.setOut(originalOutput);
+        }
+
+        assertTrue(bookings.isEmpty());
+        assertTrue(output.toString(StandardCharsets.UTF_8)
+                .contains("Booking cancelled: [B] exam - CS2113 Midterm (venue: LT1, timing: 10:30am)"));
+    }
+
+    @Test
+    void processCommand_cancelUnknownBooking_keepsListUnchanged() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
+        Ui ui = new Ui(bookings);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        PrintStream originalOutput = System.out;
+        try (PrintStream capturedOutput = new PrintStream(output, true, StandardCharsets.UTF_8)) {
+            System.setOut(capturedOutput);
+            assertFalse(ui.processCommand("cancel n/Nonexistent"));
+        } finally {
+            System.setOut(originalOutput);
+        }
+
+        assertEquals(1, bookings.size());
+        assertTrue(output.toString(StandardCharsets.UTF_8).contains("No booking found with the name: Nonexistent"));
     }
 
     /**

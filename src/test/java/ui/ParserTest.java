@@ -89,6 +89,20 @@ class ParserTest {
     }
 
     @Test
+    void parseCancel_validName_returnsName() {
+        assertEquals("CS2113 Midterm", parser.parseCancel("cancel n/CS2113 Midterm"));
+        assertEquals("Part a/b", parser.parseCancel("  CANCEL\tn/  Part a/b  "));
+    }
+
+    @Test
+    void parseCancel_missingOrBlankName_throws() {
+        String[] commands = {"cancel", "cancel   ", "cancel n/", "cancel n/   ", "cancel Midterm", "cancel r/exam"};
+        for (String command : commands) {
+            assertThrows(InvalidCommandException.class, () -> parser.parseCancel(command), command);
+        }
+    }
+
+    @Test
     void parseViewList_noFilter_returnsBookings() {
         assertEquals("bookings", parser.parseViewList("list"));
         assertEquals("bookings", parser.parseViewList("  list   "));
