@@ -1,4 +1,4 @@
-package Ui;
+package ui;
 
 import java.util.Locale;
 
@@ -25,7 +25,7 @@ public class Parser {
         String originalCommand = separateInput(input)[0];
         String command = originalCommand.toLowerCase(Locale.ROOT);
         switch (command) {
-        case "book", "cancel", "bye":
+        case "book", "cancel", "list", "bye":
             return command;
         default:
             throw new InvalidCommandException(originalCommand + " is not a valid command! -_-");
@@ -80,5 +80,34 @@ public class Parser {
             throw new InvalidCommandException("Booking name must not be empty.");
         }
         return name;
+    }
+
+    /**
+     * Parses a view command into 3 separate cases,
+     * View lectures and exams, view lectures only and view exams only
+     * @param input whole string parsed by program
+     */
+    public String parseViewList(String input) {
+        String command = parseCommand(input);
+        String[] separatedInput = separateInput(input);
+
+        if (!command.equals("list") || separatedInput.length > 2) {
+            throw new InvalidCommandException("Please only input the command and items you want to view");
+        }
+
+        if (separatedInput.length == 1) {
+            return "bookings";
+        }
+
+        String item = separatedInput[1].strip();
+
+        switch (item) {
+        case "lectures":
+            return "lectures";
+        case "exams":
+            return "exams";
+        default:
+            throw new InvalidCommandException("list must be followed by an empty word, exams or lectures");
+        }
     }
 }
