@@ -25,7 +25,7 @@ public class Parser {
         String originalCommand = separateInput(input)[0];
         String command = originalCommand.toLowerCase(Locale.ROOT);
         switch (command) {
-        case "book", "bye":
+        case "book", "cancel", "bye":
             return command;
         default:
             throw new InvalidCommandException(originalCommand + " is not a valid command! -_-");
@@ -61,5 +61,24 @@ public class Parser {
             throw new InvalidCommandException("Booking name, venue and timing must not be empty.");
         }
         return new Booking(reason, name, venue, timing);
+    }
+
+        /**
+     * Extracts the booking name from a command in the form: cancel n/BOOKING_NAME.
+     * The name is kept as text, so it may contain spaces.
+     */
+    public String parseCancel(String input) {
+        String command = parseCommand(input);
+        String[] separatedInput = separateInput(input);
+        if (!command.equals("cancel") || separatedInput.length < 2
+                || !separatedInput[1].strip().startsWith("n/")) {
+            throw new InvalidCommandException("Please use: cancel n/BOOKING_NAME");
+        }
+
+        String name = separatedInput[1].strip().substring(2).strip();
+        if (name.isBlank()) {
+            throw new InvalidCommandException("Booking name must not be empty.");
+        }
+        return name;
     }
 }
