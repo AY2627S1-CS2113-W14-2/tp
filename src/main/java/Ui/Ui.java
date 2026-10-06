@@ -35,6 +35,17 @@ public class Ui {
                 System.out.println("Booking added: " + booking);
                 System.out.println(LINE_BREAK);
                 break;
+            case "cancel":
+                String name = parser.parseCancel(userInput);
+                int index = bookingList.findByName(name);
+                if (index == -1) {
+                    throw new InvalidCommandException("No booking found with the name: " + name);
+                }
+                Booking cancelled = bookingList.get(index);
+                bookingList.remove(index);
+                System.out.println("Booking cancelled: " + cancelled);
+                System.out.println(LINE_BREAK);
+                break;
             default:
                 throw new InvalidCommandException("Unknown command: " + command);
             }

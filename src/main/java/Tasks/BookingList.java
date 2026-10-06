@@ -23,4 +23,16 @@ public class BookingList {
     public Booking getLast() {
         return bookings.getLast();
     }
+    /**
+     * Returns the index of the first booking with the given name (ignoring case),
+     * or -1 if there is no such booking.
+     */
+    public int findByName(String name) {
+        for (int i = 0; i < bookings.size(); i++) {
+            if (bookings.get(i).getName().equalsIgnoreCase(name)) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }

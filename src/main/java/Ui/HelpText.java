@@ -11,6 +11,9 @@ public final class HelpText {
                 BOOKING_REASON must be exam or lecture.
                 e.g. book r/exam n/CS2113 Midterm v/LT1 t/10:30am
 
+            cancel n/BOOKING_NAME: cancel an existing booking so the venue is free again.
+                e.g. cancel n/CS2113 Midterm
+                
             bye: exit EduReserve
             """;
 
