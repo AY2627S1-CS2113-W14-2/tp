@@ -3,7 +3,15 @@ package command;
 import Tasks.Booking;
 import Tasks.BookingList;
 
+/**
+ * Displays and filters the current list of bookings without changing it
+ */
 public class ListCommand extends Command {
+    /**
+     * Displays current bookings in a list by their original order with the option to filter
+     * @param bookings Arraylist of Booking read and printed line by line
+     * @param item filter used to show only lectures/exams
+     */
     @Override
     public void execute(BookingList bookings, String item) {
         int listSize = bookings.size();
