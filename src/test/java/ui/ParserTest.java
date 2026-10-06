@@ -118,13 +118,13 @@ class ParserTest {
     @Test
     void parseViewList_invalidInputs_throws() {
         String[] commands = {
-                "list meetings",
-                "list exam",
-                "list lecture",
-                "list exams lectures",
-                "list exams extra",
-                "book",
-                "bye"
+            "list meetings",
+            "list exam",
+            "list lecture",
+            "list exams lectures",
+            "list exams extra",
+            "book",
+            "bye"
         };
 
         for (String command : commands) {
