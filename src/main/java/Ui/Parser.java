@@ -19,14 +19,13 @@ public class Parser {
     }
 
     /**
-     * Returns a recognised command in lowercase, or reports an unknown command.
+     * Parse command in lowercase and catch unknown commands.
      */
     public String parseCommand(String input) {
         String originalCommand = separateInput(input)[0];
         String command = originalCommand.toLowerCase(Locale.ROOT);
         switch (command) {
-        case "book":
-        case "bye":
+        case "book", "bye":
             return command;
         default:
             throw new InvalidCommandException(originalCommand + " is not a valid command! -_-");
@@ -34,32 +33,33 @@ public class Parser {
     }
 
     /**
-     * Creates an exam or lecture booking using the field order shown in HelpText.
-     * Venue and timing are kept as text, so values may contain spaces.
+     * Creates a named exam or lecture booking in the order r/, n/, v/, t/.
+     * Field values are kept as text, so names, venues, and timings may contain spaces.
      */
     public Booking parseBooking(String input) {
         String command = parseCommand(input);
         String[] separatedInput = separateInput(input);
         if (!command.equals("book") || separatedInput.length < 2) {
-            throw new InvalidCommandException("Please use: book r/BOOKING_REASON v/VENUE t/TIMING");
+            throw new InvalidCommandException("Please use: book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING");
         }
 
-        // Split only before a field prefix, preserving spaces and dates inside values.
-        String[] fields = separatedInput[1].strip().split("\\p{javaWhitespace}+(?=[a-zA-Z]/)");
-        if (fields.length != 3 || !fields[0].startsWith("r/")
-                || !fields[1].startsWith("v/") || !fields[2].startsWith("t/")) {
-            throw new InvalidCommandException("Please use: book r/BOOKING_REASON v/VENUE t/TIMING");
+        // checks for r/, n/, v/, t/
+        String[] fields = separatedInput[1].strip().split("\\p{javaWhitespace}+(?=[rntv]/)");
+        if (fields.length != 4 || !fields[0].startsWith("r/") || !fields[1].startsWith("n/")
+                || !fields[2].startsWith("v/") || !fields[3].startsWith("t/")) {
+            throw new InvalidCommandException("Please use: book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING");
         }
 
         String reason = fields[0].substring(2).strip().toLowerCase(Locale.ROOT);
-        String venue = fields[1].substring(2).strip();
-        String timing = fields[2].substring(2).strip();
+        String name = fields[1].substring(2).strip();
+        String venue = fields[2].substring(2).strip();
+        String timing = fields[3].substring(2).strip();
         if (!reason.equals("exam") && !reason.equals("lecture")) {
             throw new InvalidCommandException("Booking reason must be exam or lecture.");
         }
-        if (venue.isBlank() || timing.isBlank()) {
-            throw new InvalidCommandException("Venue and timing must not be empty.");
+        if (name.isBlank() || venue.isBlank() || timing.isBlank()) {
+            throw new InvalidCommandException("Booking name, venue and timing must not be empty.");
         }
-        return new Booking(reason, venue, timing);
+        return new Booking(reason, name, venue, timing);
     }
 }
