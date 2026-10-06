@@ -1,22 +1,16 @@
 package Ui;
 
 /**
- * Supplies the shared command guide shown at startup and after input errors.
+ * HelpText for Users to understand how to use EduReserve
  */
 public final class HelpText {
-    /**
-     * Command syntax displayed at startup and after input errors.
-     */
     public static final String COMMAND_LIST = """
             \n
             How to use EduReserve:
-            book r/BOOKING_REASON v/VENUE t/TIMING:
-                BOOKING_REASON must be exam or lecture (case-insensitive).
-                Supply non-empty fields in the order r/, v/, t/.
-                Examples:
-                book r/exam v/LT1 t/10:30am
-                book r/lecture v/LT2 t/2:00pm
-            
+            book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING:
+                BOOKING_REASON must be exam or lecture.
+                e.g. book r/exam n/CS2113 Midterm v/LT1 t/10:30am
+
             bye: exit EduReserve
             """;
 
@@ -26,7 +20,7 @@ public final class HelpText {
     public static final String LINE_BREAK = "─".repeat(60);
 
     /**
-     * Prevents construction because this class only holds shared text.
+     * Prevents construction because this class is only for CONSTANTS.
      */
     private HelpText() {}
 }

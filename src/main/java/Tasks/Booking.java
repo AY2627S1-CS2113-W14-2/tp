@@ -1,23 +1,26 @@
 package Tasks;
 
 /**
- * An exam or lecture reservation with a venue and user-supplied timing.
+ * A named exam or lecture reservation with a venue and user-supplied timing.
  */
 public class Booking extends Task {
+    private final String name;
     private final String timing;
     private final String venue;
 
-    /**
-     * Creates a booking whose description is its booking reason.
-     */
-    public Booking(String reason, String venue, String timing) {
+    public Booking(String reason, String name, String venue, String timing) {
         super(reason);
+        this.name = name;
         this.timing = timing;
         this.venue = venue;
     }
 
     public String getReason() {
         return description;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getVenue() {
@@ -37,6 +40,7 @@ public class Booking extends Task {
 
     @Override
     public String toString() {
-        return "[" + getTaskIcon() + "] " + getReason() + " (venue: " + venue + ", timing: " + timing + ")";
+        return "[" + getTaskIcon() + "] " + getReason() + " - " + name
+                + " (venue: " + venue + ", timing: " + timing + ")";
     }
 }
