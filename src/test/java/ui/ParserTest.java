@@ -88,4 +88,34 @@ class ParserTest {
                 () -> parser.parseBooking("todo r/exam n/Midterm v/LT1 t/10:30am"));
     }
 
+    @Test
+    void parseViewList_noFilter_returnsBookings() {
+        assertEquals("bookings", parser.parseViewList("list"));
+        assertEquals("bookings", parser.parseViewList("  list   "));
+    }
+
+    @Test
+    void parseViewList_validFilters_returnsRequestedType() {
+        assertEquals("exams", parser.parseViewList("list exams"));
+        assertEquals("lectures", parser.parseViewList("list lectures"));
+        assertEquals("lectures", parser.parseViewList("  LIST\tlectures  "));
+    }
+
+    @Test
+    void parseViewList_invalidInputs_throws() {
+        String[] commands = {
+                "list meetings",
+                "list exam",
+                "list lecture",
+                "list exams lectures",
+                "list exams extra",
+                "book",
+                "bye"
+        };
+
+        for (String command : commands) {
+            assertThrows(InvalidCommandException.class,
+                    () -> parser.parseViewList(command), command);
+        }
+    }
 }

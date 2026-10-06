@@ -5,6 +5,7 @@ import static ui.HelpText.LINE_BREAK;
 import Exceptions.InvalidCommandException;
 import Tasks.Booking;
 import Tasks.BookingList;
+import command.ListCommand;
 
 /**
  * Executes commands and displays booking confirmations or input errors.
@@ -34,6 +35,11 @@ public class Ui {
                 bookingList.add(booking);
                 System.out.println("Booking added: " + booking);
                 System.out.println(LINE_BREAK);
+                break;
+            case "list":
+                String item = parser.parseViewList(userInput);
+                System.out.println("Ok, here is the list of " + item +":");
+                new ListCommand().execute(bookingList, item);
                 break;
             default:
                 throw new InvalidCommandException("Unknown command: " + command);
