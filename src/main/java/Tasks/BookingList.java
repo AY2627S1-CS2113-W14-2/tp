@@ -23,7 +23,7 @@ public class BookingList {
     public Booking getLast() {
         return bookings.getLast();
     }
-        /**
+    /**
      * Returns the index of the first booking with the given name (ignoring case),
      * or -1 if there is no such booking.
      */

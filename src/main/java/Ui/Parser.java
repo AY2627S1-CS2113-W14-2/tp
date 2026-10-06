@@ -63,7 +63,7 @@ public class Parser {
         return new Booking(reason, name, venue, timing);
     }
 
-        /**
+    /**
      * Extracts the booking name from a command in the form: cancel n/BOOKING_NAME.
      * The name is kept as text, so it may contain spaces.
      */
