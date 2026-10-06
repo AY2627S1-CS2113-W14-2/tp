@@ -1,6 +1,6 @@
-package Ui;
+package ui;
 
-import static Ui.HelpText.LINE_BREAK;
+import static ui.HelpText.LINE_BREAK;
 
 import Exceptions.InvalidCommandException;
 import Tasks.Booking;

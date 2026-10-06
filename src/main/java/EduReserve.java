@@ -1,10 +1,10 @@
-import static Ui.HelpText.LINE_BREAK;
+import static ui.HelpText.LINE_BREAK;
 
 import java.util.Scanner;
 
 import Tasks.BookingList;
-import Ui.HelpText;
-import Ui.Ui;
+import ui.HelpText;
+import ui.Ui;
 
 /**
  * Runs the interactive EduReserve booking application.

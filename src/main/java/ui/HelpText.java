@@ -1,4 +1,4 @@
-package Ui;
+package ui;
 
 /**
  * HelpText for Users to understand how to use EduReserve
