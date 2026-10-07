@@ -234,7 +234,7 @@ class UiTest {
 
         String response = captureListOutput(ui, "viewbooking n/CS2113 Midterm");
 
-        assertTrue(response.contains("Here are the booking details forCS2113 Midterm:"));
+        assertTrue(response.contains("Here are the booking details for CS2113 Midterm:"));
         assertTrue(response.contains("Booking purpose: exam"));
         assertTrue(response.contains("Booking venue: LT1"));
         assertTrue(response.contains("Booking timing: 10:30am"));
@@ -264,7 +264,7 @@ class UiTest {
 
         String response = captureListOutput(ui, "viewbooking n/Part a/b: Final Review");
 
-        assertTrue(response.contains("Here are the booking details forPart a/b: Final Review:"));
+        assertTrue(response.contains("Here are the booking details for Part a/b: Final Review:"));
         assertTrue(response.contains("Booking purpose: exam"));
         assertTrue(response.contains("Booking venue: Lecture Theatre 2"));
         assertTrue(response.contains("Booking timing: 05/10/2026 2:00pm"));
