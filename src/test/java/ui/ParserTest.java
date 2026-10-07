@@ -132,4 +132,71 @@ class ParserTest {
                     () -> parser.parseViewList(command), command);
         }
     }
+
+    @Test
+    void parseViewBooking_validName_returnsName() {
+        assertEquals("CS2113 Midterm", parser.parseViewBooking("viewbooking n/CS2113 Midterm"));
+    }
+
+    @Test
+    void parseViewBooking_nameWithPunctuationAndSpaces_isPreserved() {
+        assertEquals("Part a/b: Final Review", parser.parseViewBooking(
+                "viewbooking n/Part a/b: Final Review"));
+    }
+
+    @Test
+    void parseViewBooking_surroundingWhitespaceAndTabs_areIgnored() {
+        assertEquals("Week 1 Lecture", parser.parseViewBooking(
+                "  viewbooking\tn/  Week 1 Lecture  "));
+    }
+
+    @Test
+    void parseViewBooking_lowercaseCommand_returnsName() {
+        assertEquals("CS2113 Midterm", parser.parseViewBooking("viewbooking n/CS2113 Midterm"));
+    }
+
+    @Test
+    void parseViewBooking_missingOrBlankName_throws() {
+        String[] commands = {
+            "viewbooking",
+            "viewbooking   ",
+            "viewbooking n/",
+            "viewbooking n/   ",
+            "viewbooking CS2113 Midterm",
+            "viewbooking r/exam"
+        };
+
+        for (String command : commands) {
+            assertThrows(InvalidCommandException.class,
+                    () -> parser.parseViewBooking(command), command);
+        }
+    }
+
+    @Test
+    void parseViewBooking_wrongCommand_throws() {
+        String[] commands = {
+            "list n/CS2113 Midterm",
+            "book n/CS2113 Midterm",
+            "cancel n/CS2113 Midterm",
+            "bye",
+            "view n/CS2113 Midterm"
+        };
+
+        for (String command : commands) {
+            assertThrows(InvalidCommandException.class,
+                    () -> parser.parseViewBooking(command), command);
+        }
+    }
+
+    @Test
+    void parseViewBooking_unknownCommand_throws() {
+        assertThrows(InvalidCommandException.class,
+                () -> parser.parseViewBooking("search n/CS2113 Midterm"));
+    }
+
+    @Test
+    void parseViewBooking_nameWithOnlyWhitespaceAfterPrefix_throws() {
+        assertThrows(InvalidCommandException.class,
+                () -> parser.parseViewBooking("viewbooking\tn/\t\t"));
+    }
 }

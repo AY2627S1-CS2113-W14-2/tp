@@ -52,6 +52,18 @@ public class Ui {
                 System.out.println("Booking cancelled: " + cancelled);
                 System.out.println(LINE_BREAK);
                 break;
+            case "viewbooking":
+                String bookingName = parser.parseViewBooking(userInput);
+                int bookingIndex = bookingList.findByName(bookingName);
+                if (bookingIndex == -1) {
+                    throw new InvalidCommandException("No booking found with the name: " + bookingName);
+                }
+                Booking targetBooking = bookingList.get(bookingIndex);
+                System.out.println("Here are the booking details for " + bookingName + ":");
+                System.out.println("Booking purpose: " + targetBooking.getReason());
+                System.out.println("Booking venue: " + targetBooking.getVenue());
+                System.out.println("Booking timing: " + targetBooking.getTiming());
+                break;
             default:
                 throw new InvalidCommandException("Unknown command: " + command);
             }
