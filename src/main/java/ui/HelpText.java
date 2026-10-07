@@ -14,6 +14,9 @@ public final class HelpText {
             cancel n/BOOKING_NAME: cancel an existing booking so the venue is free again.
                 e.g. cancel n/CS2113 Midterm
                 
+            viewbooking n/BOOKING_NAME: views an existing booking and shows the details.
+                e.g. viewbooking n/CS2113 Midterm
+                
             bye: exit EduReserve
             """;
 

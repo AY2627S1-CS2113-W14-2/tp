@@ -225,4 +225,113 @@ class UiTest {
         assertFalse(response.contains("Title:"));
         assertEquals(3, bookings.size());
     }
+
+    @Test
+    void processCommand_viewbooking_printsExistingDetails() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
+        Ui ui = new Ui(bookings);
+
+        String response = captureListOutput(ui, "viewbooking n/CS2113 Midterm");
+
+        assertTrue(response.contains("Here are the booking details for CS2113 Midterm:"));
+        assertTrue(response.contains("Booking purpose: exam"));
+        assertTrue(response.contains("Booking venue: LT1"));
+        assertTrue(response.contains("Booking timing: 10:30am"));
+        assertEquals(1, bookings.size());
+        assertEquals("CS2113 Midterm", bookings.get(0).getName());
+    }
+
+    @Test
+    void processCommand_viewbooking_printsCaseInsensitiveMatch() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("lecture", "Week 1 Lecture", "LT2", "2:00pm"));
+        Ui ui = new Ui(bookings);
+
+        String response = captureListOutput(ui, "viewbooking n/week 1 lecture");
+
+        assertTrue(response.contains("Booking purpose: lecture"));
+        assertTrue(response.contains("Booking venue: LT2"));
+        assertTrue(response.contains("Booking timing: 2:00pm"));
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void processCommand_viewbooking_printsPunctuatedName() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "Part a/b: Final Review", "Lecture Theatre 2", "05/10/2026 2:00pm"));
+        Ui ui = new Ui(bookings);
+
+        String response = captureListOutput(ui, "viewbooking n/Part a/b: Final Review");
+
+        assertTrue(response.contains("Here are the booking details for Part a/b: Final Review:"));
+        assertTrue(response.contains("Booking purpose: exam"));
+        assertTrue(response.contains("Booking venue: Lecture Theatre 2"));
+        assertTrue(response.contains("Booking timing: 05/10/2026 2:00pm"));
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void processCommand_viewbooking_acceptsSurroundingWhitespace() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("lecture", "Week 1 Lecture", "LT2", "2:00pm"));
+        Ui ui = new Ui(bookings);
+
+        String response = captureListOutput(ui, "  viewbooking\tn/  Week 1 Lecture  ");
+
+        assertTrue(response.contains("Booking purpose: lecture"));
+        assertTrue(response.contains("Booking venue: LT2"));
+        assertTrue(response.contains("Booking timing: 2:00pm"));
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void processCommand_viewbooking_unknownBookingShowsError() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
+        Ui ui = new Ui(bookings);
+
+        String response = captureListOutput(ui, "viewbooking n/Nonexistent");
+
+        assertTrue(response.contains("No booking found with the name: Nonexistent"));
+        assertTrue(response.contains(HelpText.COMMAND_LIST));
+        assertFalse(response.contains("Booking purpose:"));
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void processCommand_viewbooking_missingNameShowsHelp() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
+        Ui ui = new Ui(bookings);
+
+        String response = captureListOutput(ui, "viewbooking");
+
+        assertTrue(response.contains("Please use: viewbooking n/BOOKING_NAME"));
+        assertTrue(response.contains(HelpText.COMMAND_LIST));
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void processCommand_viewbooking_blankNameShowsHelp() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
+        Ui ui = new Ui(bookings);
+
+        String response = captureListOutput(ui, "viewbooking n/   ");
+
+        assertTrue(response.contains("Booking name must not be empty."));
+        assertTrue(response.contains(HelpText.COMMAND_LIST));
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void processCommand_viewbooking_doesNotExitApplication() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
+        Ui ui = new Ui(bookings);
+
+        assertFalse(captureListOutput(ui, "viewbooking n/CS2113 Midterm").isEmpty());
+        assertTrue(ui.processCommand("bye"));
+    }
 }
