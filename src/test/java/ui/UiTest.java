@@ -227,7 +227,7 @@ class UiTest {
     }
 
     @Test
-    void processCommand_viewbooking_existingBooking_printsDetails() {
+    void processCommand_viewbooking_printsExistingDetails() {
         BookingList bookings = new BookingList();
         bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
         Ui ui = new Ui(bookings);
@@ -243,7 +243,7 @@ class UiTest {
     }
 
     @Test
-    void processCommand_viewbooking_nameMatchingIsCaseInsensitive_printsDetails() {
+    void processCommand_viewbooking_printsCaseInsensitiveMatch() {
         BookingList bookings = new BookingList();
         bookings.add(new Booking("lecture", "Week 1 Lecture", "LT2", "2:00pm"));
         Ui ui = new Ui(bookings);
@@ -257,7 +257,7 @@ class UiTest {
     }
 
     @Test
-    void processCommand_viewbooking_nameWithSpacesAndPunctuation_printsDetails() {
+    void processCommand_viewbooking_printsPunctuatedName() {
         BookingList bookings = new BookingList();
         bookings.add(new Booking("exam", "Part a/b: Final Review", "Lecture Theatre 2", "05/10/2026 2:00pm"));
         Ui ui = new Ui(bookings);
@@ -272,7 +272,7 @@ class UiTest {
     }
 
     @Test
-    void processCommand_viewbooking_surroundingWhitespace_isAccepted() {
+    void processCommand_viewbooking_acceptsSurroundingWhitespace() {
         BookingList bookings = new BookingList();
         bookings.add(new Booking("lecture", "Week 1 Lecture", "LT2", "2:00pm"));
         Ui ui = new Ui(bookings);
@@ -286,7 +286,7 @@ class UiTest {
     }
 
     @Test
-    void processCommand_viewbooking_unknownBooking_showsErrorWithoutChangingBookings() {
+    void processCommand_viewbooking_unknownBookingShowsError() {
         BookingList bookings = new BookingList();
         bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
         Ui ui = new Ui(bookings);
@@ -300,7 +300,7 @@ class UiTest {
     }
 
     @Test
-    void processCommand_viewbooking_missingName_showsHelpWithoutChangingBookings() {
+    void processCommand_viewbooking_missingNameShowsHelp() {
         BookingList bookings = new BookingList();
         bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
         Ui ui = new Ui(bookings);
@@ -313,7 +313,7 @@ class UiTest {
     }
 
     @Test
-    void processCommand_viewbooking_blankName_showsHelpWithoutChangingBookings() {
+    void processCommand_viewbooking_blankNameShowsHelp() {
         BookingList bookings = new BookingList();
         bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
         Ui ui = new Ui(bookings);
