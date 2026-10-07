@@ -23,7 +23,7 @@ public final class HelpText {
     /**
      * Separates command responses.
      */
-    public static final String LINE_BREAK = "─".repeat(60);
+    public static final String LINE_BREAK = "-".repeat(60);
 
     /**
      * Prevents construction because this class is only for CONSTANTS.
