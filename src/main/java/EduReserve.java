@@ -14,11 +14,12 @@ public class EduReserve {
      * Reads the user's name and processes booking commands until exit or end of input.
      */
     public static void main(String[] args) {
-        String banner = " ____        _        \n"
-                + "|  _ \\ _   _| | _____ \n"
-                + "| | | | | | | |/ / _ \\\n"
-                + "| |_| | |_| |   <  __/\n"
-                + "|____/ \\__,_|_|\\_\\___|\n";
+        String banner = " _____       _               ____                                                  \n"
+                + "| ____|   __| |   _   _     |  _ \\     ___     ___     ___    _ __   __   __   ___\n"
+                + "|  _|    / _` |  | | | |    | |_) |   / _ \\   / __|   / _ \\  | '__|  \\ \\ / /  / _ \\\n"
+                + "| |___  | (_| |  | |_| |    |  _ <   |  __/   \\__ \\  |  __/  | |      \\ V /  |  __/\n"
+                + "|_____|  \\__,_|   \\__,_|    |_| \\_\\   \\___|   |___/   \\___|  |_|       \\_/    \\___|";
+
         System.out.println(banner);
         System.out.println("What is your name?");
 
@@ -29,12 +30,14 @@ public class EduReserve {
             if (!in.hasNextLine()) {
                 return;
             }
-            System.out.println("Hello, welcome to eduReserve " + in.nextLine());
+
+            String userName = in.nextLine().trim();
+            System.out.println("Hello, " + userName + "! Welcome to EduReserve.");
             System.out.println(LINE_BREAK);
             System.out.println(HelpText.COMMAND_LIST);
             System.out.println(LINE_BREAK);
 
-            // Process Commands
+            // Process commands
             while (in.hasNextLine()) {
                 String userInput = in.nextLine();
 
