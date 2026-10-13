@@ -8,8 +8,15 @@ public class Booking extends Task {
     private final String timing;
     private final String venue;
 
+    /**
+     * Creates a booking from fields already validated by the parser.
+     */
     public Booking(String reason, String name, String venue, String timing) {
         super(reason);
+        assert "exam".equals(reason) || "lecture".equals(reason) : "Booking reason must be exam or lecture";
+        assert name != null && !name.isBlank() : "Booking name must already be validated";
+        assert venue != null && !venue.isBlank() : "Booking venue must already be validated";
+        assert timing != null && !timing.isBlank() : "Booking timing must already be validated";
         this.name = name;
         this.timing = timing;
         this.venue = venue;

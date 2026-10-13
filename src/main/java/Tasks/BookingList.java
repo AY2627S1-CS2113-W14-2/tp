@@ -5,8 +5,14 @@ import java.util.ArrayList;
 /** Owns booking list and provides operations for managing them. */
 public class BookingList {
     private final ArrayList<Booking> bookings = new ArrayList<>();
+
+    /** Adds a booking and checks that it was appended successfully. */
     public void add(Booking booking) {
+        assert booking != null : "Cannot add a null booking";
+        int previousSize = bookings.size();
         bookings.add(booking);
+        assert bookings.size() == previousSize + 1 : "Adding a booking must increase the size by one";
+        assert bookings.getLast() == booking : "The added booking must be the last booking";
     }
     public Booking get(int index) {
         return bookings.get(index);
