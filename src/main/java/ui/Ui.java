@@ -62,7 +62,8 @@ public class Ui {
                     throw new InvalidCommandException("No booking found with the name: " + bookingName);
                 }
 
-                assert bookingIndex >= 0 && bookingIndex < bookingList.size() : "Booking index must be within the list size";
+                assert bookingIndex >= 0 && bookingIndex < bookingList.size()
+                        : "Booking index must be within the list size";
                 Booking targetBooking = bookingList.get(bookingIndex);
 
                 assert targetBooking != null : "Booking must be valid";
