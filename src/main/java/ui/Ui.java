@@ -16,6 +16,7 @@ public class Ui {
     private final Parser parser = new Parser();
 
     public Ui(BookingList bookingList) {
+        assert bookingList != null : "Ui requires a booking list";
         this.bookingList = bookingList;
     }
 
@@ -23,6 +24,7 @@ public class Ui {
      * Processes one command and returns whether the user requested to exit.
      */
     public boolean processCommand(String userInput) {
+        assert userInput != null : "User input must not be null";
         try {
             System.out.println(LINE_BREAK);
             String command = parser.parseCommand(userInput);
@@ -49,6 +51,7 @@ public class Ui {
                 }
                 Booking cancelled = bookingList.get(index);
                 bookingList.remove(index);
+                assert cancelled.getName().equalsIgnoreCase(name) : "Cancelled booking must match the name";
                 System.out.println("Booking cancelled: " + cancelled);
                 System.out.println(LINE_BREAK);
                 break;

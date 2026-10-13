@@ -67,8 +67,12 @@ public class Parser {
     /**
      * Extracts the booking name from a command in the form: cancel n/BOOKING_NAME.
      * The name is kept as text, so it may contain spaces.
+     * @param input whole command string entered by the user, never null
+     * @return the booking name to cancel
+     * @throws InvalidCommandException if the command is not a valid cancel command
      */
     public String parseCancel(String input) {
+        assert input != null : "Cancel command input must not be null";
         String command = parseCommand(input);
         String[] separatedInput = separateInput(input);
         if (!command.equals("cancel") || separatedInput.length < 2
