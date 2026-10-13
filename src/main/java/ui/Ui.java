@@ -66,7 +66,8 @@ public class Ui {
                 Booking targetBooking = bookingList.get(bookingIndex);
 
                 assert targetBooking != null : "Booking must be valid";
-                assert targetBooking.getName().equalsIgnoreCase(bookingName) : "View booking must match the name";
+                assert targetBooking.getName().equalsIgnoreCase(bookingName)
+                        : "View booking must match the name";
                 assert targetBooking.getReason() != null : "Reason for booking cannot be empty";
                 assert targetBooking.getVenue() != null : "Venue in booking cannot be empty";
                 assert targetBooking.getTiming() != null : "Timing of venue cannot be empty";
