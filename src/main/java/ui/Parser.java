@@ -102,12 +102,12 @@ public class Parser {
         String item = separatedInput[1].strip();
 
         switch (item) {
-        case "lectures":
+        case "r/lectures":
             return "lectures";
-        case "exams":
+        case "r/exams":
             return "exams";
         default:
-            throw new InvalidCommandException("list must be followed by an empty word, exams or lectures");
+            throw new InvalidCommandException("list must be followed by an empty word, r/exams or r/lectures");
         }
     }
 

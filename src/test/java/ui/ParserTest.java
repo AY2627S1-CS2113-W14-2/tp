@@ -110,17 +110,17 @@ class ParserTest {
 
     @Test
     void parseViewList_validFilters_returnsRequestedType() {
-        assertEquals("exams", parser.parseViewList("list exams"));
-        assertEquals("lectures", parser.parseViewList("list lectures"));
-        assertEquals("lectures", parser.parseViewList("  LIST\tlectures  "));
+        assertEquals("exams", parser.parseViewList("list r/exams"));
+        assertEquals("lectures", parser.parseViewList("list r/lectures"));
+        assertEquals("lectures", parser.parseViewList("  LIST\tr/lectures  "));
     }
 
     @Test
     void parseViewList_invalidInputs_throws() {
         String[] commands = {
             "list meetings",
-            "list exam",
-            "list lecture",
+            "list r/exam",
+            "list r/lecture",
             "list exams lectures",
             "list exams extra",
             "book",

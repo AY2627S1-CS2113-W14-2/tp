@@ -14,8 +14,9 @@ public final class HelpText {
             cancel n/BOOKING_NAME: cancel an existing booking so the venue is free again.
                 e.g. cancel n/CS2113 Midterm
                 
-            list BOOKING_REASON (optional):
-                BOOKING_REASON must be blank, exams or lectures.
+            list r/BOOKING_REASON (optional):
+                BOOKING_REASON must be exams or lectures.
+                Omit r/BOOKING_REASON to list both exams and lectures
                 e.g. list exams   
                 
             viewbooking n/BOOKING_NAME: views an existing booking and shows the details.

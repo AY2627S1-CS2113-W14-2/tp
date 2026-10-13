@@ -168,7 +168,7 @@ class UiTest {
         BookingList bookings = new BookingList();
         Ui ui = createUiWithBookings(bookings);
 
-        String response = captureListOutput(ui, "list exams");
+        String response = captureListOutput(ui, "list r/exams");
         String expectedRows = String.join(System.lineSeparator(),
                 "1. exam Title: CS2113 Lecture 7",
                 "2. exam Title: CG2028 Finals");
@@ -186,7 +186,7 @@ class UiTest {
         BookingList bookings = new BookingList();
         Ui ui = createUiWithBookings(bookings);
 
-        String response = captureListOutput(ui, "list lectures");
+        String response = captureListOutput(ui, "list r/lectures");
 
         assertTrue(response.contains("Ok, here is the list of lectures:"));
         assertTrue(response.contains("1. lecture Title: EE2028"));
@@ -202,7 +202,7 @@ class UiTest {
         BookingList bookings = new BookingList();
         Ui ui = new Ui(bookings);
 
-        for (String command : new String[]{"list", "list exams", "list lectures"}) {
+        for (String command : new String[]{"list", "list r/exams", "list r/lectures"}) {
             String response = captureListOutput(ui, command);
 
             assertTrue(response.contains("Ok, here is the list of"), command);
@@ -220,7 +220,7 @@ class UiTest {
         String response = captureListOutput(ui, "list meetings");
 
         assertTrue(response.contains(
-                "list must be followed by an empty word, exams or lectures"));
+                "list must be followed by an empty word, r/exams or r/lectures"));
         assertTrue(response.contains(HelpText.COMMAND_LIST));
         assertFalse(response.contains("Title:"));
         assertEquals(3, bookings.size());
