@@ -17,7 +17,7 @@ public final class HelpText {
             list r/BOOKING_REASON (optional):
                 BOOKING_REASON must be exams or lectures.
                 Omit r/BOOKING_REASON to list both exams and lectures
-                e.g. list exams   
+                e.g. list r/exams   
                 
             viewbooking n/BOOKING_NAME: views an existing booking and shows the details.
                 e.g. viewbooking n/CS2113 Midterm

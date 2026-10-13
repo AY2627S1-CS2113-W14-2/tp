@@ -14,20 +14,29 @@ public class ListCommand extends Command {
      */
     @Override
     public void execute(BookingList bookings, String item) {
+        assert bookings != null : "Booking list cannot be null";
         int listSize = bookings.size();
+
+        assert "bookings".equals(item)
+                || "lectures".equals(item)
+                || "exams".equals(item)
+                : "Unexpected item in list " + item;
+
         switch (item) {
         case "bookings":
             for (int i = 0; i < listSize; i++) {
                 Booking element = bookings.get(i);
-                printElement(i, element);
+                assert element != null : "No such booking exists at index " + i;
+                printElement(i, listSize, element);
             }
             break;
         case "lectures":
             int lectureIndex = 0;
             for (int i = 0; i < listSize; i++) {
                 Booking element = bookings.get(i);
+                assert element != null : "No such booking exists at index " + i;
                 if (element.getReason().equals("lecture")) {
-                    printElement(lectureIndex, element);
+                    printElement(lectureIndex, listSize, element);
                     lectureIndex++;
                 }
             }
@@ -36,8 +45,9 @@ public class ListCommand extends Command {
             int examIndex = 0;
             for (int i = 0; i < listSize; i++) {
                 Booking element = bookings.get(i);
+                assert element != null : "No such booking exists at index " + i;
                 if (element.getReason().equals("exam")) {
-                    printElement(examIndex, element);
+                    printElement(examIndex, listSize, element);
                     examIndex++;
                 }
             }
@@ -45,9 +55,19 @@ public class ListCommand extends Command {
         default:
             break;
         }
+        assert bookings.size() == listSize : "Listing bookings should not change list size: before: "
+                + listSize + ", after " + bookings.size();
     }
 
-    private void printElement(int index, Booking element) {
+    /**
+     * Prints a single booking with its display number, reason and name.
+     * @param index index zero-based display index, adjusted for filtered results
+     * @param bookingsSize total number of bookings
+     * @param element booking to display
+     */
+    private void printElement(int index, int bookingsSize, Booking element) {
+        assert index >= 0 && index < bookingsSize : "Booking to be printed is not in the list";
+        assert element != null : "Booking to be printed cannot be null";
         System.out.println((index + 1) + ". " + element.getReason() + " Title: " + element.getName());
     }
 
