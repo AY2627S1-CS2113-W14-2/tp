@@ -119,6 +119,9 @@ public class Parser {
     /**
      * Extracts the booking name from a command in the form: viewBooking n/BOOKING_NAME.
      * The name is kept as text, so it may contain spaces.
+     * @param input whole string parsed by program
+     * @return the booking name to view
+     * @throws InvalidCommandException if the command is not a valid view booking command
      */
     public String parseViewBooking(String input) {
         String command = parseCommand(input);

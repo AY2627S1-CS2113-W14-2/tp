@@ -61,7 +61,18 @@ public class Ui {
                 if (bookingIndex == -1) {
                     throw new InvalidCommandException("No booking found with the name: " + bookingName);
                 }
+
+                assert bookingIndex >= 0 && bookingIndex < bookingList.size()
+                        : "Booking index must be within the list size";
                 Booking targetBooking = bookingList.get(bookingIndex);
+
+                assert targetBooking != null : "Booking must be valid";
+                assert targetBooking.getName().equalsIgnoreCase(bookingName)
+                        : "View booking must match the name";
+                assert targetBooking.getReason() != null : "Reason for booking cannot be empty";
+                assert targetBooking.getVenue() != null : "Venue in booking cannot be empty";
+                assert targetBooking.getTiming() != null : "Timing of venue cannot be empty";
+
                 System.out.println("Here are the booking details for " + bookingName + ":");
                 System.out.println("Booking purpose: " + targetBooking.getReason());
                 System.out.println("Booking venue: " + targetBooking.getVenue());
