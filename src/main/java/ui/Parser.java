@@ -37,6 +37,7 @@ public class Parser {
      * Field values are kept as text, so names, venues, and timings may contain spaces.
      */
     public Booking parseBooking(String input) {
+        assert input != null : "Booking command input must not be null";
         String command = parseCommand(input);
         String[] separatedInput = separateInput(input);
         if (!command.equals("book") || separatedInput.length < 2) {
