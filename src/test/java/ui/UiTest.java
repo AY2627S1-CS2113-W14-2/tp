@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -145,85 +146,120 @@ class UiTest {
         return output.toString(StandardCharsets.UTF_8);
     }
 
-    @Test
-    void processCommand_list_printsAllBookingsInOrder() {
+    /**
+     * Checks the heading, displayed rows and preservation of stored booking order.
+     */
+    private void assertListing(String command, String heading, String... expectedRows) {
         BookingList bookings = new BookingList();
         Ui ui = createUiWithBookings(bookings);
 
-        String response = captureListOutput(ui, "list");
-        String expectedRows = String.join(System.lineSeparator(),
+        String response = captureListOutput(ui, command);
+        List<String> actualRows = response.lines()
+                .filter(line -> line.matches("\\d+\\. .* Title: .*"))
+                .toList();
+
+        assertTrue(response.contains(heading), response);
+        assertEquals(List.of(expectedRows), actualRows, command);
+        assertFalse(response.contains(HelpText.COMMAND_LIST), response);
+        assertFalse(response.contains("Unknown command"), response);
+
+        // Sorting the displayed list must preserve the stored bookings and order.
+        assertEquals(3, bookings.size());
+        assertEquals("CS2113 Lecture 7", bookings.get(0).getName());
+        assertEquals("CG2028 Finals", bookings.get(1).getName());
+        assertEquals("EE2028", bookings.get(2).getName());
+    }
+
+    @Test
+    void processCommand_list_printsAllBookingsInOriginalOrder() {
+        assertListing("list",
+                "Ok, here is the list of bookings in ORIGINAL order",
                 "1. exam Title: CS2113 Lecture 7",
                 "2. exam Title: CG2028 Finals",
                 "3. lecture Title: EE2028");
-
-        assertTrue(response.contains("Ok, here is the list of bookings:"));
-        assertTrue(response.contains(expectedRows));
-        assertFalse(response.contains(HelpText.COMMAND_LIST));
-        assertFalse(response.contains("Unknown command"));
-        assertEquals(3, bookings.size());
     }
 
     @Test
     void processCommand_listExams_printsOnlyExams() {
-        BookingList bookings = new BookingList();
-        Ui ui = createUiWithBookings(bookings);
-
-        String response = captureListOutput(ui, "list r/exams");
-        String expectedRows = String.join(System.lineSeparator(),
+        assertListing("list r/exams",
+                "Ok, here is the list of exams in ORIGINAL order",
                 "1. exam Title: CS2113 Lecture 7",
                 "2. exam Title: CG2028 Finals");
-
-        assertTrue(response.contains("Ok, here is the list of exams:"));
-        assertTrue(response.contains(expectedRows));
-        assertFalse(response.contains("EE2028"));
-        assertFalse(response.contains(HelpText.COMMAND_LIST));
-        assertFalse(response.contains("Unknown command"));
-        assertEquals(3, bookings.size());
     }
 
     @Test
-    void processCommand_listLectures_printsOnlyLecturesStartingAtOne() {
-        BookingList bookings = new BookingList();
-        Ui ui = createUiWithBookings(bookings);
+    void processCommand_listLectures_startsNumberingAtOne() {
+        assertListing("list r/lectures",
+                "Ok, here is the list of lectures in ORIGINAL order",
+                "1. lecture Title: EE2028");
+    }
 
-        String response = captureListOutput(ui, "list r/lectures");
+    @Test
+    void processCommand_listAlphabetic_sortsAllBookings() {
+        assertListing("list s/alpha",
+                "Ok, here is the list of bookings in ALPHABETIC order",
+                "1. exam Title: CG2028 Finals",
+                "2. exam Title: CS2113 Lecture 7",
+                "3. lecture Title: EE2028");
+    }
 
-        assertTrue(response.contains("Ok, here is the list of lectures:"));
-        assertTrue(response.contains("1. lecture Title: EE2028"));
-        assertFalse(response.contains("CS2113 Lecture 7"));
-        assertFalse(response.contains("CG2028 Finals"));
-        assertFalse(response.contains(HelpText.COMMAND_LIST));
-        assertFalse(response.contains("Unknown command"));
-        assertEquals(3, bookings.size());
+    @Test
+    void processCommand_listReverseAlphabetic_sortsAllBookingsBackwards() {
+        assertListing("list s/~alpha",
+                "Ok, here is the list of bookings in REVERSE_ALPHABETIC order",
+                "1. lecture Title: EE2028",
+                "2. exam Title: CS2113 Lecture 7",
+                "3. exam Title: CG2028 Finals");
+    }
+
+    @Test
+    void processCommand_listExamsAlphabetic_filtersThenSorts() {
+        assertListing("list r/exams s/alpha",
+                "Ok, here is the list of exams in ALPHABETIC order",
+                "1. exam Title: CG2028 Finals",
+                "2. exam Title: CS2113 Lecture 7");
     }
 
     @Test
     void processCommand_listEmptyBookings_printsNoBookingRows() {
-        BookingList bookings = new BookingList();
-        Ui ui = new Ui(bookings);
+        Ui ui = new Ui(new BookingList());
+        String[] commands = {
+            "list",
+            "list r/exams",
+            "list r/lectures",
+            "list s/alpha",
+            "list r/exams s/~alpha"
+        };
 
-        for (String command : new String[]{"list", "list r/exams", "list r/lectures"}) {
+        for (String command : commands) {
             String response = captureListOutput(ui, command);
 
             assertTrue(response.contains("Ok, here is the list of"), command);
             assertFalse(response.contains("Title:"), command);
             assertFalse(response.contains(HelpText.COMMAND_LIST), command);
-            assertTrue(bookings.isEmpty());
         }
     }
 
     @Test
-    void processCommand_listInvalidFilter_showsHelpWithoutChangingBookings() {
+    void processCommand_listInvalidOptions_showsHelpWithoutChangingBookings() {
         BookingList bookings = new BookingList();
         Ui ui = createUiWithBookings(bookings);
 
-        String response = captureListOutput(ui, "list meetings");
+        String[] commands = {
+            "list meetings",
+            "list r/meeting",
+            "list s/numeric",
+            "list r/exams r/lectures",
+            "list s/alpha s/~alpha"
+        };
 
-        assertTrue(response.contains(
-                "list must be followed by an empty word, r/exams or r/lectures"));
-        assertTrue(response.contains(HelpText.COMMAND_LIST));
-        assertFalse(response.contains("Title:"));
-        assertEquals(3, bookings.size());
+        for (String command : commands) {
+            String response = captureListOutput(ui, command);
+
+            assertTrue(response.contains(HelpText.COMMAND_LIST), command);
+            assertFalse(response.contains("Title:"), command);
+            assertEquals(3, bookings.size(), command);
+        }
     }
 
     @Test

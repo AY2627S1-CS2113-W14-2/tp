@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import Exceptions.InvalidCommandException;
 import Tasks.Booking;
+import command.SortOrder;
 
 /**
  * Interprets command text without printing or changing the booking list.
@@ -90,30 +91,59 @@ public class Parser {
     /**
      * Parses a view command into 3 separate cases,
      * View lectures and exams, view lectures only and view exams only
+     * View the specified lectures or exams by alphabetical order
      * @param input whole string parsed by program
      */
-    public String parseViewList(String input) {
+    public ListOptions parseViewList(String input) {
         String command = parseCommand(input);
+
+        if (!command.equals("list")) {
+            throw new InvalidCommandException("Please use list r/exams or r/lectures and optional s/SORT_ORDER");
+        }
+
         String[] separatedInput = separateInput(input);
 
-        if (!command.equals("list") || separatedInput.length > 2) {
-            throw new InvalidCommandException("Please only input the command and items you want to view");
-        }
-
         if (separatedInput.length == 1) {
-            return "bookings";
+            return new ListOptions("bookings", SortOrder.ORIGINAL);
         }
 
-        String item = separatedInput[1].strip();
+        String[] options = separatedInput[1].strip()
+                .split("\\p{javaWhitespace}+");
 
-        switch (item) {
-        case "r/lectures":
-            return "lectures";
-        case "r/exams":
-            return "exams";
-        default:
-            throw new InvalidCommandException("list must be followed by an empty word, r/exams or r/lectures");
+        boolean reasonSeen = false;
+        boolean sortOrderSeen = false;
+        String item = "bookings";
+        SortOrder sortOrder = SortOrder.ORIGINAL;
+        for (String option : options) {
+            if (option.startsWith("r/")) {
+                if (reasonSeen) {
+                    throw new InvalidCommandException("Reason should only be specified once");
+                }
+                reasonSeen = true;
+                if (option.equalsIgnoreCase("r/lectures")) {
+                    item = "lectures";
+                } else if (option.equalsIgnoreCase("r/exams")) {
+                    item = "exams";
+                } else {
+                    throw new InvalidCommandException("Reason should be lectures or exams");
+                }
+            } else if (option.startsWith("s/")) {
+                if (sortOrderSeen) {
+                    throw new InvalidCommandException("Sort order should only be specified once");
+                }
+                sortOrderSeen = true;
+                if (option.equalsIgnoreCase("s/alpha")) {
+                    sortOrder = SortOrder.ALPHABETIC;
+                } else if (option.equalsIgnoreCase("s/~alpha")) {
+                    sortOrder = SortOrder.REVERSE_ALPHABETIC;
+                } else {
+                    throw new InvalidCommandException("Sorted order should be alpha or ~alpha");
+                }
+            } else {
+                throw new InvalidCommandException("list must be followed by a reason or sort order");
+            }
         }
+        return new ListOptions(item, sortOrder);
     }
 
     /**
@@ -159,5 +189,11 @@ public class Parser {
             throw new InvalidCommandException("Search keyword must not be empty.");
         }
         return keyword;
+    }
+
+    /**
+     * Holds the booking filter and sorting options for the list command
+     */
+    public record ListOptions(String item, SortOrder sortOrder) {
     }
 }
