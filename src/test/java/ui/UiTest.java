@@ -234,7 +234,9 @@ class UiTest {
 
         String response = captureListOutput(ui, "viewbooking n/CS2113 Midterm");
 
-        assertTrue(response.contains("Here are the booking details for CS2113 Midterm:"));
+        assertTrue(response.contains(
+                "Ok, here are all the booking details relevant to CS2113 Midterm:"));
+        assertTrue(response.contains("Booking 1:"));
         assertTrue(response.contains("Booking purpose: exam"));
         assertTrue(response.contains("Booking venue: LT1"));
         assertTrue(response.contains("Booking timing: 10:30am"));
@@ -264,7 +266,9 @@ class UiTest {
 
         String response = captureListOutput(ui, "viewbooking n/Part a/b: Final Review");
 
-        assertTrue(response.contains("Here are the booking details for Part a/b: Final Review:"));
+        assertTrue(response.contains(
+                "Ok, here are all the booking details relevant to Part a/b: Final Review:"));
+        assertTrue(response.contains("Booking 1:"));
         assertTrue(response.contains("Booking purpose: exam"));
         assertTrue(response.contains("Booking venue: Lecture Theatre 2"));
         assertTrue(response.contains("Booking timing: 05/10/2026 2:00pm"));
@@ -283,6 +287,26 @@ class UiTest {
         assertTrue(response.contains("Booking venue: LT2"));
         assertTrue(response.contains("Booking timing: 2:00pm"));
         assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void processCommand_viewbooking_printsAllExactNameMatches() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
+        bookings.add(new Booking("lecture", "CS2113 Midterm", "LT2", "2:00pm"));
+        bookings.add(new Booking("exam", "CS2113 Finals", "LT3", "4:00pm"));
+        Ui ui = new Ui(bookings);
+
+        String response = captureListOutput(ui, "viewbooking n/cs2113 midterm");
+
+        assertTrue(response.contains("Booking 1:"));
+        assertTrue(response.contains("Booking 2:"));
+        assertTrue(response.contains("Booking purpose: exam"));
+        assertTrue(response.contains("Booking purpose: lecture"));
+        assertTrue(response.contains("Booking venue: LT1"));
+        assertTrue(response.contains("Booking venue: LT2"));
+        assertFalse(response.contains("LT3"));
+        assertEquals(3, bookings.size());
     }
 
     @Test

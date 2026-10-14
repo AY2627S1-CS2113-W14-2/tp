@@ -58,6 +58,27 @@ public class BookingList {
     }
 
     /**
+     * Returns a list of bookings with the exact given name,
+     * or an empty list if there is no such booking.
+     * The name must already be validated by the parser, so it is never null or blank.
+     * @param name to look for in order to get matches
+     */
+    public ArrayList<Booking> findAllByName(String name) {
+        assert name != null && !name.isBlank()
+                : "Booking name must already be validated";
+
+        ArrayList<Booking> exactMatches = new ArrayList<>();
+
+        for (Booking booking : bookings) {
+            if (booking.getName().equalsIgnoreCase(name)) {
+                exactMatches.add(booking);
+            }
+        }
+
+        return exactMatches;
+    }
+
+    /**
      * Returns the bookings whose name contains the keyword, ignoring case, in their original order.
      * The keyword must already be validated by the parser, so it is never null or blank.
      * The returned list is a copy, so changing it does not change the bookings.
