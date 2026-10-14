@@ -1,6 +1,5 @@
 package command;
 
-import Exceptions.InvalidCommandException;
 import Tasks.Booking;
 import Tasks.BookingList;
 
