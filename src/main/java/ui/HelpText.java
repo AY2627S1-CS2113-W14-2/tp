@@ -21,6 +21,9 @@ public final class HelpText {
                 
             viewbooking n/BOOKING_NAME: views an existing booking and shows the details.
                 e.g. viewbooking n/CS2113 Midterm
+            
+            find n/KEYWORD: finds bookings whose name contains the keyword (not case sensitive).
+                e.g. find n/CS2
                 
             bye: exit EduReserve
             """;

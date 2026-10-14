@@ -334,4 +334,46 @@ class UiTest {
         assertFalse(captureListOutput(ui, "viewbooking n/CS2113 Midterm").isEmpty());
         assertTrue(ui.processCommand("bye"));
     }
+
+    @Test
+    void processCommand_find_showsOnlyMatchingBookings() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
+        bookings.add(new Booking("exam", "CS2445 Final Exam", "LT2", "2:00pm"));
+        Ui ui = new Ui(bookings);
+
+        String broadSearch = runAndCapture(ui, "find n/CS2");
+        String narrowSearch = runAndCapture(ui, "find n/cs2113");
+        String noMatch = runAndCapture(ui, "find n/Tutorial");
+
+        assertTrue(broadSearch.contains("1. [B] exam - CS2113 Midterm"));
+        assertTrue(broadSearch.contains("2. [B] exam - CS2445 Final Exam"));
+        assertTrue(narrowSearch.contains("1. [B] exam - CS2113 Midterm"));
+        assertFalse(narrowSearch.contains("CS2445"));
+        assertTrue(noMatch.contains("No bookings found matching: Tutorial"));
+        assertEquals(2, bookings.size());
+    }
+
+    @Test
+    void processCommand_findWithoutKeyword_showsErrorAndKeepsList() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
+
+        String response = runAndCapture(new Ui(bookings), "find n/");
+
+        assertTrue(response.contains("Search keyword must not be empty."));
+        assertEquals(1, bookings.size());
+    }
+
+    private String runAndCapture(Ui ui, String command) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        PrintStream originalOutput = System.out;
+        try (PrintStream capturedOutput = new PrintStream(output, true, StandardCharsets.UTF_8)) {
+            System.setOut(capturedOutput);
+            assertFalse(ui.processCommand(command));
+        } finally {
+            System.setOut(originalOutput);
+        }
+        return output.toString(StandardCharsets.UTF_8);
+    }
 }
