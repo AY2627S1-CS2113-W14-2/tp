@@ -1,5 +1,6 @@
 package command;
 
+import Exceptions.InvalidCommandException;
 import Tasks.Booking;
 import Tasks.BookingList;
 
@@ -76,7 +77,7 @@ public class ListCommand extends Command {
 
     /**
      * Sorts the last shown list according to the specified sortorder
-     * @param sortBy determines if the function sorts the list according to alphabetical order, the inverse or does nothing to it
+     * @param sortBy sort the list by a user specified order
      */
     private void sortLastShownList(SortOrder sortBy) {
         int listSize = lastShownList.size();
@@ -92,6 +93,8 @@ public class ListCommand extends Command {
                     Comparator.comparing(Booking::getName, String.CASE_INSENSITIVE_ORDER)
                             .reversed());
             break;
+        default:
+            throw new IllegalArgumentException("Unexpected sort order: " + sortBy.toString());
         }
         assert lastShownList.size() == listSize: "Sorting the list should not change the number of bookings: before: "
                 + listSize + " after: " + lastShownList.size();
