@@ -199,4 +199,23 @@ class ParserTest {
         assertThrows(InvalidCommandException.class,
                 () -> parser.parseViewBooking("viewbooking\tn/\t\t"));
     }
+
+    @Test
+    void parseFind_validKeyword_returnsKeyword() {
+        assertEquals("CS2", parser.parseFind("find n/CS2"));
+        assertEquals("final exam", parser.parseFind("  FIND\tn/  final exam  "));
+    }
+
+    @Test
+    void parseFind_missingOrBlankKeyword_throws() {
+        String[] commands = {"find", "find   ", "find n/", "find n/   ", "find CS2", "find r/exam"};
+        for (String command : commands) {
+            assertThrows(InvalidCommandException.class, () -> parser.parseFind(command), command);
+        }
+    }
+
+    @Test
+    void parseFind_nullInput_throwsAssertionError() {
+        assertThrows(AssertionError.class, () -> parser.parseFind(null));
+    }
 }

@@ -1,6 +1,7 @@
 package Tasks;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 /** Owns booking list and provides operations for managing them. */
 public class BookingList {
@@ -54,5 +55,25 @@ public class BookingList {
             }
         }
         return -1;
+    }
+
+    /**
+     * Returns the bookings whose name contains the keyword, ignoring case, in their original order.
+     * The keyword must already be validated by the parser, so it is never null or blank.
+     * The returned list is a copy, so changing it does not change the bookings.
+     * @param keyword text to look for inside booking names
+     * @return matching bookings, empty if none match
+     */
+    public ArrayList<Booking> findByKeyword(String keyword) {
+        assert keyword != null && !keyword.isBlank() : "Search keyword must already be validated";
+        String lowerCaseKeyword = keyword.toLowerCase(Locale.ROOT);
+        ArrayList<Booking> matches = new ArrayList<>();
+        for (Booking booking : bookings) {
+            if (booking.getName().toLowerCase(Locale.ROOT).contains(lowerCaseKeyword)) {
+                matches.add(booking);
+            }
+        }
+        assert matches.size() <= bookings.size() : "Cannot find more bookings than exist";
+        return matches;
     }
 }

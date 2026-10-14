@@ -6,6 +6,7 @@ import Exceptions.InvalidCommandException;
 import Tasks.Booking;
 import Tasks.BookingList;
 import command.ListCommand;
+import command.FindCommand;
 
 /**
  * Executes commands and displays booking confirmations or input errors.
@@ -77,6 +78,11 @@ public class Ui {
                 System.out.println("Booking purpose: " + targetBooking.getReason());
                 System.out.println("Booking venue: " + targetBooking.getVenue());
                 System.out.println("Booking timing: " + targetBooking.getTiming());
+                break;
+            case "find":
+                String keyword = parser.parseFind(userInput);
+                new FindCommand().execute(bookingList, keyword);
+                System.out.println(LINE_BREAK);
                 break;
             default:
                 throw new InvalidCommandException("Unknown command: " + command);

@@ -25,7 +25,7 @@ public class Parser {
         String originalCommand = separateInput(input)[0];
         String command = originalCommand.toLowerCase(Locale.ROOT);
         switch (command) {
-        case "book", "cancel", "list", "bye", "viewbooking":
+        case "book", "cancel", "list", "bye", "find", "viewbooking":
             return command;
         default:
             throw new InvalidCommandException(originalCommand + " is not a valid command! -_-");
@@ -136,5 +136,28 @@ public class Parser {
             throw new InvalidCommandException("Booking name must not be empty.");
         }
         return name;
+    }
+
+    /**
+     * Extracts the search keyword from a command in the form: find n/KEYWORD.
+     * The keyword is kept as text, so it may contain spaces.
+     * @param input whole command string entered by the user, never null
+     * @return the keyword to search for in booking names
+     * @throws InvalidCommandException if the command is not a valid find command
+     */
+    public String parseFind(String input) {
+        assert input != null : "Find command input must not be null";
+        String command = parseCommand(input);
+        String[] separatedInput = separateInput(input);
+        if (!command.equals("find") || separatedInput.length < 2
+                || !separatedInput[1].strip().startsWith("n/")) {
+            throw new InvalidCommandException("Please use: find n/KEYWORD");
+        }
+
+        String keyword = separatedInput[1].strip().substring(2).strip();
+        if (keyword.isBlank()) {
+            throw new InvalidCommandException("Search keyword must not be empty.");
+        }
+        return keyword;
     }
 }
