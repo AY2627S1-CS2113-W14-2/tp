@@ -14,10 +14,15 @@ public final class HelpText {
             cancel n/BOOKING_NAME: cancel an existing booking so the venue is free again.
                 e.g. cancel n/CS2113 Midterm
                 
-            list r/BOOKING_REASON (optional):
+            list r/BOOKING_REASON (optional) s/SORT_ORDER (optional):
                 BOOKING_REASON must be exams or lectures.
                 Omit r/BOOKING_REASON to list both exams and lectures
                 e.g. list r/exams   
+                
+                SORT_ORDER must be alpha or ~alpha
+                alpha for alphabetical order and ~alpha for the reverse
+                Omit s/SORT_ORDER to show the list in original order
+                e.g list r/exams s/alpha
                 
             viewbooking n/BOOKING_NAME: views an existing booking and shows the details.
                 e.g. viewbooking n/CS2113 Midterm

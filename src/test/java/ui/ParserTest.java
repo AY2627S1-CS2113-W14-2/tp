@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import Exceptions.InvalidCommandException;
 import Tasks.Booking;
+import command.SortOrder;
 
 /**
  * Checks booking reasons, required fields, and preservation of user-supplied details.
@@ -103,28 +104,84 @@ class ParserTest {
     }
 
     @Test
-    void parseViewList_noFilter_returnsBookings() {
-        assertEquals("bookings", parser.parseViewList("list"));
-        assertEquals("bookings", parser.parseViewList("  list   "));
+    void parseViewList_noOptions_returnsOriginalBookings() {
+        for (String command : new String[]{"list", "  list   "}) {
+            Parser.ListOptions options = parser.parseViewList(command);
+
+            assertEquals("bookings", options.item(), command);
+            assertEquals(SortOrder.ORIGINAL, options.sortOrder(), command);
+        }
     }
 
     @Test
-    void parseViewList_validFilters_returnsRequestedType() {
-        assertEquals("exams", parser.parseViewList("list r/exams"));
-        assertEquals("lectures", parser.parseViewList("list r/lectures"));
-        assertEquals("lectures", parser.parseViewList("  LIST\tr/lectures  "));
+    void parseViewList_filterOnly_returnsOriginalOrder() {
+        Parser.ListOptions exams = parser.parseViewList("list r/exams");
+        assertEquals("exams", exams.item());
+        assertEquals(SortOrder.ORIGINAL, exams.sortOrder());
+
+        Parser.ListOptions lectures = parser.parseViewList("list r/lectures");
+        assertEquals("lectures", lectures.item());
+        assertEquals(SortOrder.ORIGINAL, lectures.sortOrder());
+    }
+
+    @Test
+    void parseViewList_sortOnly_returnsAllBookings() {
+        Parser.ListOptions alphabetic = parser.parseViewList("list s/alpha");
+        assertEquals("bookings", alphabetic.item());
+        assertEquals(SortOrder.ALPHABETIC, alphabetic.sortOrder());
+
+        Parser.ListOptions reverse = parser.parseViewList("list s/~alpha");
+        assertEquals("bookings", reverse.item());
+        assertEquals(SortOrder.REVERSE_ALPHABETIC, reverse.sortOrder());
+    }
+
+    @Test
+    void parseViewList_filterAndSort_acceptsEitherOrder() {
+        Parser.ListOptions expected =
+                new Parser.ListOptions("exams", SortOrder.ALPHABETIC);
+
+        assertEquals(expected, parser.parseViewList("list r/exams s/alpha"));
+        assertEquals(expected, parser.parseViewList("list s/alpha r/exams"));
+    }
+
+    @Test
+    void parseViewList_whitespaceAndMixedCaseValues_areAccepted() {
+        Parser.ListOptions options =
+                parser.parseViewList("  LIST\tr/LeCtUrEs   s/~AlPhA  ");
+
+        assertEquals("lectures", options.item());
+        assertEquals(SortOrder.REVERSE_ALPHABETIC, options.sortOrder());
     }
 
     @Test
     void parseViewList_invalidInputs_throws() {
         String[] commands = {
             "list meetings",
+            "list exams",
             "list r/exam",
             "list r/lecture",
-            "list exams lectures",
-            "list exams extra",
+            "list r/",
+            "list s/",
+            "list s/numeric",
+            "list r/exams extra",
+            "list s/alpha extra",
             "book",
             "bye"
+        };
+
+        for (String command : commands) {
+            assertThrows(InvalidCommandException.class,
+                    () -> parser.parseViewList(command), command);
+        }
+    }
+
+    @Test
+    void parseViewList_repeatedOptions_throws() {
+        String[] commands = {
+            "list r/exams r/lectures",
+            "list r/exams r/exams",
+            "list s/alpha s/~alpha",
+            "list s/alpha s/alpha"
         };
 
         for (String command : commands) {

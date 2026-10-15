@@ -41,9 +41,10 @@ public class Ui {
                 System.out.println(LINE_BREAK);
                 break;
             case "list":
-                String item = parser.parseViewList(userInput);
-                System.out.println("Ok, here is the list of " + item +":");
-                new ListCommand().execute(bookingList, item);
+                ui.Parser.ListOptions listOptions = parser.parseViewList(userInput);
+                System.out.println("Ok, here is the list of " + listOptions.item() +" in "
+                        + listOptions.sortOrder().toString() + " order");
+                new ListCommand().execute(bookingList, listOptions.item(), listOptions.sortOrder());
                 break;
             case "cancel":
                 String name = parser.parseCancel(userInput);
