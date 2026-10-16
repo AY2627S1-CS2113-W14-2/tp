@@ -9,7 +9,8 @@ public final class HelpText {
             How to use EduReserve:
             book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING:
                 BOOKING_REASON must be exam or lecture.
-                e.g. book r/exam n/CS2113 Midterm v/LT1 t/10:30am
+                TIMING must use dd/MM/yyyy HH:mm.
+                e.g. book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00
 
             cancel n/BOOKING_NAME: cancel an existing booking so the venue is free again.
                 e.g. cancel n/CS2113 Midterm
@@ -24,8 +25,9 @@ public final class HelpText {
                 Omit s/SORT_ORDER to show the list in original order
                 e.g list r/exams s/alpha
                 
-            viewbooking n/BOOKING_NAME: views an existing booking and shows the details.
-                e.g. viewbooking n/CS2113 Midterm
+            viewbooking n/BOOKING_NAME (optional) s/time:
+                Views matching bookings and optionally sorts them chronologically.
+                e.g. viewbooking n/CS2113 Midterm s/time
             
             find n/KEYWORD: finds bookings whose name contains the keyword (not case sensitive).
                 e.g. find n/CS2

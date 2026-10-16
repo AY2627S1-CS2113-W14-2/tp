@@ -1,5 +1,6 @@
 package ui;
 
+import java.time.format.DateTimeParseException;
 import java.util.Locale;
 
 import Exceptions.InvalidCommandException;
@@ -61,6 +62,12 @@ public class Parser {
         }
         if (name.isBlank() || venue.isBlank() || timing.isBlank()) {
             throw new InvalidCommandException("Booking name, venue and timing must not be empty.");
+        }
+        try {
+            Booking.parseStartTime(timing);
+        } catch (DateTimeParseException e) {
+            throw new InvalidCommandException(
+                    "Timing must use dd/MM/yyyy HH:mm, for example 05/10/2026 14:00.");
         }
         return new Booking(reason, name, venue, timing);
     }
@@ -154,18 +161,40 @@ public class Parser {
      * @throws InvalidCommandException if the command is not a valid view booking command
      */
     public String parseViewBooking(String input) {
+        return parseViewBookingOptions(input).getName();
+    }
+
+    /**
+     * Parses a view booking command with an optional chronological sort option.
+     *
+     * @param input whole command string entered by the user
+     * @return the booking name and whether to sort by time
+     */
+    public ViewOptions parseViewBookingOptions(String input) {
         String command = parseCommand(input);
         String[] separatedInput = separateInput(input);
         if (!command.equals("viewbooking") || separatedInput.length < 2
                 || !separatedInput[1].strip().startsWith("n/")) {
-            throw new InvalidCommandException("Please use: viewbooking n/BOOKING_NAME");
+            throw new InvalidCommandException("Please use: viewbooking n/BOOKING_NAME [s/time]");
         }
 
-        String name = separatedInput[1].strip().substring(2).strip();
+        String details = separatedInput[1].strip().substring(2).strip();
+        boolean sortByTime = false;
+        int sortOptionIndex = details.indexOf(" s/");
+        if (sortOptionIndex >= 0) {
+            String sortOption = details.substring(sortOptionIndex + 1).strip();
+            if (!sortOption.equalsIgnoreCase("s/time")) {
+                throw new InvalidCommandException("Sort order must be time.");
+            }
+            details = details.substring(0, sortOptionIndex).strip();
+            sortByTime = true;
+        }
+
+        String name = details;
         if (name.isBlank()) {
             throw new InvalidCommandException("Booking name must not be empty.");
         }
-        return name;
+        return new ViewOptions(name, sortByTime);
     }
 
     /**
