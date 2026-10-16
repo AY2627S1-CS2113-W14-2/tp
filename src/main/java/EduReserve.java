@@ -1,8 +1,10 @@
 import static ui.HelpText.LINE_BREAK;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 import Tasks.BookingList;
+import storage.Storage;
 import ui.HelpText;
 import ui.Ui;
 
@@ -23,16 +25,32 @@ public class EduReserve {
         System.out.println(banner);
         System.out.println("What is your name?");
 
-        BookingList bookingList = new BookingList();
-        Ui command = new Ui(bookingList);
-
         try (Scanner in = new Scanner(System.in)) {
             if (!in.hasNextLine()) {
                 return;
             }
 
             String userName = in.nextLine().trim();
+
+            if (userName.isBlank()) {
+                System.out.println("Username cannot be blank.");
+                return;
+            }
+
             System.out.println("Hello, " + userName + "! Welcome to EduReserve.");
+
+            Storage storage = new Storage(userName);
+            BookingList bookingList;
+
+            try {
+                bookingList = storage.loadBookings();
+            } catch (IOException e) {
+                System.out.println("Unable to load your bookings.");
+                return;
+            }
+
+            Ui command = new Ui(bookingList);
+
             System.out.println(LINE_BREAK);
             System.out.println(HelpText.COMMAND_LIST);
             System.out.println(LINE_BREAK);
@@ -45,7 +63,15 @@ public class EduReserve {
                     continue;
                 }
 
-                if (command.processCommand(userInput)) {
+                boolean shouldExit = command.processCommand(userInput);
+
+                try {
+                    storage.saveBookings(bookingList);
+                } catch (IOException e) {
+                    System.out.println("Unable to save your bookings.");
+                }
+
+                if (shouldExit) {
                     break;
                 }
             }
