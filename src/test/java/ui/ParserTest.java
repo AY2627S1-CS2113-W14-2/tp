@@ -17,33 +17,35 @@ class ParserTest {
 
     @Test
     void parseBooking_exam_createsBooking() {
-        Booking booking = parser.parseBooking("book r/exam n/CS2113 Midterm v/LT1 t/10:30am");
+        Booking booking = parser.parseBooking(
+                "book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 10:30");
 
         assertEquals("exam", booking.getReason());
         assertEquals("CS2113 Midterm", booking.getName());
         assertEquals("LT1", booking.getVenue());
-        assertEquals("10:30am", booking.getTiming());
+        assertEquals("05/10/2026 10:30", booking.getTiming());
     }
 
     @Test
     void parseBooking_lecture_preservesSpacesAndDates() {
         Booking booking = parser.parseBooking(
-                "book r/lecture n/Part a/b Lecture v/Lecture Theatre 2 t/05/10/2026 2:00pm");
+                "book r/lecture n/Part a/b Lecture v/Lecture Theatre 2 t/05/10/2026 14:00");
 
         assertEquals("lecture", booking.getReason());
         assertEquals("Part a/b Lecture", booking.getName());
         assertEquals("Lecture Theatre 2", booking.getVenue());
-        assertEquals("05/10/2026 2:00pm", booking.getTiming());
+        assertEquals("05/10/2026 14:00", booking.getTiming());
     }
 
     @Test
     void parseBooking_mixedCaseAndWhitespace_normalizesReason() {
-        Booking booking = parser.parseBooking("  BOOK\tr/  LeCtUrE\tn/  Week 1 Lecture   v/ LT2   t/ 2:00pm  ");
+        Booking booking = parser.parseBooking(
+                "  BOOK\tr/  LeCtUrE\tn/  Week 1 Lecture   v/ LT2   t/ 05/10/2026 14:00  ");
 
         assertEquals("lecture", booking.getReason());
         assertEquals("Week 1 Lecture", booking.getName());
         assertEquals("LT2", booking.getVenue());
-        assertEquals("2:00pm", booking.getTiming());
+        assertEquals("05/10/2026 14:00", booking.getTiming());
     }
 
     @Test
