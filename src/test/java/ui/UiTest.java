@@ -26,8 +26,8 @@ class UiTest {
         PrintStream originalOutput = System.out;
         try (PrintStream capturedOutput = new PrintStream(output, true, StandardCharsets.UTF_8)) {
             System.setOut(capturedOutput);
-            assertFalse(ui.processCommand("book r/exam n/CS2113 Midterm v/LT1 t/10:30am"));
-            assertFalse(ui.processCommand("book r/lecture n/Week 1 Lecture v/LT2 t/2:00pm"));
+            assertFalse(ui.processCommand("book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 10:30"));
+            assertFalse(ui.processCommand("book r/lecture n/Week 1 Lecture v/LT2 t/05/10/2026 14:00"));
         } finally {
             System.setOut(originalOutput);
         }
@@ -38,8 +38,10 @@ class UiTest {
         assertEquals("lecture", bookings.get(1).getReason());
         assertEquals("Week 1 Lecture", bookings.get(1).getName());
         String response = output.toString(StandardCharsets.UTF_8);
-        assertTrue(response.contains("Booking added: [B] exam - CS2113 Midterm (venue: LT1, timing: 10:30am)"));
-        assertTrue(response.contains("Booking added: [B] lecture - Week 1 Lecture (venue: LT2, timing: 2:00pm)"));
+        assertTrue(response.contains(
+                "Booking added: [B] exam - CS2113 Midterm (venue: LT1, timing: 05/10/2026 10:30)"));
+        assertTrue(response.contains(
+                "Booking added: [B] lecture - Week 1 Lecture (venue: LT2, timing: 05/10/2026 14:00)"));
     }
 
     @Test
@@ -54,7 +56,7 @@ class UiTest {
             assertFalse(ui.processCommand("book r/exam n/Midterm v/LT1 t/"));
             assertFalse(ui.processCommand("book r/exam n/ v/LT1 t/10:30am"));
             assertTrue(bookings.isEmpty());
-            assertFalse(ui.processCommand("book r/lecture n/Week 1 Lecture v/LT2 t/2:00pm"));
+            assertFalse(ui.processCommand("book r/lecture n/Week 1 Lecture v/LT2 t/05/10/2026 14:00"));
         } finally {
             System.setOut(originalOutput);
         }
@@ -118,11 +120,11 @@ class UiTest {
         Ui ui = new Ui(bookings);
 
         captureListOutput(ui,
-                "book r/exam n/CS2113 Lecture 7 v/LT13 t/1600-1800");
+                "book r/exam n/CS2113 Lecture 7 v/LT13 t/05/10/2026 16:00");
         captureListOutput(ui,
-                "book r/exam n/CG2028 Finals v/MSPH5 t/1400-1530");
+                "book r/exam n/CG2028 Finals v/MSPH5 t/06/10/2026 14:00");
         captureListOutput(ui,
-                "book r/lecture n/EE2028 v/LT7 t/1300-1400");
+                "book r/lecture n/EE2028 v/LT7 t/07/10/2026 13:00");
 
         assertEquals(3, bookings.size());
         return ui;
