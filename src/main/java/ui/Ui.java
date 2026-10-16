@@ -59,9 +59,11 @@ public class Ui {
                 System.out.println(LINE_BREAK);
                 break;
             case "viewbooking":
-                String bookingName = parser.parseViewBooking(userInput);
-                System.out.println("Ok, here are the individual bookings relevant to " + bookingName +":");
-                new ViewCommand().execute(bookingList, bookingName);
+                ViewOptions viewOptions = parser.parseViewBookingOptions(userInput);
+                System.out.println("Ok, here are the individual bookings relevant to "
+                        + viewOptions.getName() + ":");
+                new ViewCommand().execute(
+                        bookingList, viewOptions.getName(), viewOptions.isSortByTime());
                 System.out.println(LINE_BREAK);
                 break;
             case "find":
