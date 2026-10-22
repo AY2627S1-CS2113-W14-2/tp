@@ -1,0 +1,78 @@
+@startuml
+skinparam sequenceMessageAlign center
+hide footbox
+
+participant "EduReserve" as App
+
+activate App
+create participant ":Ui" as UI
+App -> UI: new Ui(bookingList)
+
+
+participant ":Parser" as Parser
+
+App -> UI: processCommand("list r/exams s/alpha")
+activate UI
+
+UI -> Parser: parseCommand(userInput)
+activate Parser
+Parser --> UI: "list"
+deactivate Parser
+
+UI -> Parser: parseViewList(userInput)
+activate Parser
+Parser --> UI: ListOptions("exams", ALPHABETIC)
+deactivate Parser
+
+note right of UI
+    Print the listing heading
+end note
+
+create participant ":ListCommand" as List
+UI -> List: new ListCommand()
+participant ":BookingList" as Bookings
+
+UI -> List: execute(bookingList, "exams", ALPHABETIC)
+activate List
+
+List -> Bookings: size()
+activate Bookings
+Bookings --> List: listSize
+deactivate Bookings
+
+note right of List
+    Clear lastShownList
+end note
+
+loop i = 0 to listSize - 1
+    List -> Bookings: get(i)
+    activate Bookings
+    Bookings --> List: booking
+    deactivate Bookings
+
+    opt booking.getReason().equals("exam")
+           note right of List
+               Add booking to lastShownList
+           end note
+       end
+end
+
+List -> List: sortLastShownList(ALPHABETIC)
+activate List
+deactivate List
+
+List -> List: printLastShownList()
+activate List
+note right of List
+    Print numbered bookings
+    in alphabetical order
+end note
+deactivate List
+
+List --> UI
+deactivate List
+
+UI --> App: false
+deactivate UI
+deactivate App
+@enduml
