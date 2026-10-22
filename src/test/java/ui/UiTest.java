@@ -348,6 +348,40 @@ class UiTest {
     }
 
     @Test
+    void processCommand_viewbooking_sortsMatchingBookingsByTime() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "05/10/2026 14:00"));
+        bookings.add(new Booking("lecture", "Other Booking", "LT2", "05/10/2026 08:00"));
+        bookings.add(new Booking("lecture", "CS2113 Midterm", "LT3", "05/10/2026 09:00"));
+        Ui ui = new Ui(bookings);
+
+        String response = captureListOutput(ui, "viewbooking n/CS2113 Midterm s/time");
+
+        int earlierBooking = response.indexOf("Booking timing: 05/10/2026 09:00");
+        int laterBooking = response.indexOf("Booking timing: 05/10/2026 14:00");
+        assertTrue(earlierBooking >= 0, response);
+        assertTrue(laterBooking >= 0, response);
+        assertTrue(earlierBooking < laterBooking, response);
+        assertFalse(response.contains("Other Booking"));
+        assertEquals(3, bookings.size());
+    }
+
+    @Test
+    void processCommand_viewbooking_timeSortWithLegacyTimingShowsError() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));
+        Ui ui = new Ui(bookings);
+
+        String response = captureListOutput(ui, "viewbooking n/CS2113 Midterm s/time");
+
+        assertTrue(response.contains(
+                "Cannot sort these bookings: their timing must use dd/MM/yyyy HH:mm."));
+        assertTrue(response.contains(HelpText.COMMAND_LIST));
+        assertFalse(response.contains("Booking purpose:"));
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
     void processCommand_viewbooking_unknownBookingShowsError() {
         BookingList bookings = new BookingList();
         bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "10:30am"));

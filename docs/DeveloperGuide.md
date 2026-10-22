@@ -33,6 +33,26 @@ Examples:
 
 ![List command sequence diagram](UMLDiagrams/ListCommandSequenceDiagram.png)
 
+### View booking: viewbooking
+Displays the details of the bookings under the same name, with optional time filtering
+
+Format: viewbooking [n/BOOKING_NAME] [s/time]
+
+Second argument is optional
+
+- BOOKING_NAME must be a valid name in the booking list
+- Sorting compares booking timings
+- Omitting s/time shows the list with original booking orders preserved
+
+Examples:
+
+|             Command              |                               Result                                |
+|:--------------------------------:|:-------------------------------------------------------------------:|
+|    `viewbooking n/mybooking`     |    Show all bookings under the name "mybooking" in booking order    |
+| `viewbooking n/mybooking s/time` | Show all bookings under the name "mybooking" in the order of timing |
+
+![View command sequence diagram](UMLDiagrams/ViewCommandSequenceDiagram.png)
+
 ## Product scope
 ### Target user profile
 
@@ -50,6 +70,7 @@ Examples:
 |v1.0|School Admin|Book lecture and exam venues|I can keep track of venues that are being used|
 |v1.0|School Admin|Cancel a booking|Keep the bookings updated in case a class is cancelled|
 |v1.0|School Admin|Find bookings by a keyword in their name|Quickly locate specific bookings without scrolling through the whole list|
+|v1.0|School Admin|View a booking|Check the details of the booking under a name|
 
 |v2.0|School Admin|find a to-do item by name|locate a to-do without having to go through the entire list|
 |v2.0|School Admin|Add booking notes|I have an alternative method to convey any messages to students beforehand|
@@ -57,6 +78,8 @@ Examples:
 |v2.0|School Admin|Redo last undo|I can redo an action if I accidentally undid it|
 |v2.0|School Admin|Be stopped from booking a venue that is already booked for that time|Avoid double-booking a venue and clashing with other classes|
 |v2.0|School Admin|Get a calendar view of today's bookings|Quickly be updated on what's scheduled for today without going through the whole list|
+|v1.0|School Admin|Edit a booking|I can change my booking details if needed|
+|v1.0|School Admin|Check size and equipment|Decide whether I have enough resources to hold an event in the venue|
 
 ## Non-Functional Requirements
 
