@@ -1,7 +1,9 @@
 package ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -195,6 +197,28 @@ class ParserTest {
     @Test
     void parseViewBooking_validName_returnsName() {
         assertEquals("CS2113 Midterm", parser.parseViewBooking("viewbooking n/CS2113 Midterm"));
+    }
+
+    @Test
+    void parseViewBookingOptions_withoutSortOption_disablesChronologicalSorting() {
+        ViewOptions options = parser.parseViewBookingOptions("viewbooking n/CS2113 Midterm");
+
+        assertEquals("CS2113 Midterm", options.getName());
+        assertFalse(options.isSortByTime());
+    }
+
+    @Test
+    void parseViewBookingOptions_timeSortOption_enablesChronologicalSorting() {
+        ViewOptions options = parser.parseViewBookingOptions("viewbooking n/CS2113 Midterm s/TIME");
+
+        assertEquals("CS2113 Midterm", options.getName());
+        assertTrue(options.isSortByTime());
+    }
+
+    @Test
+    void parseViewBookingOptions_unsupportedSortOption_throws() {
+        assertThrows(InvalidCommandException.class,
+                () -> parser.parseViewBookingOptions("viewbooking n/CS2113 Midterm s/alpha"));
     }
 
     @Test
