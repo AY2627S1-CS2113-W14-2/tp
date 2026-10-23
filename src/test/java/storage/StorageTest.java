@@ -22,15 +22,14 @@ class StorageTest {
     Path tempDirectory;
 
     @Test
-    void loadBookings_newUser_createsEmptyFile()
+    void loadBookings_missingDataFile_createsEmptyFile()
             throws IOException {
-        Storage storage = new Storage(
-                tempDirectory,
-                "NewUser");
+        Storage storage = new Storage(tempDirectory);
 
         BookingList loadedBookings = storage.loadBookings();
 
         assertTrue(loadedBookings.isEmpty());
+        assertTrue(Files.exists(tempDirectory.resolve("bookings.txt")));
 
         try (Stream<Path> files = Files.list(tempDirectory)) {
             assertEquals(1, files.count());
@@ -40,9 +39,7 @@ class StorageTest {
     @Test
     void saveBookings_existingBookings_loadsSameBookings()
             throws IOException {
-        Storage storage = new Storage(
-                tempDirectory,
-                "James");
+        Storage storage = new Storage(tempDirectory);
 
         BookingList bookings = new BookingList();
 
@@ -95,17 +92,12 @@ class StorageTest {
     }
 
     @Test
-    void loadBookings_differentLetterCase_keepsUsersSeparate()
+    void loadBookings_separateStorageInstances_shareSameDataFile()
             throws IOException {
-        Storage upperCaseStorage = new Storage(
-                tempDirectory,
-                "James");
+        Storage firstStorage = new Storage(tempDirectory);
+        Storage secondStorage = new Storage(tempDirectory);
 
-        Storage lowerCaseStorage = new Storage(
-                tempDirectory,
-                "james");
-
-        BookingList upperCaseBookings = new BookingList();
+        BookingList bookings = new BookingList();
 
         Booking exam = new Booking(
                 "exam",
@@ -113,13 +105,15 @@ class StorageTest {
                 "LT1",
                 "10AM");
 
-        upperCaseBookings.add(exam);
-        upperCaseStorage.saveBookings(upperCaseBookings);
+        bookings.add(exam);
+        firstStorage.saveBookings(bookings);
 
-        BookingList lowerCaseBookings =
-                lowerCaseStorage.loadBookings();
+        BookingList loadedBookings = secondStorage.loadBookings();
 
-        assertTrue(lowerCaseBookings.isEmpty());
+        assertEquals(1, loadedBookings.size());
+        assertEquals(
+                "James Exam",
+                loadedBookings.get(0).getName());
 
         Booking lecture = new Booking(
                 "lecture",
@@ -127,28 +121,19 @@ class StorageTest {
                 "LT2",
                 "2PM");
 
-        lowerCaseBookings.add(lecture);
-        lowerCaseStorage.saveBookings(lowerCaseBookings);
+        loadedBookings.add(lecture);
+        secondStorage.saveBookings(loadedBookings);
 
-        BookingList loadedUpperCaseBookings =
-                upperCaseStorage.loadBookings();
+        BookingList reloadedBookings = firstStorage.loadBookings();
 
-        BookingList loadedLowerCaseBookings =
-                lowerCaseStorage.loadBookings();
-
-        assertEquals(1, loadedUpperCaseBookings.size());
-        assertEquals(1, loadedLowerCaseBookings.size());
-
-        assertEquals(
-                "James Exam",
-                loadedUpperCaseBookings.get(0).getName());
+        assertEquals(2, reloadedBookings.size());
 
         assertEquals(
                 "james Lecture",
-                loadedLowerCaseBookings.get(0).getName());
+                reloadedBookings.get(1).getName());
 
         try (Stream<Path> files = Files.list(tempDirectory)) {
-            assertEquals(2, files.count());
+            assertEquals(1, files.count());
         }
     }
 }
