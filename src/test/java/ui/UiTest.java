@@ -472,4 +472,43 @@ class UiTest {
         }
         return output.toString(StandardCharsets.UTF_8);
     }
+
+    @Test
+    void processCommand_bookSameVenueAndTime_isRejectedEvenInDifferentCase() {
+        BookingList bookings = new BookingList();
+        Ui ui = new Ui(bookings);
+        runAndCapture(ui, "book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00");
+
+        String response = runAndCapture(ui, "book r/lecture n/Week 1 Lecture v/lt1 t/05/10/2026 14:00");
+
+        assertTrue(response.contains(
+                "Booking clash: LT1 is already booked at 05/10/2026 14:00 for CS2113 Midterm."), response);
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void processCommand_bookDifferentTimeOrVenue_isAccepted() {
+        BookingList bookings = new BookingList();
+        Ui ui = new Ui(bookings);
+
+        runAndCapture(ui, "book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00");
+        runAndCapture(ui, "book r/exam n/CS2113 Quiz v/LT1 t/05/10/2026 15:00");
+        runAndCapture(ui, "book r/lecture n/Week 1 Lecture v/LT2 t/05/10/2026 14:00");
+
+        assertEquals(3, bookings.size());
+    }
+
+    @Test
+    void processCommand_calendar_handlesEmptyDayAndExtraWords() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "Old Exam", "LT1", "05/10/2020 14:00"));
+        Ui ui = new Ui(bookings);
+
+        String emptyDay = runAndCapture(ui, "calendar");
+        String extraWords = runAndCapture(ui, "calendar tomorrow");
+
+        assertTrue(emptyDay.contains("No bookings on "), emptyDay);
+        assertTrue(extraWords.contains("Please use: calendar"), extraWords);
+        assertEquals(1, bookings.size());
+    }
 }

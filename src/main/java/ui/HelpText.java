@@ -11,6 +11,7 @@ public final class HelpText {
                 BOOKING_REASON must be exam or lecture.
                 TIMING must use dd/MM/yyyy HH:mm.
                 e.g. book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00
+                A booking is rejected if that venue is already booked at the same date and time.
 
             cancel n/BOOKING_NAME: cancel an existing booking so the venue is free again.
                 e.g. cancel n/CS2113 Midterm
@@ -31,6 +32,9 @@ public final class HelpText {
             
             find n/KEYWORD: finds bookings whose name contains the keyword (not case sensitive).
                 e.g. find n/CS2
+
+            calendar: shows today's bookings in order of start time.
+                e.g. calendar
                 
             bye: exit EduReserve
             """;
