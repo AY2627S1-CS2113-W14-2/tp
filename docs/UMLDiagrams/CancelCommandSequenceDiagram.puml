@@ -1,0 +1,56 @@
+@startuml
+skinparam sequenceMessageAlign center
+hide footbox
+
+participant "EduReserve" as App
+
+activate App
+create participant ":Ui" as UI
+App -> UI: new Ui(bookingList)
+
+participant ":Parser" as Parser
+participant ":BookingList" as Bookings
+
+App -> UI: processCommand("cancel n/CS2113 Midterm")
+activate UI
+
+UI -> Parser: parseCommand(userInput)
+activate Parser
+Parser --> UI: "cancel"
+deactivate Parser
+
+UI -> Parser: parseCancel(userInput)
+activate Parser
+Parser --> UI: "CS2113 Midterm"
+deactivate Parser
+
+UI -> Bookings: findByName("CS2113 Midterm")
+activate Bookings
+Bookings --> UI: index
+deactivate Bookings
+
+alt index == -1
+    note right of UI
+        Throw InvalidCommandException
+        "No booking found with the name"
+    end note
+else booking found
+    UI -> Bookings: get(index)
+    activate Bookings
+    Bookings --> UI: cancelled
+    deactivate Bookings
+
+    UI -> Bookings: remove(index)
+    activate Bookings
+    Bookings --> UI
+    deactivate Bookings
+
+    note right of UI
+        Print "Booking cancelled: ..."
+    end note
+end
+
+UI --> App: false
+deactivate UI
+deactivate App
+@enduml
