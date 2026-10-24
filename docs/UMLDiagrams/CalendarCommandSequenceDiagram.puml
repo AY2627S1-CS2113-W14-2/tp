@@ -1,0 +1,60 @@
+@startuml
+skinparam sequenceMessageAlign center
+hide footbox
+
+participant "EduReserve" as App
+
+activate App
+create participant ":Ui" as UI
+App -> UI: new Ui(bookingList)
+
+participant ":Parser" as Parser
+participant ":BookingList" as Bookings
+
+App -> UI: processCommand("calendar")
+activate UI
+
+UI -> Parser: parseCommand(userInput)
+activate Parser
+Parser --> UI: "calendar"
+deactivate Parser
+
+UI -> Parser: parseCalendar(userInput)
+activate Parser
+Parser --> UI
+deactivate Parser
+
+create participant ":CalendarCommand" as Calendar
+UI -> Calendar: new CalendarCommand()
+
+UI -> Calendar: execute(bookingList, "today")
+activate Calendar
+
+Calendar -> Calendar: execute(bookingList, LocalDate.now())
+activate Calendar
+
+Calendar -> Bookings: findByDate(date)
+activate Bookings
+Bookings --> Calendar: dayBookings
+deactivate Bookings
+
+alt dayBookings is empty
+    note right of Calendar
+        Print "No bookings on dd/MM/yyyy."
+    end note
+else bookings found
+    note right of Calendar
+        Print numbered bookings
+        with start time, earliest first
+    end note
+end
+
+deactivate Calendar
+
+Calendar --> UI
+deactivate Calendar
+
+UI --> App: false
+deactivate UI
+deactivate App
+@enduml

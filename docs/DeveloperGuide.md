@@ -53,6 +53,99 @@ Examples:
 
 ![View command sequence diagram](UMLDiagrams/ViewCommandSequenceDiagram.png)
 
+### Cancelling a booking: cancel
+Removes a booking so that its venue and time can be used again
+
+Format: cancel n/BOOKING_NAME
+
+- BOOKING_NAME is not case sensitive and may contain spaces
+- If several bookings share the same name, only the first one in the list is cancelled
+- An error is shown if no booking has that name, and the list is left unchanged
+
+Examples:
+
+|            Command             |                          Result                           |
+|:------------------------------:|:---------------------------------------------------------:|
+|   `cancel n/CS2113 Midterm`    |        Cancel the booking named "CS2113 Midterm"          |
+|   `cancel n/cs2113 midterm`    | Same booking as above, as capitalization is ignored       |
+
+Implementation: `Parser#parseCancel` extracts the name, `BookingList#findByName` returns the index of the first
+match (or -1), and `BookingList#remove` deletes it. Assertions check that the index is inside the list and that the
+list shrinks by exactly one, while user mistakes such as a missing name throw `InvalidCommandException`.
+![Cancel command sequence diagram](UMLDiagrams/CancelCommandSequenceDiagram.png)
+
+### Finding bookings: find
+Shows every booking whose name contains a keyword
+
+Format: find n/KEYWORD
+
+- KEYWORD is not case sensitive and may contain spaces
+- A booking matches if its name contains the keyword anywhere, not just at the start
+- Matches are shown in their original order, with their venue and timing
+- If nothing matches, a message says so. The booking list is never changed
+
+Examples:
+
+|        Command         |                                        Result                                         |
+|:----------------------:|:-------------------------------------------------------------------------------------:|
+|     `find n/CS2`       | Show both "CS2113 Midterm" and "CS2445 Final Exam"                                    |
+|    `find n/CS2113`     | Show only "CS2113 Midterm"                                                            |
+|   `find n/final exam`  | Show only "CS2445 Final Exam"                                                         |
+
+Implementation: `Parser#parseFind` extracts the keyword, `Ui` passes it to `FindCommand`, and `FindCommand` calls
+`BookingList#findByKeyword` and prints each match. Assertions check that the keyword is not blank, that every result
+contains the keyword and that the list size is unchanged.
+![Find command sequence diagram](UMLDiagrams/FindCommandSequenceDiagram.png)
+
+### Preventing booking clashes: book
+A new booking is rejected if its venue is already booked at the same time
+
+Format: book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING (same as before)
+
+- A clash means an existing booking with the same venue (not case sensitive) and exactly the same TIMING
+- A booking only has a start time, so two bookings in the same venue that start at different times never clash
+- Older saved bookings without a full dd/MM/yyyy HH:mm timing are not checked
+- Cancelling the existing booking frees the venue and time again
+
+Examples, assuming `book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00` already exists:
+
+|                       Command                       |            Result             |
+|:---------------------------------------------------:|:-----------------------------:|
+| `book r/lecture n/Week 1 v/lt1 t/05/10/2026 14:00`  | Rejected: LT1 is already booked |
+| `book r/lecture n/Week 1 v/LT1 t/05/10/2026 15:00`  |            Added              |
+| `book r/lecture n/Week 1 v/LT2 t/05/10/2026 14:00`  |            Added              |
+
+Implementation: after `Parser#parseBooking` succeeds, `Ui` calls `BookingList#findClash`. It returns the booking that
+already uses the venue and time, or null. A clash is reported as an `InvalidCommandException`, so the new booking is
+never added.
+![Book command sequence diagram](UMLDiagrams/BookCommandSequenceDiagram.png)
+
+### Daily calendar: calendar
+Shows the bookings that start today, with their start times
+
+Format: calendar
+
+- Takes no arguments, and extra words are rejected
+- Today is read from the computer's clock
+- Bookings are shown earliest first, with start time, purpose, name and venue
+- Older saved bookings without a full date are skipped
+- If nothing starts today, "No bookings on dd/MM/yyyy." is shown
+
+Example output:
+
+```
+Calendar for 05/10/2026:
+1. 09:00 - lecture - Week 1 Lecture (venue: LT2)
+2. 14:00 - exam - CS2113 Midterm (venue: LT1)
+```
+
+Implementation: `Parser#parseCalendar` checks there are no extra words and `Ui` calls
+`CalendarCommand#execute(bookings, "today")`. That method calls `CalendarCommand#execute(bookings, LocalDate)`, which
+asks `BookingList#findByDate` for the bookings starting on that date, sorted by start time, and prints them. The
+`LocalDate` version exists so that tests can check the output for a fixed date instead of depending on today's date.
+
+![Calendar command sequence diagram](UMLDiagrams/CalendarCommandSequenceDiagram.png)
+
 ## Product scope
 ### Target user profile
 

@@ -1,0 +1,55 @@
+@startuml
+skinparam sequenceMessageAlign center
+hide footbox
+
+participant "EduReserve" as App
+
+activate App
+create participant ":Ui" as UI
+App -> UI: new Ui(bookingList)
+
+participant ":Parser" as Parser
+participant ":BookingList" as Bookings
+
+App -> UI: processCommand("find n/CS2")
+activate UI
+
+UI -> Parser: parseCommand(userInput)
+activate Parser
+Parser --> UI: "find"
+deactivate Parser
+
+UI -> Parser: parseFind(userInput)
+activate Parser
+Parser --> UI: "CS2"
+deactivate Parser
+
+create participant ":FindCommand" as Find
+UI -> Find: new FindCommand()
+
+UI -> Find: execute(bookingList, "CS2")
+activate Find
+
+Find -> Bookings: findByKeyword("CS2")
+activate Bookings
+Bookings --> Find: matches
+deactivate Bookings
+
+alt matches is empty
+    note right of Find
+        Print "No bookings found matching: CS2"
+    end note
+else matches found
+    note right of Find
+        Print numbered matches
+        in original order
+    end note
+end
+
+Find --> UI
+deactivate Find
+
+UI --> App: false
+deactivate UI
+deactivate App
+@enduml

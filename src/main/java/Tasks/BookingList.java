@@ -1,6 +1,8 @@
 package Tasks;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Locale;
 
 /** Owns booking list and provides operations for managing them. */
@@ -18,6 +20,7 @@ public class BookingList {
     /**
      * Returns the booking at the given index.
      * The caller must pass a valid index, for example one returned by {@link #findByName(String)}.
+     * @author Pratham-tech
      */
     public Booking get(int index) {
         assert index >= 0 && index < bookings.size() : "Booking index must be within the list";
@@ -26,6 +29,7 @@ public class BookingList {
     /**
      * Removes the booking at the given index and checks that exactly one booking was removed.
      * The caller must pass a valid index, for example one returned by {@link #findByName(String)}.
+     * @author Pratham-tech
      */
     public void remove(int index) {
         assert index >= 0 && index < bookings.size() : "Cannot remove a booking outside the list";
@@ -46,6 +50,7 @@ public class BookingList {
      * Returns the index of the first booking with the given name (ignoring case),
      * or -1 if there is no such booking.
      * The name must already be validated by the parser, so it is never null or blank.
+     * @author Pratham-tech
      */
     public int findByName(String name) {
         assert name != null && !name.isBlank() : "Booking name to search for must already be validated";
@@ -82,6 +87,7 @@ public class BookingList {
      * Returns the bookings whose name contains the keyword, ignoring case, in their original order.
      * The keyword must already be validated by the parser, so it is never null or blank.
      * The returned list is a copy, so changing it does not change the bookings.
+     * @author Pratham-tech
      * @param keyword text to look for inside booking names
      * @return matching bookings, empty if none match
      */
@@ -94,6 +100,48 @@ public class BookingList {
                 matches.add(booking);
             }
         }
+        assert matches.size() <= bookings.size() : "Cannot find more bookings than exist";
+        return matches;
+    }
+
+    /**
+     * Returns an existing booking that clashes with the new booking, or null if the venue is free.
+     * A clash means the same venue (ignoring case) starting at exactly the same date and time.
+     * Older saved bookings without a full date are skipped because their time cannot be compared.
+     * @author Pratham-tech
+     * @param newBooking booking about to be added, never null and with a valid start time
+     * @return the booking already using that venue and time, or null if there is none
+     */
+    public Booking findClash(Booking newBooking) {
+        assert newBooking != null : "Booking to check for a clash must not be null";
+        assert newBooking.getStartTime() != null : "Booking to check for a clash must have a start time";
+        for (Booking existing : bookings) {
+            boolean sameVenue = existing.getVenue().equalsIgnoreCase(newBooking.getVenue());
+            boolean sameTime = newBooking.getStartTime().equals(existing.getStartTime());
+            if (sameVenue && sameTime) {
+                return existing;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the bookings that start on the given date, ordered by start time.
+     * Older saved bookings without a full date are skipped because they have no start time.
+     * The returned list is a copy, so changing it does not change the bookings.
+     * @author Pratham-tech
+     * @param date day to look for, never null
+     * @return bookings starting on that day, earliest first, empty if there are none
+     */
+    public ArrayList<Booking> findByDate(LocalDate date) {
+        assert date != null : "Date to search for must not be null";
+        ArrayList<Booking> matches = new ArrayList<>();
+        for (Booking booking : bookings) {
+            if (booking.getStartTime() != null && booking.getStartTime().toLocalDate().equals(date)) {
+                matches.add(booking);
+            }
+        }
+        matches.sort(Comparator.comparing(Booking::getStartTime));
         assert matches.size() <= bookings.size() : "Cannot find more bookings than exist";
         return matches;
     }
