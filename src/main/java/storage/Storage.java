@@ -5,69 +5,43 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 import Tasks.Booking;
 import Tasks.BookingList;
 
 /**
- * Saves bookings for one user.
+ * Saves bookings for the single user of the application.
  */
 public class Storage {
     private static final String DELIMITER = " | ";
+    private static final String FILE_NAME = "bookings.txt";
 
     private final Path filePath;
 
     /**
      * Uses the default data folder.
-     *
-     * @param userName the current username
      */
-    public Storage(String userName) {
-        this(Path.of("data", "users"), userName);
+    public Storage() {
+        this(Path.of("data"));
     }
 
     /**
      * Uses the given data folder.
      *
      * @param dataDirectory the data folder
-     * @param userName the current username
      */
-    public Storage(Path dataDirectory, String userName) {
+    public Storage(Path dataDirectory) {
         if (dataDirectory == null) {
             throw new IllegalArgumentException(
                     "Storage directory must not be null");
         }
 
-        if (userName == null) {
-            throw new IllegalArgumentException(
-                    "Username must not be null");
-        }
-
-        String cleanUserName = userName.trim();
-
-        if (cleanUserName.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Username must not be blank");
-        }
-
-        byte[] userNameBytes = cleanUserName.getBytes(
-                StandardCharsets.UTF_8);
-
-        Base64.Encoder encoder = Base64.getUrlEncoder();
-        encoder = encoder.withoutPadding();
-
-        String encodedUserName = encoder.encodeToString(
-                userNameBytes);
-
-        String fileName = encodedUserName + ".txt";
-
-        filePath = dataDirectory.resolve(fileName);
+        filePath = dataDirectory.resolve(FILE_NAME);
     }
 
     /**
-     * Loads this user's bookings.
+     * Loads the saved bookings.
      *
      * @return the saved bookings
      * @throws IOException if the file cannot be read
@@ -104,7 +78,7 @@ public class Storage {
     }
 
     /**
-     * Saves this user's bookings.
+     * Saves the bookings.
      *
      * @param bookings the bookings to save
      * @throws IOException if the file cannot be written
@@ -137,7 +111,7 @@ public class Storage {
     }
 
     /**
-     * Creates a file for a new user.
+     * Creates the data file when the application is run for the first time.
      *
      * @throws IOException if the file cannot be created
      */

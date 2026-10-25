@@ -8,10 +8,12 @@ import Tasks.BookingList;
 
 /**
  * Searches the bookings for names containing a keyword without changing the list.
+ * @author Pratham-tech
  */
 public class FindCommand extends Command {
     /**
      * Prints every booking whose name contains the keyword, ignoring case, in their original order.
+     * @author Pratham-tech
      * @param bookings Arraylist of Booking to search, never null
      * @param item keyword to look for in booking names, never null or blank
      */

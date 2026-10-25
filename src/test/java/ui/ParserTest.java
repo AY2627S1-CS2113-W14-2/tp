@@ -301,4 +301,23 @@ class ParserTest {
     void parseFind_nullInput_throwsAssertionError() {
         assertThrows(AssertionError.class, () -> parser.parseFind(null));
     }
+
+    @Test
+    void parseCalendar_commandOnly_isAccepted() {
+        parser.parseCalendar("calendar");
+        parser.parseCalendar("  CALENDAR  ");
+    }
+
+    @Test
+    void parseCalendar_extraWords_throws() {
+        String[] commands = {"calendar today", "calendar d/05/10/2026", "calendar 5"};
+        for (String command : commands) {
+            assertThrows(InvalidCommandException.class, () -> parser.parseCalendar(command), command);
+        }
+    }
+
+    @Test
+    void parseCalendar_nullInput_throwsAssertionError() {
+        assertThrows(AssertionError.class, () -> parser.parseCalendar(null));
+    }
 }

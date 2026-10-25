@@ -9,6 +9,7 @@ import command.BookCommand;
 import command.ListCommand;
 import command.FindCommand;
 import command.ViewCommand;
+import command.CalendarCommand;
 
 /**
  * Executes commands and displays booking confirmations or input errors.
@@ -37,6 +38,14 @@ public class Ui {
                 return true;
             case "book":
                 new BookCommand(parser).execute(bookingList, userInput);
+                Booking booking = parser.parseBooking(userInput);
+                Booking clash = bookingList.findClash(booking);
+                if (clash != null) {
+                    throw new InvalidCommandException("Booking clash: " + clash.getVenue() + " is already booked at "
+                            + clash.getTiming() + " for " + clash.getName() + ".");
+                }
+                bookingList.add(booking);
+                System.out.println("Booking added: " + booking);
                 System.out.println(LINE_BREAK);
                 break;
             case "list":
@@ -68,6 +77,11 @@ public class Ui {
             case "find":
                 String keyword = parser.parseFind(userInput);
                 new FindCommand().execute(bookingList, keyword);
+                System.out.println(LINE_BREAK);
+                break;
+            case "calendar":
+                parser.parseCalendar(userInput);
+                new CalendarCommand().execute(bookingList, "today");
                 System.out.println(LINE_BREAK);
                 break;
             default:

@@ -33,13 +33,13 @@ public class EduReserve {
             String userName = in.nextLine().trim();
 
             if (userName.isBlank()) {
-                System.out.println("Username cannot be blank.");
+                System.out.println("Name cannot be blank.");
                 return;
             }
 
             System.out.println("Hello, " + userName + "! Welcome to EduReserve.");
 
-            Storage storage = new Storage(userName);
+            Storage storage = new Storage();
             BookingList bookingList;
 
             try {
