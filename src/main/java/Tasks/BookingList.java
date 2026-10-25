@@ -43,6 +43,14 @@ public class BookingList {
         bookings.remove(index);
         assert bookings.size() == previousSize - 1 : "Removing a booking must decrease the size by one";
     }
+
+    /** Replaces the selected booking in place, preserving the number and order of bookings. */
+    public void replace(Booking original, Booking replacement) {
+        int index = bookings.indexOf(original);
+        assert index >= 0 : "The original booking must still be in the list";
+        assert replacement != null : "Cannot replace a booking with null";
+        bookings.set(index, replacement);
+    }
     public int size() {
         return bookings.size();
     }

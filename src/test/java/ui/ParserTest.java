@@ -18,6 +18,41 @@ class ParserTest {
     private final Parser parser = new Parser();
 
     @Test
+    void parseEdit_fullName_preservesSpacesAndIgnoresCommandCase() {
+        assertEquals("editbooking", parser.parseCommand("EDITBOOKING n/Midterm"));
+        assertEquals("CS2113 Midterm", parser.parseEdit("  EDITBOOKING\tn/  CS2113 Midterm  "));
+    }
+
+    @Test
+    void parseEdit_missingNameOrWrongCommand_throws() {
+        for (String input : new String[]{"editbooking", "editbooking n/", "editbooking Midterm",
+            "editbooking r/exam", "find n/Midterm"}) {
+            assertThrows(InvalidCommandException.class, () -> parser.parseEdit(input), input);
+        }
+    }
+
+    @Test
+    void parseEditedBooking_partialFields_preservesOtherFieldsAndSlashesWithinNames() {
+        Booking original = new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00");
+
+        Booking updated = parser.parseEditedBooking(original, "\tn/Part a/b Final Review  \tv/Lecture Theatre 2  ");
+
+        assertEquals("Part a/b Final Review", updated.getName());
+        assertEquals("Lecture Theatre 2", updated.getVenue());
+        assertEquals(original.getTiming(), updated.getTiming());
+        assertEquals(original.getReason(), updated.getReason());
+    }
+
+    @Test
+    void parseEditedBooking_invalidOrRepeatedFields_throws() {
+        Booking original = new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00");
+        for (String input : new String[]{"", " ", "LT2", "x/LT2", "v/", "n/", "r/", "t/",
+            "v/LT2 v/LT3", "r/lecture r/exam", "n/One n/Two", "t/05/10/2026 14:00 t/06/10/2026 14:00"}) {
+            assertThrows(InvalidCommandException.class, () -> parser.parseEditedBooking(original, input), input);
+        }
+    }
+
+    @Test
     void parseBooking_invalidDatesAndTimes_reportRequiredFormat() {
         String[] timings = {
             "10:30am", "31/02/2026 14:00", "29/02/2025 14:00", "05/13/2026 14:00",

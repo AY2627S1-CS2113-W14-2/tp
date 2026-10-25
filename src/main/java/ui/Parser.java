@@ -26,6 +26,9 @@ public class Parser {
     public String parseCommand(String input) {
         String originalCommand = separateInput(input)[0];
         String command = originalCommand.toLowerCase(Locale.ROOT);
+        if (command.equals("editbooking")) {
+            return command;
+        }
         switch (command) {
         case "book", "cancel", "list", "bye", "find", "viewbooking", "calendar":
             return command;
@@ -70,6 +73,86 @@ public class Parser {
                     "Timing must use dd/MM/yyyy HH:mm, for example 05/10/2026 14:00.");
         }
         return new Booking(reason, name, venue, timing);
+    }
+
+    /**
+     * Applies supplied edit fields to a copy of the original booking, keeping omitted fields unchanged.
+     * Fields may appear in any order, but each prefix may appear only once.
+     * @author produdepunk
+     * @param original booking being edited
+     * @param input one or more r/, n/, v/, or t/ fields
+     * @return a validated replacement, without changing the original
+     */
+    public Booking parseEditedBooking(Booking original, String input) {
+        assert original != null : "Editing requires an original booking";
+        assert input != null : "Edit fields must not be null";
+        String reason = original.getReason();
+        String name = original.getName();
+        String venue = original.getVenue();
+        String timing = original.getTiming();
+        String seenPrefixes = "";
+        String[] fields = input.strip().split("\\p{javaWhitespace}+(?=[rnvt]/)");
+        for (String field : fields) {
+            if (field.length() < 2 || field.charAt(1) != '/' || "rnvt".indexOf(field.charAt(0)) < 0) {
+                throw new InvalidCommandException("Enter changes using r/REASON n/NAME v/VENUE t/TIMING."
+                        + " Omit fields to keep them, or type abort.");
+            }
+            String prefix = field.substring(0, 1);
+            if (seenPrefixes.contains(prefix)) {
+                throw new InvalidCommandException("Each edit field may only be specified once.");
+            }
+            seenPrefixes += prefix;
+            String value = field.substring(2).strip();
+            switch (prefix) {
+            case "r":
+                reason = value.toLowerCase(Locale.ROOT);
+                break;
+            case "n":
+                name = value;
+                break;
+            case "v":
+                venue = value;
+                break;
+            case "t":
+                timing = value;
+                break;
+            default:
+                throw new AssertionError("Edit prefix must already be validated");
+            }
+        }
+        return createValidatedEditedBooking(reason, name, venue, timing);
+    }
+
+    /** Validates edited booking fields while leaving the original booking parser intact. */
+    private Booking createValidatedEditedBooking(String reason, String name, String venue, String timing) {
+        if (!reason.equals("exam") && !reason.equals("lecture")) {
+            throw new InvalidCommandException("Booking reason must be exam or lecture.");
+        }
+        if (name.isBlank() || venue.isBlank() || timing.isBlank()) {
+            throw new InvalidCommandException("Booking name, venue and timing must not be empty.");
+        }
+        try {
+            Booking.parseStartTime(timing);
+        } catch (DateTimeParseException e) {
+            throw new InvalidCommandException(
+                    "Timing must use dd/MM/yyyy HH:mm, for example 05/10/2026 14:00.");
+        }
+        return new Booking(reason, name, venue, timing);
+    }
+
+    /** Extracts the full booking name to edit; partial-name searches are not accepted. */
+    public String parseEdit(String input) {
+        assert input != null : "Edit command input must not be null";
+        String[] separatedInput = separateInput(input);
+        if (!parseCommand(input).equals("editbooking") || separatedInput.length < 2
+                || !separatedInput[1].strip().startsWith("n/")) {
+            throw new InvalidCommandException("Please use: editbooking n/BOOKING_NAME");
+        }
+        String name = separatedInput[1].strip().substring(2).strip();
+        if (name.isBlank()) {
+            throw new InvalidCommandException("Booking name must not be empty.");
+        }
+        return name;
     }
 
     /**

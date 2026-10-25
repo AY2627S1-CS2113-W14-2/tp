@@ -13,6 +13,12 @@ public final class HelpText {
                 e.g. book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00
                 A booking is rejected if that venue is already booked at the same date and time.
 
+            editbooking n/BOOKING_NAME: edit an existing booking (full name, not case sensitive).
+                If several bookings match, enter the number from the displayed filtered list.
+                Then enter changes using r/REASON n/NAME v/VENUE t/TIMING in any order.
+                Omit fields to keep them. Type abort to cancel editing, or bye to exit.
+                e.g. editbooking n/CS2113 Midterm, then v/LT2 t/06/10/2026 14:00
+
             cancel n/BOOKING_NAME: cancel an existing booking so the venue is free again.
                 e.g. cancel n/CS2113 Midterm
                 
