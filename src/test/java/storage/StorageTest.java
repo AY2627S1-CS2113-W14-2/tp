@@ -1,6 +1,7 @@
 package storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -20,6 +21,90 @@ import Tasks.BookingList;
 class StorageTest {
     @TempDir
     Path tempDirectory;
+
+    @Test
+    void constructor_nullDirectory_rejectsInvalidConfiguration() {
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> new Storage(null));
+        assertEquals("Storage directory must not be null", error.getMessage());
+    }
+
+    @Test
+    void saveBookings_nullList_preservesExistingFile() throws IOException {
+        Path dataFile = tempDirectory.resolve("bookings.txt");
+        String original = "B | exam | Midterm | LT1 | 05/10/2026 14:00\n";
+        Files.writeString(dataFile, original);
+
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+                () -> new Storage(tempDirectory).saveBookings(null));
+
+        assertEquals("Booking list must not be null", error.getMessage());
+        assertEquals(original, Files.readString(dataFile));
+    }
+
+    @Test
+    void loadBookings_blankLines_areSkipped() throws IOException {
+        Files.writeString(tempDirectory.resolve("bookings.txt"),
+                "\n  \t\nB | exam | Midterm | LT1 | 05/10/2026 14:00\n\n");
+
+        BookingList bookings = new Storage(tempDirectory).loadBookings();
+
+        assertEquals(1, bookings.size());
+        assertEquals("Midterm", bookings.get(0).getName());
+    }
+
+    @Test
+    void loadBookings_invalidFields_reportPhysicalLineNumberAndPreserveFile() throws IOException {
+        String[] invalidLines = {
+            "B | exam | Midterm | LT1",
+            "B | exam | Midterm | LT1 | 14:00 | extra",
+            "X | exam | Midterm | LT1 | 14:00",
+            "B | meeting | Midterm | LT1 | 14:00",
+            "B | exam |   | LT1 | 14:00",
+            "B | exam | Midterm |   | 14:00",
+            "B | exam | Midterm | LT1 | "
+        };
+        Path dataFile = tempDirectory.resolve("bookings.txt");
+        Storage storage = new Storage(tempDirectory);
+        for (String line : invalidLines) {
+            String contents = "B | lecture | Valid | LT2 | 10AM\n\n" + line + "\n";
+            Files.writeString(dataFile, contents);
+
+            IOException error = assertThrows(IOException.class, storage::loadBookings, line);
+
+            assertEquals("Invalid booking data at line 3", error.getMessage(), line);
+            assertEquals(contents, Files.readString(dataFile), line);
+        }
+    }
+
+    @Test
+    void saveBookings_emptyList_clearsPreviouslySavedBookings() throws IOException {
+        Storage storage = new Storage(tempDirectory);
+        Files.writeString(tempDirectory.resolve("bookings.txt"), "B | exam | Old | LT1 | 10AM\n");
+
+        storage.saveBookings(new BookingList());
+
+        assertEquals("", Files.readString(tempDirectory.resolve("bookings.txt")));
+        assertTrue(storage.loadBookings().isEmpty());
+    }
+
+    @Test
+    void loadBookings_nestedDirectory_createsParents() throws IOException {
+        Path nested = tempDirectory.resolve("nested/data");
+
+        assertTrue(new Storage(nested).loadBookings().isEmpty());
+        assertTrue(Files.isRegularFile(nested.resolve("bookings.txt")));
+    }
+
+    @Test
+    void loadAndSave_directoryOccupiedByFile_reportIoFailure() throws IOException {
+        Path occupied = tempDirectory.resolve("occupied");
+        Files.writeString(occupied, "keep this file");
+        Storage storage = new Storage(occupied);
+
+        assertThrows(IOException.class, storage::loadBookings);
+        assertThrows(IOException.class, () -> storage.saveBookings(new BookingList()));
+        assertEquals("keep this file", Files.readString(occupied));
+    }
 
     @Test
     void loadBookings_missingDataFile_createsEmptyFile()

@@ -5,11 +5,17 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Locale;
 
-/** Owns booking list and provides operations for managing them. */
+/**
+ * Owns booking list and provides operations for managing them.
+ * @author Maxkedd
+ */
 public class BookingList {
     private final ArrayList<Booking> bookings = new ArrayList<>();
 
-    /** Adds a booking and checks that it was appended successfully. */
+    /**
+     * Adds a booking and checks that it was appended successfully.
+     * @author Maxkedd
+     */
     public void add(Booking booking) {
         assert booking != null : "Cannot add a null booking";
         int previousSize = bookings.size();

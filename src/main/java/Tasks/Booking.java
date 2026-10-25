@@ -7,6 +7,7 @@ import java.time.format.ResolverStyle;
 
 /**
  * A named exam or lecture reservation with a venue and user-supplied timing.
+ * @author Maxkedd
  */
 public class Booking extends Task {
     private static final DateTimeFormatter TIMING_FORMAT =
@@ -21,6 +22,7 @@ public class Booking extends Task {
 
     /**
      * Creates a booking from fields already validated by the parser.
+     * @author Maxkedd
      */
     public Booking(String reason, String name, String venue, String timing) {
         super(reason);
