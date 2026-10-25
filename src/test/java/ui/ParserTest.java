@@ -218,6 +218,30 @@ class ParserTest {
     }
 
     @Test
+    void parseViewList_timeIncreasing_acceptsFilterAndEitherOptionOrder() {
+        Parser.ListOptions all = parser.parseViewList("list s/time");
+        assertEquals("bookings", all.item());
+        assertEquals(SortOrder.TIME_INCREASING, all.sortOrder());
+
+        Parser.ListOptions expected =
+                new Parser.ListOptions("exams", SortOrder.TIME_INCREASING);
+        assertEquals(expected, parser.parseViewList("list r/exams s/time"));
+        assertEquals(expected, parser.parseViewList("  LIST\ts/TIME r/exams  "));
+    }
+
+    @Test
+    void parseViewList_timeDecreasing_acceptsFilterAndEitherOptionOrder() {
+        Parser.ListOptions all = parser.parseViewList("list s/~time");
+        assertEquals("bookings", all.item());
+        assertEquals(SortOrder.TIME_DECREASING, all.sortOrder());
+
+        Parser.ListOptions expected =
+                new Parser.ListOptions("lectures", SortOrder.TIME_DECREASING);
+        assertEquals(expected, parser.parseViewList("list r/lectures s/~time"));
+        assertEquals(expected, parser.parseViewList("  LIST\ts/~TIME r/lectures  "));
+    }
+
+    @Test
     void parseViewList_filterAndSort_acceptsEitherOrder() {
         Parser.ListOptions expected =
                 new Parser.ListOptions("exams", SortOrder.ALPHABETIC);
@@ -245,8 +269,12 @@ class ParserTest {
             "list r/",
             "list s/",
             "list s/numeric",
+            "list s/time_sideways",
+            "list s/time_up",
+            "list s/time_down",
             "list r/exams extra",
             "list s/alpha extra",
+            "list s/time extra",
             "book",
             "bye"
         };
@@ -263,7 +291,9 @@ class ParserTest {
             "list r/exams r/lectures",
             "list r/exams r/exams",
             "list s/alpha s/~alpha",
-            "list s/alpha s/alpha"
+            "list s/alpha s/alpha",
+            "list s/time s/~time",
+            "list s/time s/time"
         };
 
         for (String command : commands) {
