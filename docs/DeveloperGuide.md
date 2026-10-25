@@ -98,7 +98,7 @@ Examples:
 | v1.0    | School Admin | Book lecture and exam venues                                         | I can keep track of venues that are being used                                        |
 | v1.0    | School Admin | Cancel a booking                                                     | Keep the bookings updated in case a class is cancelled                                |
 | v1.0    | School Admin | Find bookings by a keyword in their name                             | Quickly locate specific bookings without scrolling through the whole list             |
-| v1.0    |School Admin  | View a booking                                                       | Check the details of the booking under a name                                         |
+| v1.0    | School Admin | View a booking                                                       | Check the details of the booking under a name                                         |
 | v1.0    | School Admin | List bookings filtered by type and sorted alphebetically             | I can view all bookings clearly in an organised manner                                |
 | v1.0    | School Admin | Edit a booking                                                       | I can change my booking details if needed                                             |
 | v1.0    | School Admin | Check size and equipment                                             | Decide whether I have enough resources to hold an event in the venue                  |
