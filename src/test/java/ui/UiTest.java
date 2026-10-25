@@ -20,6 +20,39 @@ import Tasks.BookingList;
  */
 class UiTest {
     @Test
+    void processCommand_editbooking_routesSelectionAndChangesThenResumesNormalCommands() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "Other", "LT0", "05/10/2026 14:00"));
+        bookings.add(new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00"));
+        bookings.add(new Booking("exam", "Midterm", "LT2", "05/10/2026 14:00"));
+        Ui ui = new Ui(bookings);
+
+        assertTrue(runAndCapture(ui, "editbooking n/Midterm").contains("2. [B] exam - Midterm (venue: LT2"));
+        assertTrue(runAndCapture(ui, "0").contains("Enter a number from 1 to 2"));
+        runAndCapture(ui, "2");
+        assertTrue(runAndCapture(ui, "v/LT3").contains("Booking updated:"));
+
+        assertEquals("LT1", bookings.get(1).getVenue());
+        assertEquals("LT3", bookings.get(2).getVenue());
+        assertTrue(runAndCapture(ui, "viewbooking n/Midterm").contains("LT3"));
+        assertTrue(ui.processCommand("bye"));
+    }
+
+    @Test
+    void processCommand_abortOrByeDuringEdit_preservesBooking() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00"));
+        Ui ui = new Ui(bookings);
+        runAndCapture(ui, "editbooking n/Midterm");
+        assertTrue(runAndCapture(ui, "abort").contains("Booking edit cancelled."));
+        assertTrue(runAndCapture(ui, "viewbooking n/Midterm").contains("LT1"));
+        runAndCapture(ui, "editbooking n/Midterm");
+
+        assertTrue(ui.processCommand("BYE"));
+        assertEquals("LT1", bookings.get(0).getVenue());
+    }
+
+    @Test
     void constructorAndProcessCommand_nullInputs_failPreconditions() {
         assertThrows(AssertionError.class, () -> new Ui(null));
         assertThrows(AssertionError.class, () -> new Ui(new BookingList()).processCommand(null));

@@ -6,6 +6,7 @@ import Exceptions.InvalidCommandException;
 import Tasks.Booking;
 import Tasks.BookingList;
 import command.BookCommand;
+import command.EditCommand;
 import command.ListCommand;
 import command.FindCommand;
 import command.ViewCommand;
@@ -18,6 +19,8 @@ public class Ui {
 
     private final BookingList bookingList;
     private final Parser parser = new Parser();
+    /** Retained between input lines while the user selects a booking and enters changes. */
+    private final EditCommand editCommand = new EditCommand();
 
     public Ui(BookingList bookingList) {
         assert bookingList != null : "Ui requires a booking list";
@@ -31,6 +34,15 @@ public class Ui {
         assert userInput != null : "User input must not be null";
         try {
             System.out.println(LINE_BREAK);
+            if (editCommand.isPending()) {
+                if (userInput.strip().equalsIgnoreCase("bye")) {
+                    editCommand.cancel();
+                    return true;
+                }
+                editCommand.processInput(bookingList, userInput);
+                System.out.println(LINE_BREAK);
+                return false;
+            }
             String command = parser.parseCommand(userInput);
 
             switch (command) {
@@ -38,6 +50,10 @@ public class Ui {
                 return true;
             case "book":
                 new BookCommand(parser).execute(bookingList, userInput);
+                System.out.println(LINE_BREAK);
+                break;
+            case "editbooking":
+                editCommand.execute(bookingList, parser.parseEdit(userInput));
                 System.out.println(LINE_BREAK);
                 break;
             case "list":
