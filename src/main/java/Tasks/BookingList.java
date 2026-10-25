@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Locale;
 
-/** Owns booking list and provides operations for managing them.
+/**
+ * Owns booking list and provides operations for managing them.
  * @author Maxkedd
  */
 public class BookingList {

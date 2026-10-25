@@ -1,6 +1,7 @@
 package Tasks;
 
-/** Holds the description shared by all task types.
+/**
+ * Holds the description shared by all task types.
  * @author Maxkedd
  */
 public abstract class Task {
