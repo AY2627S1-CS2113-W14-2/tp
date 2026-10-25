@@ -182,7 +182,7 @@ public class Parser {
     /**
      * Parses a view command into 3 separate cases,
      * View lectures and exams, view lectures only and view exams only
-     * View the specified lectures or exams by alphabetical order
+     * View the specified lectures or exams by alphabetical order or time order
      * @param input whole string parsed by program
      */
     public ListOptions parseViewList(String input) {
@@ -223,15 +223,24 @@ public class Parser {
                     throw new InvalidCommandException("Sort order should only be specified once");
                 }
                 sortOrderSeen = true;
-                if (option.equalsIgnoreCase("s/alpha")) {
+                switch (option.toLowerCase(Locale.ROOT)) {
+                case "s/alpha":
                     sortOrder = SortOrder.ALPHABETIC;
-                } else if (option.equalsIgnoreCase("s/~alpha")) {
+                    break;
+                case "s/~alpha":
                     sortOrder = SortOrder.REVERSE_ALPHABETIC;
-                } else {
-                    throw new InvalidCommandException("Sorted order should be alpha or ~alpha");
+                    break;
+                case "s/time":
+                    sortOrder = SortOrder.TIME_INCREASING;
+                    break;
+                case "s/~time":
+                    sortOrder = SortOrder.TIME_DECREASING;
+                    break;
+                default:
+                    throw new InvalidCommandException("list must be followed by a valid sort order");
                 }
             } else {
-                throw new InvalidCommandException("list must be followed by a reason or sort order");
+                throw new InvalidCommandException("List must be followed by a valid reason or sort order");
             }
         }
         return new ListOptions(item, sortOrder);

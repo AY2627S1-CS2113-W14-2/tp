@@ -27,8 +27,9 @@ public final class HelpText {
                 Omit r/BOOKING_REASON to list both exams and lectures
                 e.g. list r/exams   
                 
-                SORT_ORDER must be alpha or ~alpha
+                SORT_ORDER must be alpha, ~alpha, time or ~time
                 alpha for alphabetical order and ~alpha for the reverse
+                time for time ascending and ~time for time descending
                 Omit s/SORT_ORDER to show the list in original order
                 e.g list r/exams s/alpha
                 
