@@ -2,6 +2,7 @@ package ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -18,6 +19,24 @@ import Tasks.BookingList;
  * Checks that commands add bookings only after validation and give useful feedback.
  */
 class UiTest {
+    @Test
+    void constructorAndProcessCommand_nullInputs_failPreconditions() {
+        assertThrows(AssertionError.class, () -> new Ui(null));
+        assertThrows(AssertionError.class, () -> new Ui(new BookingList()).processCommand(null));
+    }
+
+    @Test
+    void processCommand_unknownCommand_printsHelpAndPreservesBookings() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00"));
+
+        String response = runAndCapture(new Ui(bookings), "unknown");
+
+        assertTrue(response.contains("unknown is not a valid command! -_-"), response);
+        assertTrue(response.contains(HelpText.COMMAND_LIST), response);
+        assertEquals(1, bookings.size());
+    }
+
     @Test
     void processCommand_validBookings_addsBothAndConfirms() {
         BookingList bookings = new BookingList();
@@ -42,6 +61,7 @@ class UiTest {
                 "Booking added: [B] exam - CS2113 Midterm (venue: LT1, timing: 05/10/2026 10:30)"));
         assertTrue(response.contains(
                 "Booking added: [B] lecture - Week 1 Lecture (venue: LT2, timing: 05/10/2026 14:00)"));
+        assertFalse(response.contains("Booking clash:"), response);
     }
 
     @Test
@@ -483,6 +503,7 @@ class UiTest {
 
         assertTrue(response.contains(
                 "Booking clash: LT1 is already booked at 05/10/2026 14:00 for CS2113 Midterm."), response);
+        assertFalse(response.contains("Booking added:"), response);
         assertEquals(1, bookings.size());
     }
 

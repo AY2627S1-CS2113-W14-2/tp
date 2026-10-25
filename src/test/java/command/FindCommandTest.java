@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +19,24 @@ import Tasks.BookingList;
  * Tests that the find command shows the right bookings and never changes the list.
  */
 class FindCommandTest {
+    @Test
+    void execute_searchUnexpectedlyChangesList_failsReadOnlyInvariant() {
+        // Simulate a broken search implementation to check the command's read-only contract.
+        BookingList bookings = new BookingList() {
+            @Override
+            public ArrayList<Booking> findByKeyword(String keyword) {
+                ArrayList<Booking> matches = super.findByKeyword(keyword);
+                remove(0);
+                return matches;
+            }
+        };
+        bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "05/10/2026 14:00"));
+
+        AssertionError error = assertThrows(AssertionError.class, () -> runFind(bookings, "CS2113"));
+
+        assertEquals("Finding bookings should not change list size: before: 1, after 0", error.getMessage());
+    }
+
     private BookingList createBookings() {
         BookingList bookings = new BookingList();
         bookings.add(new Booking("exam", "CS2113 Midterm", "LT1", "05/10/2026 14:00"));
@@ -65,6 +84,7 @@ class FindCommandTest {
         assertTrue(runFind(bookings, "Tutorial").contains("No bookings found matching: Tutorial"));
         assertEquals(3, bookings.size());
         assertThrows(AssertionError.class, () -> new FindCommand().execute(bookings, " "));
+        assertThrows(AssertionError.class, () -> new FindCommand().execute(bookings, null));
         assertThrows(AssertionError.class, () -> new FindCommand().execute(null, "CS2"));
     }
 }

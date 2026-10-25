@@ -18,6 +18,49 @@ class ParserTest {
     private final Parser parser = new Parser();
 
     @Test
+    void parseBooking_invalidDatesAndTimes_reportRequiredFormat() {
+        String[] timings = {
+            "10:30am", "31/02/2026 14:00", "29/02/2025 14:00", "05/13/2026 14:00",
+            "05/10/2026 24:00", "05/10/2026 14:60", "2026-10-05 14:00", "5/10/2026 14:00"
+        };
+        for (String timing : timings) {
+            InvalidCommandException error = assertThrows(InvalidCommandException.class,
+                    () -> parser.parseBooking("book r/exam n/Midterm v/LT1 t/" + timing), timing);
+            assertEquals("Timing must use dd/MM/yyyy HH:mm, for example 05/10/2026 14:00.",
+                    error.getMessage(), timing);
+        }
+    }
+
+    @Test
+    void parseBooking_leapDay_acceptsRealDate() {
+        Booking booking = parser.parseBooking("book r/exam n/Midterm v/LT1 t/29/02/2028 00:00");
+        assertEquals(java.time.LocalDateTime.of(2028, 2, 29, 0, 0), booking.getStartTime());
+    }
+
+    @Test
+    void parseBookingAndCancel_nullInput_failPreconditions() {
+        assertThrows(AssertionError.class, () -> parser.parseBooking(null));
+        assertThrows(AssertionError.class, () -> parser.parseCancel(null));
+    }
+
+    @Test
+    void specializedParsers_otherRecognizedCommand_rejectWrongCommand() {
+        assertThrows(InvalidCommandException.class, () -> parser.parseCancel("list n/Midterm"));
+        assertThrows(InvalidCommandException.class, () -> parser.parseFind("list n/Midterm"));
+        assertThrows(InvalidCommandException.class, () -> parser.parseViewList("bye"));
+        assertThrows(InvalidCommandException.class, () -> parser.parseCalendar("bye"));
+    }
+
+    @Test
+    void parseCommand_unknownOrBlankInput_reportsOriginalCommand() {
+        for (String command : new String[]{"UNKNOWN", "", "   "}) {
+            InvalidCommandException error = assertThrows(InvalidCommandException.class,
+                    () -> parser.parseCommand(command));
+            assertEquals(command.strip() + " is not a valid command! -_-", error.getMessage());
+        }
+    }
+
+    @Test
     void parseBooking_exam_createsBooking() {
         Booking booking = parser.parseBooking(
                 "book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 10:30");

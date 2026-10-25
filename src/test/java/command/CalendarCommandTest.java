@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
@@ -20,6 +21,24 @@ import Tasks.BookingList;
  */
 class CalendarCommandTest {
     private static final LocalDate OCTOBER_5 = LocalDate.of(2026, 10, 5);
+
+    @Test
+    void execute_searchUnexpectedlyChangesList_failsReadOnlyInvariant() {
+        // Simulate a broken date search to check the command's read-only contract.
+        BookingList bookings = new BookingList() {
+            @Override
+            public ArrayList<Booking> findByDate(LocalDate date) {
+                ArrayList<Booking> matches = super.findByDate(date);
+                remove(0);
+                return matches;
+            }
+        };
+        bookings.add(new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00"));
+
+        AssertionError error = assertThrows(AssertionError.class, () -> runCalendar(bookings, OCTOBER_5));
+
+        assertEquals("Showing the calendar should not change list size: before: 1, after 0", error.getMessage());
+    }
 
     private String runCalendar(BookingList bookings, LocalDate date) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
