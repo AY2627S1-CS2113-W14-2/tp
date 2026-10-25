@@ -8,6 +8,33 @@
 
 {Describe the design and implementation of the product. Use UML diagrams and short code snippets where applicable.}
 
+### Creating a booking: book
+
+Adds a named exam or lecture booking.
+
+Format: `book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING`
+
+- All four fields are required and must appear in the order `r/`, `n/`, `v/`, `t/`.
+- The reason must be `exam` or `lecture` (case-insensitive).
+- The name and venue must not be blank and may contain spaces.
+- Timing must be a valid date and time in `dd/MM/yyyy HH:mm` format.
+
+Example: `book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00`
+
+`Ui.processCommand` identifies the command and creates a `BookCommand`, passing it the existing
+`Parser`. `BookCommand.execute` passes the full input to `Parser.parseBooking`, which validates
+the fields and constructs a `Booking`. The command then calls `BookingList.add` and prints the
+confirmation. `Ui` prints the separator and returns `false` so the application continues.
+
+![Book command sequence diagram](UMLDiagrams/BookingSequenceDiagram.png)
+
+The diagram shows a successful booking; validation internals and storage are omitted for clarity.
+If validation fails, `Parser` throws `InvalidCommandException` before a booking is added.
+The exception propagates through `BookCommand` to `Ui`, which displays the error and command help.
+After `processCommand` returns, `EduReserve` saves the booking list using `Storage.saveBookings`.
+
+[Editable PlantUML source](UMLDiagrams/BookingSequenceDiagram.puml)
+
 ### Listing bookings: list
 Displays the bookings, with optional filtering and alphabetical sorting
 
@@ -73,6 +100,8 @@ Examples:
 | v1.0    | School Admin | Find bookings by a keyword in their name                             | Quickly locate specific bookings without scrolling through the whole list             |
 | v1.0    |School Admin  | View a booking                                                       | Check the details of the booking under a name                                         |
 | v1.0    | School Admin | List bookings filtered by type and sorted alphebetically             | I can view all bookings clearly in an organised manner                                |
+| v1.0    | School Admin | Edit a booking                                                       | I can change my booking details if needed                                             |
+| v1.0    | School Admin | Check size and equipment                                             | Decide whether I have enough resources to hold an event in the venue                  |
 | v2.0    | School Admin | find a to-do item by name                                            | locate a to-do without having to go through the entire list                           |
 | v2.0    | School Admin | Add booking notes                                                    | I have an alternative method to convey any messages to students beforehand            |
 | v2.0    | School Admin | Undo the previous action                                             | I can rewind accidental actions                                                       |
@@ -81,8 +110,6 @@ Examples:
 | v2.0    | School Admin | Get a calendar view of today's bookings                              | Quickly be updated on what's scheduled for today without going through the whole list |
 | v2.0    | School Admin | View a list of the bookings sorted by time                           | I can clearly see which bookings come after which time                                |
 | v2.0    | School Admin | View a list of available venues                                      | I can clearly see which booking slots are free                                        |
-| v1.0    | School Admin | Edit a booking                                                       | I can change my booking details if needed                                             |
-| v1.0    | School Admin | Check size and equipment                                             | Decide whether I have enough resources to hold an event in the venue                  |
 
 
 ## Non-Functional Requirements

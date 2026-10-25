@@ -5,6 +5,7 @@ import static ui.HelpText.LINE_BREAK;
 import Exceptions.InvalidCommandException;
 import Tasks.Booking;
 import Tasks.BookingList;
+import command.BookCommand;
 import command.ListCommand;
 import command.FindCommand;
 import command.ViewCommand;
@@ -35,9 +36,7 @@ public class Ui {
             case "bye":
                 return true;
             case "book":
-                Booking booking = parser.parseBooking(userInput);
-                bookingList.add(booking);
-                System.out.println("Booking added: " + booking);
+                new BookCommand(parser).execute(bookingList, userInput);
                 System.out.println(LINE_BREAK);
                 break;
             case "list":
