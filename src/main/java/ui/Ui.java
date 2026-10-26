@@ -10,6 +10,7 @@ import command.ListCommand;
 import command.FindCommand;
 import command.ViewCommand;
 import command.CalendarCommand;
+import command.UndoCommand;
 
 /**
  * Executes commands and displays booking confirmations or input errors.
@@ -18,6 +19,7 @@ public class Ui {
 
     private final BookingList bookingList;
     private final Parser parser = new Parser();
+    private final UndoCommand undoCommand = new UndoCommand();
 
     public Ui(BookingList bookingList) {
         assert bookingList != null : "Ui requires a booking list";
@@ -26,6 +28,7 @@ public class Ui {
 
     /**
      * Processes one command and returns whether the user requested to exit.
+     * @author Maxkedd
      */
     public boolean processCommand(String userInput) {
         assert userInput != null : "User input must not be null";
@@ -37,7 +40,8 @@ public class Ui {
             case "bye":
                 return true;
             case "book":
-                new BookCommand(parser).execute(bookingList, userInput);
+                undoCommand.executeAndRecord(command, userInput, bookingList,
+                        () -> new BookCommand(parser).execute(bookingList, userInput));
                 System.out.println(LINE_BREAK);
                 break;
             case "list":
@@ -47,15 +51,11 @@ public class Ui {
                 new ListCommand().execute(bookingList, listOptions.item(), listOptions.sortOrder());
                 break;
             case "cancel":
-                String name = parser.parseCancel(userInput);
-                int index = bookingList.findByName(name);
-                if (index == -1) {
-                    throw new InvalidCommandException("No booking found with the name: " + name);
-                }
-                Booking cancelled = bookingList.get(index);
-                bookingList.remove(index);
-                assert cancelled.getName().equalsIgnoreCase(name) : "Cancelled booking must match the name";
-                System.out.println("Booking cancelled: " + cancelled);
+                undoCommand.executeAndRecord(command, userInput, bookingList, () -> cancelBooking(userInput));
+                System.out.println(LINE_BREAK);
+                break;
+            case "/undo":
+                undoCommand.execute(bookingList, userInput);
                 System.out.println(LINE_BREAK);
                 break;
             case "viewbooking":
@@ -83,5 +83,21 @@ public class Ui {
             System.out.println(e.getMessage() + HelpText.COMMAND_LIST);
         }
         return false;
+    }
+
+    /**
+     * Cancels the first booking matching the supplied name after validating the input.
+     * @author Maxkedd
+     */
+    private void cancelBooking(String userInput) {
+        String name = parser.parseCancel(userInput);
+        int index = bookingList.findByName(name);
+        if (index == -1) {
+            throw new InvalidCommandException("No booking found with the name: " + name);
+        }
+        Booking cancelled = bookingList.get(index);
+        bookingList.remove(index);
+        assert cancelled.getName().equalsIgnoreCase(name) : "Cancelled booking must match the name";
+        System.out.println("Booking cancelled: " + cancelled);
     }
 }

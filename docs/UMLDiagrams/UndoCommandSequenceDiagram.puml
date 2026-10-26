@@ -1,0 +1,84 @@
+@startuml
+' @author Maxkedd
+skinparam sequenceMessageAlign center
+hide footbox
+
+participant "EduReserve" as App
+participant ":Ui" as UI
+participant ":Parser" as Parser
+participant "undoCommand:UndoCommand" as Undo
+participant "history:Deque<UndoEntry>" as History
+participant ":BookingList" as Bookings
+participant ":Storage" as Storage
+
+note over App, Storage
+    Existing application objects are already initialized; userInput = "/undo".
+    Each successful book/cancel command has stored its full input and previous booking list in history.
+    Input validation, separator output, collection accessors and storage internals are omitted.
+end note
+
+activate App
+App -> UI: processCommand(userInput)
+activate UI
+UI -> Parser: parseCommand(userInput)
+activate Parser
+Parser --> UI: "/undo"
+deactivate Parser
+
+UI -> Undo: execute(bookingList, userInput)
+activate Undo
+Undo -> History: isEmpty()
+activate History
+History --> Undo: empty
+deactivate History
+
+alt empty == true
+    note right of Undo: Print "No commands to undo."
+else history contains an undoable command
+    Undo -> History: peek()
+    activate History
+    History --> Undo: lastCommand
+    deactivate History
+
+    loop while bookingList is not empty
+        Undo -> Bookings: size()
+        activate Bookings
+        Bookings --> Undo: size
+        deactivate Bookings
+        Undo -> Bookings: remove(size - 1)
+        activate Bookings
+        Bookings --> Undo
+        deactivate Bookings
+    end
+
+    loop for each booking in lastCommand.previousBookings()
+        Undo -> Bookings: add(booking)
+        activate Bookings
+        Bookings --> Undo
+        deactivate Bookings
+    end
+
+    Undo -> History: pop()
+    activate History
+    History --> Undo: removed entry
+    deactivate History
+
+    note right of Undo
+        Print "Undid command: " + lastCommand.userInput()
+        The full original command is shown.
+        Undo itself is not added to history.
+    end note
+end
+
+Undo --> UI
+deactivate Undo
+UI --> App: false
+deactivate UI
+
+App -> Storage: saveBookings(bookingList)
+activate Storage
+note right of Storage: Write current bookings\nto data/bookings.txt.
+Storage --> App
+deactivate Storage
+deactivate App
+@enduml
