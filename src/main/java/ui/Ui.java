@@ -12,6 +12,7 @@ import command.FindCommand;
 import command.ViewCommand;
 import command.CalendarCommand;
 import command.UndoCommand;
+import command.RedoCommand;
 
 /**
  * Executes commands and displays booking confirmations or input errors.
@@ -21,6 +22,7 @@ public class Ui {
     private final BookingList bookingList;
     private final Parser parser = new Parser();
     private final UndoCommand undoCommand = new UndoCommand();
+    private final RedoCommand redoCommand = new RedoCommand(undoCommand);
     /** Retained between input lines while the user selects a booking and enters changes. */
     private final EditCommand editCommand = new EditCommand();
 
@@ -72,6 +74,10 @@ public class Ui {
                 break;
             case "/undo":
                 undoCommand.execute(bookingList, userInput);
+                System.out.println(LINE_BREAK);
+                break;
+            case "/redo":
+                redoCommand.execute(bookingList, userInput);
                 System.out.println(LINE_BREAK);
                 break;
             case "viewbooking":

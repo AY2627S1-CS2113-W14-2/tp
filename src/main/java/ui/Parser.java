@@ -34,7 +34,7 @@ public class Parser {
             return command;
         }
         switch (command) {
-        case "book", "cancel", "list", "bye", "find", "viewbooking", "calendar", "/undo":
+        case "book", "cancel", "list", "bye", "find", "viewbooking", "calendar", "/undo", "/redo":
             return command;
         default:
             throw new InvalidCommandException(originalCommand + " is not a valid command! -_-");

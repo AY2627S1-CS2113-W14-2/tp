@@ -79,7 +79,8 @@ class UndoCommandTest {
         UndoCommand undo = new UndoCommand();
         assertTrue(undo.isUndoable("book"));
         assertTrue(undo.isUndoable("cancel"));
-        for (String command : new String[]{"list", "find", "viewbooking", "calendar", "bye", "/undo", "unknown"}) {
+        for (String command : new String[]{
+            "list", "find", "viewbooking", "calendar", "bye", "/undo", "/redo", "unknown"}) {
             assertFalse(undo.isUndoable(command), command);
         }
     }

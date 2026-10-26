@@ -107,11 +107,11 @@ class EduReserveTest {
     }
 
     /**
-     * Checks that undo updates the saved file while the app is still waiting for another command.
+     * Checks that undo and redo update storage while the app is still waiting for another command.
      * @author Maxkedd
      */
     @Test
-    void main_undoBooking_savesRestoredStateBeforeNextCommand() throws Exception {
+    void main_undoAndRedoBooking_saveRestoredStateBeforeNextCommand() throws Exception {
         Process process = startApplication();
         String firstBooking = "B | exam | First | LT1 | 05/10/2026 14:00\n";
         String secondBooking = "B | exam | Second | LT2 | 05/10/2026 14:00\n";
@@ -132,11 +132,21 @@ class EduReserveTest {
             assertEquals(1, reloaded.size());
             assertEquals("First", reloaded.get(0).getName());
 
+            process.getOutputStream().write("/redo\n".getBytes(StandardCharsets.UTF_8));
+            process.getOutputStream().flush();
+            awaitSavedBookings(process, firstBooking + secondBooking);
+            assertTrue(process.isAlive(), "Redo must save without requiring the application to exit");
+            BookingList redone = new Storage(workingDirectory.resolve("data")).loadBookings();
+            assertEquals(2, redone.size());
+            assertEquals("Second", redone.get(1).getName());
+
             process.getOutputStream().write("bye\n".getBytes(StandardCharsets.UTF_8));
             process.getOutputStream().close();
             String response = awaitExit(process);
             assertTrue(response.lines().anyMatch(line -> line.equals(
                     "Undid command: book r/exam n/Second v/LT2 t/05/10/2026 14:00")), response);
+            assertTrue(response.lines().anyMatch(line -> line.equals(
+                    "Redid command: book r/exam n/Second v/LT2 t/05/10/2026 14:00")), response);
             assertFalse(response.contains("Unable to save"), response);
         } finally {
             stopIfRunning(process);

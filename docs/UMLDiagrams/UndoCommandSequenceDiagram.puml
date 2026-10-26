@@ -11,12 +11,6 @@ participant "history:Deque<UndoEntry>" as History
 participant ":BookingList" as Bookings
 participant ":Storage" as Storage
 
-note over App, Storage
-    Existing application objects are already initialized; userInput = "/undo".
-    Each successful book/cancel command has stored its full input and previous booking list in history.
-    Input validation, separator output, collection accessors and storage internals are omitted.
-end note
-
 activate App
 App -> UI: processCommand(userInput)
 activate UI
@@ -62,6 +56,8 @@ else history contains an undoable command
     activate History
     History --> Undo: removed entry
     deactivate History
+
+    note right of Undo: Push lastCommand onto redoHistory\nso /redo can restore its after snapshot.
 
     note right of Undo
         Print "Undid command: " + lastCommand.userInput()

@@ -46,6 +46,10 @@ public final class HelpText {
 
             /undo: undo the last successful book or cancel command in this session.
                 Repeat /undo to undo earlier commands.
+
+            /redo: redo the most recently undone command in this session.
+                Repeat /redo to redo further undone commands.
+                A successful new book or cancel command clears all remaining redo history.
                 
             bye: exit EduReserve
             """;
