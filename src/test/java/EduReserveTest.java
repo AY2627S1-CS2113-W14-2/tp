@@ -13,6 +13,9 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import Tasks.BookingList;
+import storage.Storage;
+
 /** Runs the real application in temporary folders so tests never touch the user's saved bookings. */
 class EduReserveTest {
     @TempDir
@@ -103,6 +106,112 @@ class EduReserveTest {
         }
     }
 
+    /**
+     * Checks that undo updates the saved file while the app is still waiting for another command.
+     * @author Maxkedd
+     */
+    @Test
+    void main_undoBooking_savesRestoredStateBeforeNextCommand() throws Exception {
+        Process process = startApplication();
+        String firstBooking = "B | exam | First | LT1 | 05/10/2026 14:00\n";
+        String secondBooking = "B | exam | Second | LT2 | 05/10/2026 14:00\n";
+        try {
+            process.getOutputStream().write(("James\n"
+                    + "book r/exam n/First v/LT1 t/05/10/2026 14:00\n"
+                    + "book r/exam n/Second v/LT2 t/05/10/2026 14:00\n")
+                    .getBytes(StandardCharsets.UTF_8));
+            process.getOutputStream().flush();
+            awaitSavedBookings(process, firstBooking + secondBooking);
+
+            process.getOutputStream().write("/undo\n".getBytes(StandardCharsets.UTF_8));
+            process.getOutputStream().flush();
+            awaitSavedBookings(process, firstBooking);
+            assertTrue(process.isAlive(), "Undo must save without requiring the application to exit");
+
+            BookingList reloaded = new Storage(workingDirectory.resolve("data")).loadBookings();
+            assertEquals(1, reloaded.size());
+            assertEquals("First", reloaded.get(0).getName());
+
+            process.getOutputStream().write("bye\n".getBytes(StandardCharsets.UTF_8));
+            process.getOutputStream().close();
+            String response = awaitExit(process);
+            assertTrue(response.lines().anyMatch(line -> line.equals(
+                    "Undid command: book r/exam n/Second v/LT2 t/05/10/2026 14:00")), response);
+            assertFalse(response.contains("Unable to save"), response);
+        } finally {
+            stopIfRunning(process);
+        }
+    }
+
+    /**
+     * Checks that undoing a cancellation restores saved booking details and order after restarting.
+     * @author Maxkedd
+     */
+    @Test
+    void main_undoCancellation_restoresSavedBookingsAcrossRestart() throws Exception {
+        Path dataFile = workingDirectory.resolve("data/bookings.txt");
+        Files.createDirectories(dataFile.getParent());
+        String originalBookings = "B | lecture | First | LT1 | 05/10/2026 09:00\n"
+                + "B | exam | Midterm | LT2 | 05/10/2026 14:00\n"
+                + "B | exam | Midterm | LT3 | 05/10/2026 15:00\n";
+        Files.writeString(dataFile, originalBookings);
+
+        String response = runApplication("James\ncancel n/Midterm\n/undo\n");
+
+        assertTrue(response.contains("Booking cancelled:"), response);
+        assertTrue(response.lines().anyMatch(line -> line.equals("Undid command: cancel n/Midterm")), response);
+        assertFalse(response.contains("Unable to save"), response);
+        assertEquals(originalBookings, Files.readString(dataFile).replace("\r\n", "\n"));
+
+        String restartedResponse = runApplication("James\nlist\n/undo\nbye\n");
+        assertTrue(restartedResponse.contains("1. lecture Title: First"), restartedResponse);
+        assertTrue(restartedResponse.contains("2. exam Title: Midterm"), restartedResponse);
+        assertTrue(restartedResponse.contains("3. exam Title: Midterm"), restartedResponse);
+        assertTrue(restartedResponse.contains("No commands to undo."), restartedResponse);
+        assertEquals(originalBookings, Files.readString(dataFile).replace("\r\n", "\n"));
+    }
+
+    /**
+     * Checks that repeated undo clears storage even when invalid and read-only commands intervene.
+     * @author Maxkedd
+     */
+    @Test
+    void main_repeatedUndo_savesEmptyListAfterSkippingInvalidCommands() throws Exception {
+        String response = runApplication("James\n"
+                + "book r/exam n/First v/LT1 t/05/10/2026 14:00\n"
+                + "book r/exam n/Second v/LT2 t/05/10/2026 14:00\n"
+                + "list\ncancel n/Missing\n/undo extra\n/undo\n/undo\n/undo\n");
+
+        assertTrue(response.contains("No booking found with the name: Missing"), response);
+        assertTrue(response.contains("Please use: /undo"), response);
+        assertEquals(java.util.List.of(
+                "Undid command: book r/exam n/Second v/LT2 t/05/10/2026 14:00",
+                "Undid command: book r/exam n/First v/LT1 t/05/10/2026 14:00"),
+                response.lines().filter(line -> line.startsWith("Undid command: ")).toList());
+        assertTrue(response.contains("No commands to undo."), response);
+        assertFalse(response.contains("Unable to save"), response);
+        assertEquals("", Files.readString(workingDirectory.resolve("data/bookings.txt")));
+        assertTrue(new Storage(workingDirectory.resolve("data")).loadBookings().isEmpty());
+    }
+
+    /**
+     * Waits for the child to finish saving the expected state without sending another command.
+     * @author Maxkedd
+     */
+    private void awaitSavedBookings(Process process, String expectedBookings) throws Exception {
+        Path dataFile = workingDirectory.resolve("data/bookings.txt");
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while (System.nanoTime() < deadline && process.isAlive()) {
+            if (Files.isRegularFile(dataFile)
+                    && Files.readString(dataFile).replace("\r\n", "\n").equals(expectedBookings)) {
+                return;
+            }
+            Thread.sleep(20);
+        }
+        throw new AssertionError("Application did not save the expected bookings:\n"
+                + Files.readString(outputFile()));
+    }
+
     /** Starts a separate Java process with an isolated working directory and optional coverage instrumentation. */
     private Process startApplication() throws Exception {
         ArrayList<String> command = new ArrayList<>();
@@ -170,19 +279,26 @@ class EduReserveTest {
         return workingDirectory.resolve("output.txt");
     }
 
+    /**
+     * Checks editing duplicate names loaded from older data, since new bookings require unique names.
+     * @author Maxkedd
+     */
     @Test
     void main_editSelectedDuplicate_persistsOnlySelectedChangeAcrossRestart() throws Exception {
-        String response = runApplication("James\n"
-                + "book r/exam n/Other v/LT0 t/05/10/2026 14:00\n"
-                + "book r/exam n/Midterm v/LT1 t/05/10/2026 14:00\n"
-                + "book r/exam n/Midterm v/LT2 t/05/10/2026 14:00\n"
-                + "editbooking n/midterm\n2\nv/LT3\nbye\n");
+        Path dataFile = workingDirectory.resolve("data/bookings.txt");
+        Files.createDirectories(dataFile.getParent());
+        Files.writeString(dataFile, "B | exam | Other | LT0 | 05/10/2026 14:00\n"
+                + "B | exam | Midterm | LT1 | 05/10/2026 14:00\n"
+                + "B | exam | Midterm | LT2 | 05/10/2026 14:00\n");
 
+        String response = runApplication("James\neditbooking n/midterm\n2\nv/LT3\nbye\n");
+
+        assertTrue(response.contains("Multiple bookings found. Select a booking from this list:"), response);
         assertTrue(response.contains("Booking updated: [B] exam - Midterm (venue: LT3"), response);
         assertEquals("B | exam | Other | LT0 | 05/10/2026 14:00\n"
                 + "B | exam | Midterm | LT1 | 05/10/2026 14:00\n"
                 + "B | exam | Midterm | LT3 | 05/10/2026 14:00\n",
-                Files.readString(workingDirectory.resolve("data/bookings.txt")).replace("\r\n", "\n"));
+                Files.readString(dataFile).replace("\r\n", "\n"));
 
         String restarted = runApplication("James\nviewbooking n/Midterm\nbye\n");
         assertTrue(restarted.contains("venue: LT3"), restarted);

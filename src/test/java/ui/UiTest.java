@@ -555,6 +555,104 @@ class UiTest {
         assertEquals(1, bookings.size());
     }
 
+    /**
+     * Checks that /undo reaches the latest successful change despite intervening commands.
+     * @author Maxkedd
+     */
+    @Test
+    void processCommand_undo_skipsReadOnlyAndInvalidCommands() {
+        BookingList bookings = new BookingList();
+        Ui ui = new Ui(bookings);
+        runAndCapture(ui, "book r/exam n/Midterm v/LT1 t/05/10/2026 14:00");
+        runAndCapture(ui, "list");
+        runAndCapture(ui, "find n/Midterm");
+        runAndCapture(ui, "viewbooking n/Midterm");
+        runAndCapture(ui, "calendar");
+        runAndCapture(ui, "book r/exam n/Clash v/LT1 t/05/10/2026 14:00");
+        runAndCapture(ui, "cancel n/Missing");
+        runAndCapture(ui, "unknown");
+
+        String response = runAndCapture(ui, "  /UNDO\t ");
+
+        assertTrue(response.lines().anyMatch(line -> line.equals(
+                "Undid command: book r/exam n/Midterm v/LT1 t/05/10/2026 14:00")), response);
+        assertTrue(bookings.isEmpty());
+        assertTrue(runAndCapture(ui, "/undo").contains("No commands to undo."));
+    }
+
+    /**
+     * Checks that undoing cancellation restores the exact booking at its original position.
+     * @author Maxkedd
+     */
+    @Test
+    void processCommand_undoCancellation_restoresOriginalPositionAndDuplicateNames() {
+        BookingList bookings = new BookingList();
+        Booking first = new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00");
+        Booking second = new Booking("exam", "Midterm", "LT2", "05/10/2026 14:00");
+        bookings.add(first);
+        bookings.add(second);
+        Ui ui = new Ui(bookings);
+        runAndCapture(ui, "cancel n/Midterm");
+        assertEquals(1, bookings.size());
+
+        String response = runAndCapture(ui, "/undo");
+
+        assertTrue(response.lines().anyMatch(line -> line.equals("Undid command: cancel n/Midterm")), response);
+        assertEquals(2, bookings.size());
+        assertEquals(first, bookings.get(0));
+        assertEquals(second, bookings.get(1));
+        assertTrue(runAndCapture(ui, "/undo").contains("No commands to undo."));
+        assertEquals(2, bookings.size());
+    }
+
+    /**
+     * Checks that an invalid undo request leaves history available for a valid request.
+     * @author Maxkedd
+     */
+    @Test
+    void processCommand_undoWithArguments_keepsHistoryForValidUndo() {
+        BookingList bookings = new BookingList();
+        Ui ui = new Ui(bookings);
+        runAndCapture(ui, "book r/exam n/Midterm v/LT1 t/05/10/2026 14:00");
+
+        assertTrue(runAndCapture(ui, "/undo extra").contains("Please use: /undo"));
+        assertEquals(1, bookings.size());
+        runAndCapture(ui, "/undo");
+        assertTrue(bookings.isEmpty());
+    }
+
+    /**
+     * Checks history when a new booking is added after an undo.
+     * @author Maxkedd
+     */
+    @Test
+    void processCommand_undoAfterNewCommand_followsRemainingHistory() {
+        BookingList bookings = new BookingList();
+        Ui ui = new Ui(bookings);
+        runAndCapture(ui, "book r/exam n/First v/LT1 t/05/10/2026 14:00");
+        runAndCapture(ui, "book r/exam n/Second v/LT2 t/05/10/2026 14:00");
+        runAndCapture(ui, "/undo");
+        runAndCapture(ui, "book r/exam n/Third v/LT3 t/05/10/2026 14:00");
+        runAndCapture(ui, "/undo");
+        assertEquals(1, bookings.size());
+        assertEquals("First", bookings.get(0).getName());
+        runAndCapture(ui, "/undo");
+        assertTrue(bookings.isEmpty());
+    }
+
+    /**
+     * Checks that a new session does not inherit another session's undo history.
+     * @author Maxkedd
+     */
+    @Test
+    void processCommand_newSession_hasNoUndoHistory() {
+        BookingList bookings = new BookingList();
+        runAndCapture(new Ui(bookings), "book r/exam n/Midterm v/LT1 t/05/10/2026 14:00");
+
+        assertTrue(runAndCapture(new Ui(bookings), "/undo").contains("No commands to undo."));
+        assertEquals(1, bookings.size());
+    }
+
     private String runAndCapture(Ui ui, String command) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         PrintStream originalOutput = System.out;
@@ -565,6 +663,32 @@ class UiTest {
             System.setOut(originalOutput);
         }
         return output.toString(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Checks that duplicate-name rejection keeps the last successful command available for undo.
+     * @author Maxkedd
+     */
+    @Test
+    void processCommand_duplicateBookingName_isRejectedWithoutChangingUndoHistory() {
+        BookingList bookings = new BookingList();
+        Ui ui = new Ui(bookings);
+        String originalInput = "book r/exam n/Midterm v/LT1 t/05/10/2026 14:00";
+        runAndCapture(ui, originalInput);
+
+        String response = runAndCapture(ui, "book r/lecture n/midterm v/LT2 t/06/10/2026 09:00");
+
+        assertTrue(response.contains("A booking with the name midterm already exists."), response);
+        assertFalse(response.contains("Booking added:"), response);
+        assertEquals(1, bookings.size());
+        assertEquals("LT1", bookings.get(0).getVenue());
+        assertTrue(runAndCapture(ui, "/undo").contains("Undid command: " + originalInput));
+        assertTrue(bookings.isEmpty());
+        assertTrue(runAndCapture(ui, "/undo").contains("No commands to undo."));
+
+        // Once undo removes the original booking, its name is available again.
+        assertTrue(runAndCapture(ui, originalInput).contains("Booking added:"));
+        assertEquals(1, bookings.size());
     }
 
     @Test

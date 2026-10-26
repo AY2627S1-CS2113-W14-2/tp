@@ -204,6 +204,40 @@ asks `BookingList#findByDate` for the bookings starting on that date, sorted by 
 
 ![Calendar command sequence diagram](UMLDiagrams/CalendarCommandSequenceDiagram.png)
 
+### Undoing a command: /undo
+
+Restores the booking list to its state before the most recent successful `book` or `cancel` command.
+
+Format: `/undo`
+
+`Ui` keeps one `UndoCommand` instance for the session. Its `isUndoable` method declares the eligible
+commands. Before executing one of these commands, `executeAndRecord` copies the current booking list.
+Only after the command succeeds does it push an `UndoEntry` containing that snapshot and the full command
+text onto `history`. Failed commands and read-only commands do not add entries.
+
+When `/undo` is entered, `Ui.processCommand` calls `UndoCommand.execute`. It reads the latest history entry,
+removes the current bookings and adds the saved bookings back in their original order. It then pops the
+history entry and prints the full command that was undone, for example:
+
+```text
+Undid command: book r/exam n/Midterm v/LT1 t/05/10/2026 14:00
+```
+
+If history is empty, it prints `No commands to undo.` and leaves the bookings unchanged. Extra arguments
+such as `/undo extra` are rejected with `InvalidCommandException`, which `Ui` catches and displays with help.
+Repeated `/undo` commands restore earlier states; undo itself is never recorded.
+
+After `processCommand` returns, `EduReserve` calls `Storage.saveBookings` to write the current list to
+`data/bookings.txt`. The restored bookings persist across restarts, but undo history lasts only for the
+current session. A save failure is reported by `EduReserve` as `Unable to save your bookings.`
+
+![Undo command sequence diagram](UMLDiagrams/UndoCommandSequenceDiagram.png)
+
+The diagram covers a valid `/undo` request, including empty history, and a successful save. Validation
+details, separator output, collection accessors and storage internals are omitted for clarity.
+
+[Editable PlantUML source](UMLDiagrams/UndoCommandSequenceDiagram.puml)
+
 ## Product scope
 ### Target user profile
 
