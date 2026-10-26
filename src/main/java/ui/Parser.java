@@ -30,6 +30,9 @@ public class Parser {
     public String parseCommand(String input) {
         String originalCommand = separateInput(input)[0];
         String command = originalCommand.toLowerCase(Locale.ROOT);
+        if (command.equals("editbooking")) {
+            return command;
+        }
         switch (command) {
         case "book", "cancel", "list", "bye", "find", "viewbooking", "calendar", "/undo":
             return command;
@@ -78,6 +81,86 @@ public class Parser {
     }
 
     /**
+     * Applies supplied edit fields to a copy of the original booking, keeping omitted fields unchanged.
+     * Fields may appear in any order, but each prefix may appear only once.
+     * @author produdepunk
+     * @param original booking being edited
+     * @param input one or more r/, n/, v/, or t/ fields
+     * @return a validated replacement, without changing the original
+     */
+    public Booking parseEditedBooking(Booking original, String input) {
+        assert original != null : "Editing requires an original booking";
+        assert input != null : "Edit fields must not be null";
+        String reason = original.getReason();
+        String name = original.getName();
+        String venue = original.getVenue();
+        String timing = original.getTiming();
+        String seenPrefixes = "";
+        String[] fields = input.strip().split("\\p{javaWhitespace}+(?=[rnvt]/)");
+        for (String field : fields) {
+            if (field.length() < 2 || field.charAt(1) != '/' || "rnvt".indexOf(field.charAt(0)) < 0) {
+                throw new InvalidCommandException("Enter changes using r/REASON n/NAME v/VENUE t/TIMING."
+                        + " Omit fields to keep them, or type abort.");
+            }
+            String prefix = field.substring(0, 1);
+            if (seenPrefixes.contains(prefix)) {
+                throw new InvalidCommandException("Each edit field may only be specified once.");
+            }
+            seenPrefixes += prefix;
+            String value = field.substring(2).strip();
+            switch (prefix) {
+            case "r":
+                reason = value.toLowerCase(Locale.ROOT);
+                break;
+            case "n":
+                name = value;
+                break;
+            case "v":
+                venue = value;
+                break;
+            case "t":
+                timing = value;
+                break;
+            default:
+                throw new AssertionError("Edit prefix must already be validated");
+            }
+        }
+        return createValidatedEditedBooking(reason, name, venue, timing);
+    }
+
+    /** Validates edited booking fields while leaving the original booking parser intact. */
+    private Booking createValidatedEditedBooking(String reason, String name, String venue, String timing) {
+        if (!reason.equals("exam") && !reason.equals("lecture")) {
+            throw new InvalidCommandException("Booking reason must be exam or lecture.");
+        }
+        if (name.isBlank() || venue.isBlank() || timing.isBlank()) {
+            throw new InvalidCommandException("Booking name, venue and timing must not be empty.");
+        }
+        try {
+            Booking.parseStartTime(timing);
+        } catch (DateTimeParseException e) {
+            throw new InvalidCommandException(
+                    "Timing must use dd/MM/yyyy HH:mm, for example 05/10/2026 14:00.");
+        }
+        return new Booking(reason, name, venue, timing);
+    }
+
+    /** Extracts the full booking name to edit; partial-name searches are not accepted. */
+    public String parseEdit(String input) {
+        assert input != null : "Edit command input must not be null";
+        String[] separatedInput = separateInput(input);
+        if (!parseCommand(input).equals("editbooking") || separatedInput.length < 2
+                || !separatedInput[1].strip().startsWith("n/")) {
+            throw new InvalidCommandException("Please use: editbooking n/BOOKING_NAME");
+        }
+        String name = separatedInput[1].strip().substring(2).strip();
+        if (name.isBlank()) {
+            throw new InvalidCommandException("Booking name must not be empty.");
+        }
+        return name;
+    }
+
+    /**
      * Extracts the booking name from a command in the form: cancel n/BOOKING_NAME.
      * The name is kept as text, so it may contain spaces.
      * @author Pratham-tech
@@ -104,7 +187,7 @@ public class Parser {
     /**
      * Parses a view command into 3 separate cases,
      * View lectures and exams, view lectures only and view exams only
-     * View the specified lectures or exams by alphabetical order
+     * View the specified lectures or exams by alphabetical order or time order
      * @param input whole string parsed by program
      */
     public ListOptions parseViewList(String input) {
@@ -145,15 +228,24 @@ public class Parser {
                     throw new InvalidCommandException("Sort order should only be specified once");
                 }
                 sortOrderSeen = true;
-                if (option.equalsIgnoreCase("s/alpha")) {
+                switch (option.toLowerCase(Locale.ROOT)) {
+                case "s/alpha":
                     sortOrder = SortOrder.ALPHABETIC;
-                } else if (option.equalsIgnoreCase("s/~alpha")) {
+                    break;
+                case "s/~alpha":
                     sortOrder = SortOrder.REVERSE_ALPHABETIC;
-                } else {
-                    throw new InvalidCommandException("Sorted order should be alpha or ~alpha");
+                    break;
+                case "s/time":
+                    sortOrder = SortOrder.TIME_INCREASING;
+                    break;
+                case "s/~time":
+                    sortOrder = SortOrder.TIME_DECREASING;
+                    break;
+                default:
+                    throw new InvalidCommandException("list must be followed by a valid sort order");
                 }
             } else {
-                throw new InvalidCommandException("list must be followed by a reason or sort order");
+                throw new InvalidCommandException("List must be followed by a valid reason or sort order");
             }
         }
         return new ListOptions(item, sortOrder);
