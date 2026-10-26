@@ -9,6 +9,7 @@ public final class HelpText {
             How to use EduReserve:
             book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING:
                 BOOKING_REASON must be exam or lecture.
+                BOOKING_NAME must be unique (not case sensitive).
                 TIMING must use dd/MM/yyyy HH:mm.
                 e.g. book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00
                 Add optional a/ATTENDEES after the timing to record the expected group size.
@@ -49,6 +50,13 @@ public final class HelpText {
 
             calendar: shows today's bookings in order of start time.
                 e.g. calendar
+
+            /undo: undo the last successful book or cancel command in this session.
+                Repeat /undo to undo earlier commands.
+
+            /redo: redo the most recently undone command in this session.
+                Repeat /redo to redo further undone commands.
+                A successful new book or cancel command clears all remaining redo history.
                 
             bye: exit EduReserve
             """;

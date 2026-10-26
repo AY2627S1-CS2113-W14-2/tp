@@ -21,12 +21,17 @@ public class BookCommand extends Command {
     }
 
     /**
-     * Rejects venue and time clashes before adding a valid booking and printing its confirmation.
+     * Rejects duplicate names (ignoring case) and venue/time clashes before adding a booking.
+     * @author Maxkedd
      */
     @Override
     public void execute(BookingList bookings, String item) {
         assert bookings != null : "Booking list cannot be null";
         Booking booking = parser.parseBooking(item);
+        if (bookings.findByName(booking.getName()) != -1) {
+            throw new InvalidCommandException("A booking with the name " + booking.getName()
+                    + " already exists. Please use a different booking name.");
+        }
         Booking clash = bookings.findClash(booking);
         if (clash != null) {
             throw new InvalidCommandException("Booking clash: " + clash.getVenue() + " is already booked at "

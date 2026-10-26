@@ -11,6 +11,7 @@ import command.SortOrder;
 
 /**
  * Interprets command text without printing or changing the booking list.
+ * @author Maxkedd
  */
 public class Parser {
     private static final Pattern TRAILING_ATTENDEE_FIELD =
@@ -18,6 +19,7 @@ public class Parser {
 
     /**
      * Splits once so spaces within booking fields are preserved.
+     * @author Maxkedd
      */
     private String[] separateInput(String input) {
         input = input.replace("\t", " ");
@@ -26,6 +28,8 @@ public class Parser {
 
     /**
      * Parse command in lowercase and catch unknown commands.
+     * @author Maxkedd
+     * @author Maxkedd
      */
     public String parseCommand(String input) {
         String originalCommand = separateInput(input)[0];
@@ -34,7 +38,7 @@ public class Parser {
             return command;
         }
         switch (command) {
-        case "book", "cancel", "list", "bye", "find", "viewbooking", "calendar", "checksize":
+        case "book", "cancel", "list", "bye", "find", "viewbooking", "calendar", "/undo", "/redo", "checksize":
             return command;
         default:
             throw new InvalidCommandException(originalCommand + " is not a valid command! -_-");
@@ -44,6 +48,7 @@ public class Parser {
     /**
      * Creates a named exam or lecture booking in the order r/, n/, v/, t/.
      * Field values are kept as text, so names, venues, and timings may contain spaces.
+     * @author Maxkedd
      */
     public Booking parseBooking(String input) {
         assert input != null : "Booking command input must not be null";

@@ -221,6 +221,67 @@ asks `BookingList#findByDate` for the bookings starting on that date, sorted by 
 
 ![Calendar command sequence diagram](UMLDiagrams/CalendarCommandSequenceDiagram.png)
 
+### Undoing a command: /undo
+
+Restores the booking list to its state before the most recent successful `book` or `cancel` command.
+
+Format: `/undo`
+
+`Ui` keeps one `UndoCommand` instance for the session. Its `isUndoable` method declares the eligible
+commands. Before executing one of these commands, `executeAndRecord` copies the current booking list.
+Only after the command succeeds does it push an `UndoEntry` containing the before and after snapshots and
+the full command text onto `history`, then clear `redoHistory`. Failed commands and read-only commands
+do not add entries or clear redo history.
+
+When `/undo` is entered, `Ui.processCommand` calls `UndoCommand.execute`. It reads the latest history entry,
+removes the current bookings and adds the saved bookings back in their original order. It then pops the
+history entry, pushes it onto `redoHistory`, and prints the full command that was undone, for example:
+
+```text
+Undid command: book r/exam n/Midterm v/LT1 t/05/10/2026 14:00
+```
+
+If history is empty, it prints `No commands to undo.` and leaves the bookings unchanged. Extra arguments
+such as `/undo extra` are rejected with `InvalidCommandException`, which `Ui` catches and displays with help.
+Repeated `/undo` commands restore earlier states; undo itself is never recorded.
+
+After `processCommand` returns, `EduReserve` calls `Storage.saveBookings` to write the current list to
+`data/bookings.txt`. The restored bookings persist across restarts, but undo history lasts only for the
+current session. A save failure is reported by `EduReserve` as `Unable to save your bookings.`
+
+![Undo command sequence diagram](UMLDiagrams/UndoCommandSequenceDiagram.png)
+
+The diagram covers a valid `/undo` request, including empty history, and a successful save. Validation
+details, separator output, collection accessors and storage internals are omitted for clarity.
+
+[Editable PlantUML source](UMLDiagrams/UndoCommandSequenceDiagram.puml)
+
+### Redoing a command: /redo
+
+Format: `/redo`
+
+`Ui` keeps a `RedoCommand` linked to the same `UndoCommand` instance used for recording and undoing commands.
+`RedoCommand.execute` validates that there are no arguments, then calls `UndoCommand.redo`. This restores
+the after snapshot of the most recently undone command, moves its entry from `redoHistory` back to
+`history`, and prints `Redid command: ` followed by the full original command. It can then be undone again.
+`EduReserve` saves the restored booking list through the same `Storage.saveBookings` call used after undo.
+
+Repeated `/redo` commands reapply commands in reverse undo order. If there is no available entry, the
+response is `No commands to redo.` and bookings stay unchanged. Redo history lasts only for the current session.
+
+A successful new `book` or `cancel` command clears **all remaining redo history**, including after a partial
+redo. For example, after booking A, B and C, undoing C and B, and redoing B, a new booking D discards the
+option to redo C. A failed command or a read-only command such as `list` leaves that option available.
+
+![Redo command sequence diagram](UMLDiagrams/RedoCommandSequenceDiagram.png)
+
+The diagram covers a valid `/redo` request, including empty redo history, and a successful save.
+The two loops expand `restoreBookings`: first clear the current list, then restore the saved **after**
+state from `resultingBookings()`. Undo instead restores the **before** state from `previousBookings()`.
+Input validation, snapshot helper calls, separator output and storage internals are omitted for clarity.
+
+[Editable PlantUML source](UMLDiagrams/RedoCommandSequenceDiagram.puml)
+
 ## Product scope
 ### Target user profile
 
