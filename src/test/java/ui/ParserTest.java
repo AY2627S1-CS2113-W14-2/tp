@@ -18,6 +18,41 @@ class ParserTest {
     private final Parser parser = new Parser();
 
     @Test
+    void parseEdit_fullName_preservesSpacesAndIgnoresCommandCase() {
+        assertEquals("editbooking", parser.parseCommand("EDITBOOKING n/Midterm"));
+        assertEquals("CS2113 Midterm", parser.parseEdit("  EDITBOOKING\tn/  CS2113 Midterm  "));
+    }
+
+    @Test
+    void parseEdit_missingNameOrWrongCommand_throws() {
+        for (String input : new String[]{"editbooking", "editbooking n/", "editbooking Midterm",
+            "editbooking r/exam", "find n/Midterm"}) {
+            assertThrows(InvalidCommandException.class, () -> parser.parseEdit(input), input);
+        }
+    }
+
+    @Test
+    void parseEditedBooking_partialFields_preservesOtherFieldsAndSlashesWithinNames() {
+        Booking original = new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00");
+
+        Booking updated = parser.parseEditedBooking(original, "\tn/Part a/b Final Review  \tv/Lecture Theatre 2  ");
+
+        assertEquals("Part a/b Final Review", updated.getName());
+        assertEquals("Lecture Theatre 2", updated.getVenue());
+        assertEquals(original.getTiming(), updated.getTiming());
+        assertEquals(original.getReason(), updated.getReason());
+    }
+
+    @Test
+    void parseEditedBooking_invalidOrRepeatedFields_throws() {
+        Booking original = new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00");
+        for (String input : new String[]{"", " ", "LT2", "x/LT2", "v/", "n/", "r/", "t/",
+            "v/LT2 v/LT3", "r/lecture r/exam", "n/One n/Two", "t/05/10/2026 14:00 t/06/10/2026 14:00"}) {
+            assertThrows(InvalidCommandException.class, () -> parser.parseEditedBooking(original, input), input);
+        }
+    }
+
+    @Test
     void parseBooking_invalidDatesAndTimes_reportRequiredFormat() {
         String[] timings = {
             "10:30am", "31/02/2026 14:00", "29/02/2025 14:00", "05/13/2026 14:00",
@@ -183,6 +218,30 @@ class ParserTest {
     }
 
     @Test
+    void parseViewList_timeIncreasing_acceptsFilterAndEitherOptionOrder() {
+        Parser.ListOptions all = parser.parseViewList("list s/time");
+        assertEquals("bookings", all.item());
+        assertEquals(SortOrder.TIME_INCREASING, all.sortOrder());
+
+        Parser.ListOptions expected =
+                new Parser.ListOptions("exams", SortOrder.TIME_INCREASING);
+        assertEquals(expected, parser.parseViewList("list r/exams s/time"));
+        assertEquals(expected, parser.parseViewList("  LIST\ts/TIME r/exams  "));
+    }
+
+    @Test
+    void parseViewList_timeDecreasing_acceptsFilterAndEitherOptionOrder() {
+        Parser.ListOptions all = parser.parseViewList("list s/~time");
+        assertEquals("bookings", all.item());
+        assertEquals(SortOrder.TIME_DECREASING, all.sortOrder());
+
+        Parser.ListOptions expected =
+                new Parser.ListOptions("lectures", SortOrder.TIME_DECREASING);
+        assertEquals(expected, parser.parseViewList("list r/lectures s/~time"));
+        assertEquals(expected, parser.parseViewList("  LIST\ts/~TIME r/lectures  "));
+    }
+
+    @Test
     void parseViewList_filterAndSort_acceptsEitherOrder() {
         Parser.ListOptions expected =
                 new Parser.ListOptions("exams", SortOrder.ALPHABETIC);
@@ -210,8 +269,12 @@ class ParserTest {
             "list r/",
             "list s/",
             "list s/numeric",
+            "list s/time_sideways",
+            "list s/time_up",
+            "list s/time_down",
             "list r/exams extra",
             "list s/alpha extra",
+            "list s/time extra",
             "book",
             "bye"
         };
@@ -228,7 +291,9 @@ class ParserTest {
             "list r/exams r/lectures",
             "list r/exams r/exams",
             "list s/alpha s/~alpha",
-            "list s/alpha s/alpha"
+            "list s/alpha s/alpha",
+            "list s/time s/~time",
+            "list s/time s/time"
         };
 
         for (String command : commands) {

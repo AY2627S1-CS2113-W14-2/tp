@@ -80,6 +80,37 @@ Examples:
 
 ![View command sequence diagram](UMLDiagrams/ViewCommandSequenceDiagram.png)
 
+### Editing a booking: editbooking
+
+Format: `editbooking n/BOOKING_NAME`
+
+- Matches the full booking name, ignoring case; partial names are not matched.
+- If multiple bookings match, a numbered list shows their reason, venue, and timing.
+  Enter the number from this filtered list to select the booking to edit.
+- With one match, the booking is selected automatically.
+- At the editing prompt, enter one or more fields: `r/REASON`, `n/NAME`, `v/VENUE`, `t/TIMING`.
+  Fields may appear in any order, once each. Omitted fields keep their existing values.
+- Reasons must be `exam` or `lecture`; timing must use `dd/MM/yyyy HH:mm`.
+- Invalid input or a venue/time clash leaves the original booking unchanged and allows a retry.
+- Type `abort` to cancel editing, or `bye` to exit without applying changes.
+
+Example session (two bookings named "Midterm"):
+
+```text
+editbooking n/Midterm
+2
+v/LT3 t/06/10/2026 15:00
+```
+
+`Ui` retains an `EditCommand` between input lines. The command uses `BookingList.findAllByName`
+to build the filtered selection and retains the selected booking object, so filtered numbers
+cannot accidentally select an unrelated booking in the full list. `Parser.parseEditedBooking`
+validates a replacement using the same constraints as creating a booking. Clash checking excludes
+the selected original booking, and `BookingList.replace` applies the change in its original position
+only after validation succeeds. The existing application loop saves the updated list.
+
+[Editable edit booking sequence diagram](UMLDiagrams/EditBookingSequenceDiagram.puml)
+
 ### Cancelling a booking: cancel
 Removes a booking so that its venue and time can be used again
 
@@ -255,7 +286,7 @@ Input validation, snapshot helper calls, separator output and storage internals 
 | v1.0    | School Admin | View a booking                                                       | Check the details of the booking under a name                                         |
 | v1.0    | School Admin | List bookings filtered by type and sorted alphebetically             | I can view all bookings clearly in an organised manner                                |
 | v1.0    | School Admin | Edit a booking                                                       | I can change my booking details if needed                                             |
-| v1.0    | School Admin | Check size and equipment                                             | Decide whether I have enough resources to hold an event in the venue                  |
+| v1.0    | School Admin | Check size of venue in terms of seats                                | Decide whether I have enough resources to hold an event in the venue                  |
 | v2.0    | School Admin | find a to-do item by name                                            | locate a to-do without having to go through the entire list                           |
 | v2.0    | School Admin | Add booking notes                                                    | I have an alternative method to convey any messages to students beforehand            |
 | v2.0    | School Admin | Undo the previous action                                             | I can rewind accidental actions                                                       |

@@ -20,6 +20,39 @@ import Tasks.BookingList;
  */
 class UiTest {
     @Test
+    void processCommand_editbooking_routesSelectionAndChangesThenResumesNormalCommands() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "Other", "LT0", "05/10/2026 14:00"));
+        bookings.add(new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00"));
+        bookings.add(new Booking("exam", "Midterm", "LT2", "05/10/2026 14:00"));
+        Ui ui = new Ui(bookings);
+
+        assertTrue(runAndCapture(ui, "editbooking n/Midterm").contains("2. [B] exam - Midterm (venue: LT2"));
+        assertTrue(runAndCapture(ui, "0").contains("Enter a number from 1 to 2"));
+        runAndCapture(ui, "2");
+        assertTrue(runAndCapture(ui, "v/LT3").contains("Booking updated:"));
+
+        assertEquals("LT1", bookings.get(1).getVenue());
+        assertEquals("LT3", bookings.get(2).getVenue());
+        assertTrue(runAndCapture(ui, "viewbooking n/Midterm").contains("LT3"));
+        assertTrue(ui.processCommand("bye"));
+    }
+
+    @Test
+    void processCommand_abortOrByeDuringEdit_preservesBooking() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00"));
+        Ui ui = new Ui(bookings);
+        runAndCapture(ui, "editbooking n/Midterm");
+        assertTrue(runAndCapture(ui, "abort").contains("Booking edit cancelled."));
+        assertTrue(runAndCapture(ui, "viewbooking n/Midterm").contains("LT1"));
+        runAndCapture(ui, "editbooking n/Midterm");
+
+        assertTrue(ui.processCommand("BYE"));
+        assertEquals("LT1", bookings.get(0).getVenue());
+    }
+
+    @Test
     void constructorAndProcessCommand_nullInputs_failPreconditions() {
         assertThrows(AssertionError.class, () -> new Ui(null));
         assertThrows(AssertionError.class, () -> new Ui(new BookingList()).processCommand(null));
@@ -243,6 +276,45 @@ class UiTest {
     }
 
     @Test
+    void processCommand_listTimeIncreasing_filtersAndPreservesStoredOrder() {
+        assertListing("list r/exams s/time",
+                "Ok, here is the list of exams in TIME_INCREASING order",
+                "1. exam Title: CS2113 Lecture 7",
+                "2. exam Title: CG2028 Finals");
+    }
+
+    @Test
+    void processCommand_listTimeDecreasing_printsLatestFirst() {
+        assertListing("list s/~time",
+                "Ok, here is the list of bookings in TIME_DECREASING order",
+                "1. lecture Title: EE2028",
+                "2. exam Title: CG2028 Finals",
+                "3. exam Title: CS2113 Lecture 7");
+    }
+
+    @Test
+    void processCommand_listTimeWithLegacyTiming_showsErrorAndPreservesBookings() {
+        BookingList bookings = new BookingList();
+        Booking legacy = new Booking("exam", "Old booking", "LT1", "10AM");
+        Booking dated = new Booking("exam", "Dated booking", "LT2", "25/10/2026 09:00");
+        bookings.add(legacy);
+        bookings.add(dated);
+        Ui ui = new Ui(bookings);
+
+        for (String command : new String[]{"list s/time", "list s/~time"}) {
+            String response = captureListOutput(ui, command);
+
+            assertTrue(response.contains(
+                    "Cannot sort these bookings: their timing must use dd/MM/yyyy HH:mm"), command);
+            assertTrue(response.contains(HelpText.COMMAND_LIST), command);
+            assertFalse(response.contains("Title:"), command);
+            assertEquals(2, bookings.size());
+            assertEquals(legacy, bookings.get(0));
+            assertEquals(dated, bookings.get(1));
+        }
+    }
+
+    @Test
     void processCommand_listEmptyBookings_printsNoBookingRows() {
         Ui ui = new Ui(new BookingList());
         String[] commands = {
@@ -250,7 +322,9 @@ class UiTest {
             "list r/exams",
             "list r/lectures",
             "list s/alpha",
-            "list r/exams s/~alpha"
+            "list r/exams s/~alpha",
+            "list s/time",
+            "list r/exams s/~time"
         };
 
         for (String command : commands) {

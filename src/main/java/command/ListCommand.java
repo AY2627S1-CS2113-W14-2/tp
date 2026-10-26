@@ -1,5 +1,6 @@
 package command;
 
+import Exceptions.InvalidCommandException;
 import Tasks.Booking;
 import Tasks.BookingList;
 
@@ -80,6 +81,11 @@ public class ListCommand extends Command {
      */
     private void sortLastShownList(SortOrder sortBy) {
         int listSize = lastShownList.size();
+        if (sortBy == SortOrder.TIME_INCREASING || sortBy == SortOrder.TIME_DECREASING) {
+            if (lastShownList.stream().anyMatch(booking -> booking.getStartTime() == null)) {
+                throw new InvalidCommandException("Cannot sort these bookings: their timing must use dd/MM/yyyy HH:mm");
+            }
+        }
         switch (sortBy) {
         case ORIGINAL:
             break;
@@ -91,6 +97,14 @@ public class ListCommand extends Command {
             lastShownList.sort(
                     Comparator.comparing(Booking::getName, String.CASE_INSENSITIVE_ORDER)
                             .reversed());
+            break;
+        case TIME_INCREASING:
+            lastShownList.sort(
+                    Comparator.comparing(Booking::getStartTime));
+            break;
+        case TIME_DECREASING:
+            lastShownList.sort(
+                    Comparator.comparing(Booking::getStartTime).reversed());
             break;
         default:
             throw new IllegalArgumentException("Unexpected sort order: " + sortBy.toString());

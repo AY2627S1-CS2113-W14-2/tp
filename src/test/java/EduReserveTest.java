@@ -289,6 +289,32 @@ class EduReserveTest {
         return workingDirectory.resolve("output.txt");
     }
 
+    /**
+     * Checks editing duplicate names loaded from older data, since new bookings require unique names.
+     * @author Maxkedd
+     */
+    @Test
+    void main_editSelectedDuplicate_persistsOnlySelectedChangeAcrossRestart() throws Exception {
+        Path dataFile = workingDirectory.resolve("data/bookings.txt");
+        Files.createDirectories(dataFile.getParent());
+        Files.writeString(dataFile, "B | exam | Other | LT0 | 05/10/2026 14:00\n"
+                + "B | exam | Midterm | LT1 | 05/10/2026 14:00\n"
+                + "B | exam | Midterm | LT2 | 05/10/2026 14:00\n");
+
+        String response = runApplication("James\neditbooking n/midterm\n2\nv/LT3\nbye\n");
+
+        assertTrue(response.contains("Multiple bookings found. Select a booking from this list:"), response);
+        assertTrue(response.contains("Booking updated: [B] exam - Midterm (venue: LT3"), response);
+        assertEquals("B | exam | Other | LT0 | 05/10/2026 14:00\n"
+                + "B | exam | Midterm | LT1 | 05/10/2026 14:00\n"
+                + "B | exam | Midterm | LT3 | 05/10/2026 14:00\n",
+                Files.readString(dataFile).replace("\r\n", "\n"));
+
+        String restarted = runApplication("James\nviewbooking n/Midterm\nbye\n");
+        assertTrue(restarted.contains("venue: LT3"), restarted);
+        assertFalse(restarted.contains("venue: LT2"), restarted);
+    }
+
     /** Stops and reaps a timed-out child before JUnit removes its temporary directory. */
     private void stopIfRunning(Process process) throws InterruptedException, IOException {
         if (process.isAlive()) {

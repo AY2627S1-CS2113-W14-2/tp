@@ -1,0 +1,112 @@
+@startuml
+scale 2
+skinparam sequenceMessageAlign center
+hide footbox
+
+participant "EduReserve" as App
+participant ":Ui" as UI
+participant ":Parser" as Parser
+participant ":EditCommand" as Edit
+participant ":BookingList" as Bookings
+participant ":Storage" as Storage
+
+activate App
+note over App, Storage
+    Successful edit where several bookings have the same name.
+    The user selects one entry from the filtered list, then changes its venue.
+    Invalid input, clashes, cancellation and the single-match path are omitted.
+end note
+
+App -> UI: processCommand("editbooking n/Midterm")
+activate UI
+UI -> Parser: parseCommand(userInput)
+activate Parser
+Parser --> UI: "editbooking"
+deactivate Parser
+
+UI -> Parser: parseEdit(userInput)
+activate Parser
+Parser --> UI: "Midterm"
+deactivate Parser
+
+UI -> Edit: execute(bookings, "Midterm")
+activate Edit
+Edit -> Bookings: findAllByName("Midterm")
+activate Bookings
+Bookings --> Edit: matchingBookings
+deactivate Bookings
+note right of Edit
+    Print the filtered matches
+    with numbers for selection
+end note
+Edit --> UI
+deactivate Edit
+UI --> App: false
+deactivate UI
+
+App -> UI: processCommand("2")
+activate UI
+UI -> Edit: isPending()
+activate Edit
+Edit --> UI: true
+deactivate Edit
+UI -> Edit: processInput(bookings, "2")
+activate Edit
+Edit -> Edit: selectBooking(matches, 2)
+note right of Edit: Print the selected booking and edit prompt
+Edit --> UI
+deactivate Edit
+UI --> App: false
+deactivate UI
+
+App -> UI: processCommand("v/LT3")
+activate UI
+UI -> Edit: isPending()
+activate Edit
+Edit --> UI: true
+deactivate Edit
+UI -> Edit: processInput(bookings, "v/LT3")
+activate Edit
+
+Edit -> Parser: parseEditedBooking(selectedBooking, input)
+activate Parser
+note right of Parser
+    Keep omitted fields from the original.
+    Validate reason, nonblank fields
+    and date/time.
+end note
+Parser --> Edit: replacementBooking
+deactivate Parser
+
+Edit -> Edit: findClashExceptSelected(bookings, replacementBooking)
+loop each booking except selectedBooking
+    Edit -> Bookings: get(index)
+    activate Bookings
+    Bookings --> Edit: existingBooking
+    deactivate Bookings
+end
+
+alt venue and time clash found
+    note right of Edit
+        Throw InvalidCommandException.
+        Keep the original booking unchanged.
+    end note
+else no clash
+    Edit -> Bookings: replace(selectedBooking, replacementBooking)
+    activate Bookings
+    Bookings --> Edit
+    deactivate Bookings
+    note right of Edit: Print "Booking updated: ..."
+end
+
+Edit --> UI
+deactivate Edit
+UI --> App: false
+deactivate UI
+
+App -> Storage: saveBookings(bookings)
+activate Storage
+Storage --> App
+deactivate Storage
+deactivate App
+@enduml
