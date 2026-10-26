@@ -21,6 +21,10 @@ Format: `book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING`
 
 Example: `book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00`
 
+Add an optional attendee count after the timing as `a/ATTENDEES`, for example:
+`book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00 a/80`.
+The count must be a positive whole number. Bookings without a count have an unknown size.
+
 `Ui.processCommand` identifies the command and creates a `BookCommand`, passing it the existing
 `Parser`. `BookCommand.execute` passes the full input to `Parser.parseBooking`, which validates
 the fields and constructs a `Booking`. The command then calls `BookingList.add` and prints the
@@ -89,7 +93,8 @@ Format: `editbooking n/BOOKING_NAME`
   Enter the number from this filtered list to select the booking to edit.
 - With one match, the booking is selected automatically.
 - At the editing prompt, enter one or more fields: `r/REASON`, `n/NAME`, `v/VENUE`, `t/TIMING`.
-  Fields may appear in any order, once each. Omitted fields keep their existing values.
+  These fields may appear in any order, once each. Omitted fields keep their existing values.
+- Add optional `a/ATTENDEES` at the end to update the booking size.
 - Reasons must be `exam` or `lecture`; timing must use `dd/MM/yyyy HH:mm`.
 - Invalid input or a venue/time clash leaves the original booking unchanged and allows a retry.
 - Type `abort` to cancel editing, or `bye` to exit without applying changes.
@@ -110,6 +115,18 @@ the selected original booking, and `BookingList.replace` applies the change in i
 only after validation succeeds. The existing application loop saves the updated list.
 
 [Editable edit booking sequence diagram](UMLDiagrams/EditBookingSequenceDiagram.puml)
+
+### Checking attendee counts: checksize
+
+The `checksize` command reports the largest recorded attendee count for each venue. Bookings without
+an attendee count are omitted, and no venue capacity values are required.
+
+Format: `checksize`
+
+The command groups bookings by venue and prints the largest attendee count recorded for each venue.
+Bookings without `a/ATTENDEES` do not contribute to the results.
+
+[Checksize sequence diagram](UMLDiagrams/CheckSizeSequenceDiagram.puml)
 
 ### Cancelling a booking: cancel
 Removes a booking so that its venue and time can be used again
@@ -224,8 +241,8 @@ asks `BookingList#findByDate` for the bookings starting on that date, sorted by 
 | v1.0    | School Admin | Find bookings by a keyword in their name                             | Quickly locate specific bookings without scrolling through the whole list             |
 | v1.0    | School Admin | View a booking                                                       | Check the details of the booking under a name                                         |
 | v1.0    | School Admin | List bookings filtered by type and sorted alphebetically             | I can view all bookings clearly in an organised manner                                |
-| v1.0    | School Admin | Edit a booking                                                       | I can change my booking details if needed                                             |
-| v1.0    | School Admin | Check size of venue in terms of seats                                | Decide whether I have enough resources to hold an event in the venue                  |
+| v2.0    | School Admin | Edit a booking                                                       | I can change my booking details if needed                                             |
+| v2.0    | School Admin | Check size of venue in terms of attendees                            | Determine I have enough resources to hold the event in the venue                      |
 | v2.0    | School Admin | find a to-do item by name                                            | locate a to-do without having to go through the entire list                           |
 | v2.0    | School Admin | Add booking notes                                                    | I have an alternative method to convey any messages to students beforehand            |
 | v2.0    | School Admin | Undo the previous action                                             | I can rewind accidental actions                                                       |

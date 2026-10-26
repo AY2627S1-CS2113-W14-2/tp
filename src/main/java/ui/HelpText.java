@@ -11,11 +11,14 @@ public final class HelpText {
                 BOOKING_REASON must be exam or lecture.
                 TIMING must use dd/MM/yyyy HH:mm.
                 e.g. book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00
+                Add optional a/ATTENDEES after the timing to record the expected group size.
+                e.g. book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00 a/80
                 A booking is rejected if that venue is already booked at the same date and time.
 
             editbooking n/BOOKING_NAME: edit an existing booking (full name, not case sensitive).
                 If several bookings match, enter the number from the displayed filtered list.
-                Then enter changes using r/REASON n/NAME v/VENUE t/TIMING in any order.
+                Then enter r/REASON, n/NAME, v/VENUE, and t/TIMING changes in any order.
+                Add optional a/ATTENDEES at the end to change the attendee count.
                 Omit fields to keep them. Type abort to cancel editing, or bye to exit.
                 e.g. editbooking n/CS2113 Midterm, then v/LT2 t/06/10/2026 14:00
 
@@ -32,6 +35,10 @@ public final class HelpText {
                 time for time ascending and ~time for time descending
                 Omit s/SORT_ORDER to show the list in original order
                 e.g list r/exams s/alpha
+
+            checksize: shows the largest recorded attendee count for each venue.
+                Bookings without an attendee count are ignored.
+                e.g. checksize
                 
             viewbooking n/BOOKING_NAME (optional) s/time:
                 Views matching bookings and optionally sorts them chronologically.

@@ -8,6 +8,7 @@ import Tasks.BookingList;
 import command.BookCommand;
 import command.EditCommand;
 import command.ListCommand;
+import command.SizeCommand;
 import command.FindCommand;
 import command.ViewCommand;
 import command.CalendarCommand;
@@ -54,6 +55,10 @@ public class Ui {
                 break;
             case "editbooking":
                 editCommand.execute(bookingList, parser.parseEdit(userInput));
+                System.out.println(LINE_BREAK);
+                break;
+            case "checksize":
+                new SizeCommand().execute(bookingList, userInput);
                 System.out.println(LINE_BREAK);
                 break;
             case "list":

@@ -81,6 +81,7 @@ public class BookingList {
      * or an empty list if there is no such booking.
      * The name must already be validated by the parser, so it is never null or blank.
      * @param name to look for in order to get matches
+     * @author produdepunk
      */
     public ArrayList<Booking> findAllByName(String name) {
         assert name != null && !name.isBlank()

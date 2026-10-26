@@ -10,6 +10,7 @@ import ui.Parser;
 /**
  * Guides the user through selecting an exact-name match and updating its details.
  * Pending input is handled by the existing UI loop so no extra console reader is needed.
+ * @author produdepunk
  */
 public class EditCommand extends Command {
     private final Parser parser = new Parser();
@@ -111,7 +112,8 @@ public class EditCommand extends Command {
     /** Displays the chosen booking and explains how to preserve fields. */
     private void printEditPrompt() {
         System.out.println("Editing: " + selectedBooking);
-        System.out.println("Enter changes using r/REASON n/NAME v/VENUE t/TIMING in any order.");
+        System.out.println("Enter r/REASON, n/NAME, v/VENUE, or t/TIMING changes in any order.");
+        System.out.println("Add optional a/ATTENDEES at the end.");
         System.out.println("Omit fields to keep them. Timing must use dd/MM/yyyy HH:mm. Type abort to cancel editing.");
     }
 

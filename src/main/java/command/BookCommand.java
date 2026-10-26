@@ -35,4 +35,5 @@ public class BookCommand extends Command {
         bookings.add(booking);
         System.out.println("Booking added: " + booking);
     }
+
 }

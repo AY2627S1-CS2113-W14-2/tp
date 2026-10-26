@@ -98,6 +98,22 @@ class UiTest {
     }
 
     @Test
+    void processCommand_checksizeReportsMaximumAttendeeCountForEachVenue() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "Smaller", "LT1", "05/10/2026 09:00", 40));
+        bookings.add(new Booking("exam", "Largest", "LT1", "05/10/2026 10:00", 90));
+        bookings.add(new Booking("lecture", "Other Venue", "LT2", "05/10/2026 11:00", 55));
+        Ui ui = new Ui(bookings);
+
+        String response = runAndCapture(ui, "checksize");
+
+        assertTrue(response.contains("LT1: 90 attendees"), response);
+        assertTrue(response.contains("LT2: 55 attendees"), response);
+        assertFalse(response.contains("LT1: 40 attendees"), response);
+        assertEquals(3, bookings.size());
+    }
+
+    @Test
     void processCommand_invalidThenValid_recoversWithoutAddingInvalidBooking() {
         BookingList bookings = new BookingList();
         Ui ui = new Ui(bookings);

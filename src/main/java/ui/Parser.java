@@ -2,6 +2,8 @@ package ui;
 
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import Exceptions.InvalidCommandException;
 import Tasks.Booking;
@@ -11,6 +13,8 @@ import command.SortOrder;
  * Interprets command text without printing or changing the booking list.
  */
 public class Parser {
+    private static final Pattern TRAILING_ATTENDEE_FIELD =
+            Pattern.compile("(?s)^(.*?)[\\p{javaWhitespace}]+a/([^\\p{javaWhitespace}]*)\\s*$");
 
     /**
      * Splits once so spaces within booking fields are preserved.
@@ -30,7 +34,7 @@ public class Parser {
             return command;
         }
         switch (command) {
-        case "book", "cancel", "list", "bye", "find", "viewbooking", "calendar":
+        case "book", "cancel", "list", "bye", "find", "viewbooking", "calendar", "checksize":
             return command;
         default:
             throw new InvalidCommandException(originalCommand + " is not a valid command! -_-");
@@ -49,17 +53,21 @@ public class Parser {
             throw new InvalidCommandException("Please use: book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING");
         }
 
-        // checks for r/, n/, v/, t/
+        // The required fields stay in order; the optional attendee count follows the timing.
         String[] fields = separatedInput[1].strip().split("\\p{javaWhitespace}+(?=[rntv]/)");
-        if (fields.length != 4 || !fields[0].startsWith("r/") || !fields[1].startsWith("n/")
-                || !fields[2].startsWith("v/") || !fields[3].startsWith("t/")) {
-            throw new InvalidCommandException("Please use: book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING");
+        if (fields.length != 4 || !fields[0].startsWith("r/")
+                || !fields[1].startsWith("n/") || !fields[2].startsWith("v/")
+                || !fields[3].startsWith("t/")) {
+            throw new InvalidCommandException("Please use: book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING"
+                    + " [a/ATTENDEES]");
         }
 
         String reason = fields[0].substring(2).strip().toLowerCase(Locale.ROOT);
         String name = fields[1].substring(2).strip();
         String venue = fields[2].substring(2).strip();
-        String timing = fields[3].substring(2).strip();
+        AttendeeSuffix timingAndAttendees = extractTrailingAttendeeField(fields[3].substring(2).strip());
+        String timing = timingAndAttendees.fields();
+        Integer attendeeCount = timingAndAttendees.attendeeCount();
         if (!reason.equals("exam") && !reason.equals("lecture")) {
             throw new InvalidCommandException("Booking reason must be exam or lecture.");
         }
@@ -72,15 +80,15 @@ public class Parser {
             throw new InvalidCommandException(
                     "Timing must use dd/MM/yyyy HH:mm, for example 05/10/2026 14:00.");
         }
-        return new Booking(reason, name, venue, timing);
+        return new Booking(reason, name, venue, timing, attendeeCount);
     }
 
     /**
      * Applies supplied edit fields to a copy of the original booking, keeping omitted fields unchanged.
-     * Fields may appear in any order, but each prefix may appear only once.
+     * The r/, n/, v/, and t/ fields may appear in any order, but only once each. Optional a/ATTENDEES goes last.
      * @author produdepunk
      * @param original booking being edited
-     * @param input one or more r/, n/, v/, or t/ fields
+     * @param input one or more r/, n/, v/, t/, or a/ fields
      * @return a validated replacement, without changing the original
      */
     public Booking parseEditedBooking(Booking original, String input) {
@@ -90,11 +98,15 @@ public class Parser {
         String name = original.getName();
         String venue = original.getVenue();
         String timing = original.getTiming();
+        AttendeeSuffix editedFields = extractTrailingAttendeeField(input);
+        Integer attendeeCount = editedFields.attendeeCount() == null
+                ? original.getAttendeeCount() : editedFields.attendeeCount();
         String seenPrefixes = "";
-        String[] fields = input.strip().split("\\p{javaWhitespace}+(?=[rnvt]/)");
+        String[] fields = editedFields.fields().strip().split("\\p{javaWhitespace}+(?=[rnvt]/)");
         for (String field : fields) {
             if (field.length() < 2 || field.charAt(1) != '/' || "rnvt".indexOf(field.charAt(0)) < 0) {
-                throw new InvalidCommandException("Enter changes using r/REASON n/NAME v/VENUE t/TIMING."
+                throw new InvalidCommandException("Enter changes using r/REASON n/NAME v/VENUE t/TIMING"
+                        + " and optional a/ATTENDEES at the end."
                         + " Omit fields to keep them, or type abort.");
             }
             String prefix = field.substring(0, 1);
@@ -120,11 +132,14 @@ public class Parser {
                 throw new AssertionError("Edit prefix must already be validated");
             }
         }
-        return createValidatedEditedBooking(reason, name, venue, timing);
+        return createValidatedEditedBooking(reason, name, venue, timing, attendeeCount);
     }
 
-    /** Validates edited booking fields while leaving the original booking parser intact. */
-    private Booking createValidatedEditedBooking(String reason, String name, String venue, String timing) {
+    /** Validates edited booking fields while leaving the original booking parser intact.
+     * @author produdepunk
+     */
+    private Booking createValidatedEditedBooking(String reason, String name, String venue, String timing,
+            Integer attendeeCount) {
         if (!reason.equals("exam") && !reason.equals("lecture")) {
             throw new InvalidCommandException("Booking reason must be exam or lecture.");
         }
@@ -137,10 +152,40 @@ public class Parser {
             throw new InvalidCommandException(
                     "Timing must use dd/MM/yyyy HH:mm, for example 05/10/2026 14:00.");
         }
-        return new Booking(reason, name, venue, timing);
+        return new Booking(reason, name, venue, timing, attendeeCount);
     }
 
-    /** Extracts the full booking name to edit; partial-name searches are not accepted. */
+    /** Parses a positive attendee count and reports a user-facing error for invalid values.
+     * @author produdepunk
+     */
+    private Integer parsePositiveAttendeeCount(String value) {
+        try {
+            int count = Integer.parseInt(value);
+            if (count > 0) {
+                return count;
+            }
+        } catch (NumberFormatException e) {
+            throw new InvalidCommandException("Attendee count must be a positive whole number.");
+        }
+        throw new InvalidCommandException("Attendee count must be a positive whole number.");
+    }
+
+    /** Extracts a trailing attendee field without treating a/ inside a name as a field prefix. */
+    private AttendeeSuffix extractTrailingAttendeeField(String input) {
+        Matcher matcher = TRAILING_ATTENDEE_FIELD.matcher(input);
+        if (!matcher.matches()) {
+            return new AttendeeSuffix(input.strip(), null);
+        }
+        return new AttendeeSuffix(matcher.group(1).stripTrailing(), parsePositiveAttendeeCount(matcher.group(2).strip()));
+    }
+
+    /** Holds ordinary booking fields and an optional attendee count suffix. */
+    private record AttendeeSuffix(String fields, Integer attendeeCount) {
+    }
+
+    /** Extracts the full booking name to edit; partial-name searches are not accepted.
+     * @author produdepunk
+     */
     public String parseEdit(String input) {
         assert input != null : "Edit command input must not be null";
         String[] separatedInput = separateInput(input);

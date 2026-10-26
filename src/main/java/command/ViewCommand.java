@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 /**
- * Displays all the relevant bookings details under the same name
+ * Displays all the relevant bookings details under the same name with option to sort by time
+ * @author produdepunk
  */
 public class ViewCommand extends Command {
     /**
