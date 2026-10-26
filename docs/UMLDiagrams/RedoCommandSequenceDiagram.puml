@@ -1,0 +1,90 @@
+@startuml
+' @author Maxkedd
+skinparam sequenceMessageAlign center
+hide footbox
+
+participant "EduReserve" as App
+participant ":Ui" as UI
+participant ":Parser" as Parser
+participant "redoCommand:RedoCommand" as Redo
+participant "undoCommand:UndoCommand" as Undo
+participant "redoHistory:Deque<UndoEntry>" as RedoHistory
+participant ":BookingList" as Bookings
+participant ":Storage" as Storage
+
+activate App
+App -> UI: processCommand(userInput)
+activate UI
+UI -> Parser: parseCommand(userInput)
+activate Parser
+Parser --> UI: "/redo"
+deactivate Parser
+
+UI -> Redo: execute(bookingList, userInput)
+activate Redo
+Redo -> Undo: redo(bookingList)
+activate Undo
+Undo -> RedoHistory: isEmpty()
+activate RedoHistory
+RedoHistory --> Undo: empty
+deactivate RedoHistory
+
+alt empty == true
+    note right of Undo: Print "No commands to redo."
+else redo history contains an undone command
+    Undo -> RedoHistory: peek()
+    activate RedoHistory
+    RedoHistory --> Undo: lastUndone
+    deactivate RedoHistory
+
+    loop while bookingList is not empty
+        Undo -> Bookings: size()
+        activate Bookings
+        Bookings --> Undo: size
+        deactivate Bookings
+        Undo -> Bookings: remove(size - 1)
+        activate Bookings
+        Bookings --> Undo
+        deactivate Bookings
+    end
+
+    note right of Undo
+        resultingBookings() is the saved list
+        AFTER the original command succeeded.
+    end note
+
+    loop for each booking in lastUndone.resultingBookings()
+        Undo -> Bookings: add(booking)
+        activate Bookings
+        Bookings --> Undo
+        deactivate Bookings
+    end
+
+    Undo -> RedoHistory: pop()
+    activate RedoHistory
+    RedoHistory --> Undo: removed entry
+    deactivate RedoHistory
+
+    note right of Undo
+        Push lastUndone back onto history
+        so the redone command can be undone again.
+        Other redo entries remain available.
+    end note
+
+    note right of Undo: Print "Redid command: " + lastUndone.userInput()
+end
+
+Undo --> Redo
+deactivate Undo
+Redo --> UI
+deactivate Redo
+UI --> App: false
+deactivate UI
+
+App -> Storage: saveBookings(bookingList)
+activate Storage
+note right of Storage: Write current bookings\nto data/bookings.txt.
+Storage --> App
+deactivate Storage
+deactivate App
+@enduml
