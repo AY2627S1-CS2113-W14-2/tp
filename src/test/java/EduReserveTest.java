@@ -279,19 +279,26 @@ class EduReserveTest {
         return workingDirectory.resolve("output.txt");
     }
 
+    /**
+     * Checks editing duplicate names loaded from older data, since new bookings require unique names.
+     * @author Maxkedd
+     */
     @Test
     void main_editSelectedDuplicate_persistsOnlySelectedChangeAcrossRestart() throws Exception {
-        String response = runApplication("James\n"
-                + "book r/exam n/Other v/LT0 t/05/10/2026 14:00\n"
-                + "book r/exam n/Midterm v/LT1 t/05/10/2026 14:00\n"
-                + "book r/exam n/Midterm v/LT2 t/05/10/2026 14:00\n"
-                + "editbooking n/midterm\n2\nv/LT3\nbye\n");
+        Path dataFile = workingDirectory.resolve("data/bookings.txt");
+        Files.createDirectories(dataFile.getParent());
+        Files.writeString(dataFile, "B | exam | Other | LT0 | 05/10/2026 14:00\n"
+                + "B | exam | Midterm | LT1 | 05/10/2026 14:00\n"
+                + "B | exam | Midterm | LT2 | 05/10/2026 14:00\n");
 
+        String response = runApplication("James\neditbooking n/midterm\n2\nv/LT3\nbye\n");
+
+        assertTrue(response.contains("Multiple bookings found. Select a booking from this list:"), response);
         assertTrue(response.contains("Booking updated: [B] exam - Midterm (venue: LT3"), response);
         assertEquals("B | exam | Other | LT0 | 05/10/2026 14:00\n"
                 + "B | exam | Midterm | LT1 | 05/10/2026 14:00\n"
                 + "B | exam | Midterm | LT3 | 05/10/2026 14:00\n",
-                Files.readString(workingDirectory.resolve("data/bookings.txt")).replace("\r\n", "\n"));
+                Files.readString(dataFile).replace("\r\n", "\n"));
 
         String restarted = runApplication("James\nviewbooking n/Midterm\nbye\n");
         assertTrue(restarted.contains("venue: LT3"), restarted);

@@ -20,6 +20,7 @@ public class Ui {
 
     private final BookingList bookingList;
     private final Parser parser = new Parser();
+    private final UndoCommand undoCommand = new UndoCommand();
     /** Retained between input lines while the user selects a booking and enters changes. */
     private final EditCommand editCommand = new EditCommand();
 
