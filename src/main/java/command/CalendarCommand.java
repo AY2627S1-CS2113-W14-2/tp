@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-import Tasks.Booking;
-import Tasks.BookingList;
+import tasks.Booking;
+import tasks.BookingList;
 
 /**
  * Shows the bookings that start on one day, earliest first, without changing the list.

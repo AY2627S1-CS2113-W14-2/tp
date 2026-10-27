@@ -1,4 +1,4 @@
-package Tasks;
+package tasks;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -44,7 +44,10 @@ public class BookingList {
         assert bookings.size() == previousSize - 1 : "Removing a booking must decrease the size by one";
     }
 
-    /** Replaces the selected booking in place, preserving the number and order of bookings. */
+    /**
+     * Replaces the selected booking in place, preserving the number and order of bookings.
+     * @author produdepunk
+     */
     public void replace(Booking original, Booking replacement) {
         int index = bookings.indexOf(original);
         assert index >= 0 : "The original booking must still be in the list";
@@ -80,6 +83,7 @@ public class BookingList {
      * Returns a list of bookings with the exact given name,
      * or an empty list if there is no such booking.
      * The name must already be validated by the parser, so it is never null or blank.
+     * @author produdepunk
      * @param name to look for in order to get matches
      */
     public ArrayList<Booking> findAllByName(String name) {

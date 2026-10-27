@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 
-import Tasks.BookingList;
+import tasks.BookingList;
 import ui.Ui;
 
 /**

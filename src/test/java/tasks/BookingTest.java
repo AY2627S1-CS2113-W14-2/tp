@@ -9,8 +9,6 @@ import java.time.format.DateTimeParseException;
 
 import org.junit.jupiter.api.Test;
 
-import Tasks.Booking;
-
 /** Checks booking values, strict date parsing, and constructor preconditions. */
 class BookingTest {
     @Test

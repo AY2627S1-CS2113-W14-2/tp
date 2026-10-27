@@ -12,9 +12,9 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 
-import Exceptions.InvalidCommandException;
-import Tasks.Booking;
-import Tasks.BookingList;
+import exceptions.InvalidCommandException;
+import tasks.Booking;
+import tasks.BookingList;
 
 /** Checks filtered selection, safe replacement, and recovery during interactive editing. */
 class EditCommandTest {

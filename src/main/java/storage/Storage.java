@@ -7,8 +7,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import Tasks.Booking;
-import Tasks.BookingList;
+import tasks.Booking;
+import tasks.BookingList;
 
 /**
  * Saves bookings for the single user of the application.

@@ -7,9 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import Exceptions.InvalidCommandException;
-import Tasks.Booking;
-import Tasks.BookingList;
+import exceptions.InvalidCommandException;
+import tasks.Booking;
+import tasks.BookingList;
 import ui.Parser;
 
 /** Checks that direct booking execution validates before changing the list. */

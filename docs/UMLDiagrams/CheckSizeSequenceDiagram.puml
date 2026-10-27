@@ -1,0 +1,55 @@
+@startuml
+scale 2
+skinparam sequenceMessageAlign center
+hide footbox
+
+participant "EduReserve" as App
+participant ":Ui" as UI
+participant ":Parser" as Parser
+participant ":BookingList" as Bookings
+participant ":Booking" as Booking
+
+App -> UI: processCommand("checksize")
+activate UI
+UI -> Parser: parseCommand(userInput)
+activate Parser
+Parser --> UI: "checksize"
+deactivate Parser
+
+create participant ":SizeCommand" as Size
+UI -> Size: new SizeCommand()
+UI -> Size: execute(bookings, userInput)
+activate Size
+
+Size -> Bookings: size()
+activate Bookings
+Bookings --> Size: bookingCount
+deactivate Bookings
+
+loop for each booking in the list
+    Size -> Bookings: get(index)
+    activate Bookings
+    Bookings --> Size: booking
+    deactivate Bookings
+    Size -> Booking: getAttendeeCount()
+    activate Booking
+    Booking --> Size: attendeeCount or null
+    deactivate Booking
+    opt attendeeCount is known
+        Size -> Booking: getVenue()
+        activate Booking
+        Booking --> Size: venue
+        deactivate Booking
+        note right of Size
+            Keep the greatest recorded attendee
+            count for this venue.
+        end note
+    end
+end
+
+Size -> Size: print maxima by venue
+Size --> UI
+deactivate Size
+UI --> App: false
+deactivate UI
+@enduml

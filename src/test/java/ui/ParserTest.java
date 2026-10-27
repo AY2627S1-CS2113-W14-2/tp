@@ -2,13 +2,14 @@ package ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import Exceptions.InvalidCommandException;
-import Tasks.Booking;
+import exceptions.InvalidCommandException;
+import tasks.Booking;
 import command.SortOrder;
 
 /**
@@ -70,6 +71,34 @@ class ParserTest {
     void parseBooking_leapDay_acceptsRealDate() {
         Booking booking = parser.parseBooking("book r/exam n/Midterm v/LT1 t/29/02/2028 00:00");
         assertEquals(java.time.LocalDateTime.of(2028, 2, 29, 0, 0), booking.getStartTime());
+    }
+
+    @Test
+    void parseBooking_optionalAttendeeCountIsStoredAndMustBePositive() {
+        Booking sizedBooking = parser.parseBooking(
+                "book r/exam n/Midterm v/LT1 t/05/10/2026 14:00 a/80");
+        Booking unsizedBooking = parser.parseBooking(
+                "book r/exam n/Final v/LT2 t/06/10/2026 14:00");
+
+        assertEquals(80, sizedBooking.getAttendeeCount());
+        assertNull(unsizedBooking.getAttendeeCount());
+        for (String count : new String[]{"0", "-2", "many"}) {
+            assertThrows(InvalidCommandException.class, () -> parser.parseBooking(
+                    "book r/exam n/Midterm v/LT1 t/05/10/2026 14:00 a/" + count), count);
+        }
+    }
+
+    @Test
+    void parseEditedBooking_attendeeSuffixUpdatesOrPreservesCount() {
+        Booking original = new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00", 80);
+
+        Booking changedVenue = parser.parseEditedBooking(original, "v/LT2");
+        Booking changedCount = parser.parseEditedBooking(original, "v/LT3 a/95");
+
+        assertEquals("LT2", changedVenue.getVenue());
+        assertEquals(80, changedVenue.getAttendeeCount());
+        assertEquals("LT3", changedCount.getVenue());
+        assertEquals(95, changedCount.getAttendeeCount());
     }
 
     @Test

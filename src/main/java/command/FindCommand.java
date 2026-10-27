@@ -3,8 +3,8 @@ package command;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import Tasks.Booking;
-import Tasks.BookingList;
+import tasks.Booking;
+import tasks.BookingList;
 
 /**
  * Searches the bookings for names containing a keyword without changing the list.

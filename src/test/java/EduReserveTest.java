@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import Tasks.BookingList;
+import tasks.BookingList;
 import storage.Storage;
 
 /** Runs the real application in temporary folders so tests never touch the user's saved bookings. */

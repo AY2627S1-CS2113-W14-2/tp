@@ -1,8 +1,8 @@
 package command;
 
-import Exceptions.InvalidCommandException;
-import Tasks.Booking;
-import Tasks.BookingList;
+import exceptions.InvalidCommandException;
+import tasks.Booking;
+import tasks.BookingList;
 import ui.Parser;
 
 /**
@@ -40,4 +40,5 @@ public class BookCommand extends Command {
         bookings.add(booking);
         System.out.println("Booking added: " + booking);
     }
+
 }

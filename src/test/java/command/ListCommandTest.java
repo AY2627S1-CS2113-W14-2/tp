@@ -12,9 +12,9 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import Tasks.Booking;
-import Tasks.BookingList;
-import Exceptions.InvalidCommandException;
+import tasks.Booking;
+import tasks.BookingList;
+import exceptions.InvalidCommandException;
 
 /** Checks the default list overload and ensures sorting does not reorder stored bookings. */
 class ListCommandTest {

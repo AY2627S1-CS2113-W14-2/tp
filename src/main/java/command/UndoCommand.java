@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-import Exceptions.InvalidCommandException;
-import Tasks.Booking;
-import Tasks.BookingList;
+import exceptions.InvalidCommandException;
+import tasks.Booking;
+import tasks.BookingList;
 
 /**
  * Shares this session's undo and redo history and restores saved booking states.

@@ -12,8 +12,8 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
-import Tasks.Booking;
-import Tasks.BookingList;
+import tasks.Booking;
+import tasks.BookingList;
 
 /**
  * Tests that the find command shows the right bookings and never changes the list.

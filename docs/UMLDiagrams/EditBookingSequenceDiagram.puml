@@ -13,7 +13,7 @@ participant ":Storage" as Storage
 activate App
 note over App, Storage
     Successful edit where several bookings have the same name.
-    The user selects one entry from the filtered list, then changes its venue.
+    The user selects one entry from the filtered list, then changes its venue and attendee count.
     Invalid input, clashes, cancellation and the single-match path are omitted.
 end note
 
@@ -59,21 +59,21 @@ deactivate Edit
 UI --> App: false
 deactivate UI
 
-App -> UI: processCommand("v/LT3")
+App -> UI: processCommand("v/LT3 a/80")
 activate UI
 UI -> Edit: isPending()
 activate Edit
 Edit --> UI: true
 deactivate Edit
-UI -> Edit: processInput(bookings, "v/LT3")
+UI -> Edit: processInput(bookings, "v/LT3 a/80")
 activate Edit
 
 Edit -> Parser: parseEditedBooking(selectedBooking, input)
 activate Parser
 note right of Parser
     Keep omitted fields from the original.
-    Validate reason, nonblank fields
-    and date/time.
+    Validate reason, nonblank fields,
+    date/time and attendee count.
 end note
 Parser --> Edit: replacementBooking
 deactivate Parser
