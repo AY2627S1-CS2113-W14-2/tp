@@ -1,6 +1,7 @@
 package storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -61,7 +62,9 @@ class StorageTest {
             "B | meeting | Midterm | LT1 | 14:00",
             "B | exam |   | LT1 | 14:00",
             "B | exam | Midterm |   | 14:00",
-            "B | exam | Midterm | LT1 | "
+            "B | exam | Midterm | LT1 | ",
+            "B | exam | Midterm | LT1 | 14:00 | 0",
+            "B | exam | Midterm | LT1 | 14:00 | twenty"
         };
         Path dataFile = tempDirectory.resolve("bookings.txt");
         Storage storage = new Storage(tempDirectory);
@@ -132,7 +135,8 @@ class StorageTest {
                 "exam",
                 "CS2113 Final Exam",
                 "COM1-02-06",
-                "10AM-12PM");
+                "10AM-12PM",
+                30);
 
         Booking lecture = new Booking(
                 "lecture",
@@ -161,6 +165,9 @@ class StorageTest {
         assertEquals(
                 "10AM-12PM",
                 loadedBookings.get(0).getTiming());
+        assertEquals(
+                30,
+                loadedBookings.get(0).getAttendeeCount());
 
         assertEquals(
                 "lecture",
@@ -174,6 +181,8 @@ class StorageTest {
         assertEquals(
                 "2PM-4PM",
                 loadedBookings.get(1).getTiming());
+        assertNull(
+                loadedBookings.get(1).getAttendeeCount());
     }
 
     @Test

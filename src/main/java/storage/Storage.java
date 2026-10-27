@@ -143,6 +143,14 @@ public class Storage {
         line = line + DELIMITER;
         line = line + booking.getTiming();
 
+        Integer attendeeCount = booking.getAttendeeCount();
+
+        line = line + DELIMITER;
+
+        if (attendeeCount != null) {
+            line = line + attendeeCount;
+        }
+
         return line;
     }
 
@@ -161,7 +169,7 @@ public class Storage {
                 " \\| ",
                 -1);
 
-        if (parts.length != 5) {
+        if (parts.length != 5 && parts.length != 6) {
             throwInvalidDataError(lineNumber);
         }
 
@@ -170,6 +178,24 @@ public class Storage {
         String name = parts[2];
         String venue = parts[3];
         String timing = parts[4];
+
+        Integer attendeeCount = null;
+
+        if (parts.length == 6) {
+            String attendeeText = parts[5];
+
+            if (!attendeeText.isBlank()) {
+                try {
+                    attendeeCount = Integer.parseInt(attendeeText);
+                } catch (NumberFormatException e) {
+                    throwInvalidDataError(lineNumber);
+                }
+
+                if (attendeeCount <= 0) {
+                    throwInvalidDataError(lineNumber);
+                }
+            }
+        }
 
         if (!type.equals("B")) {
             throwInvalidDataError(lineNumber);
@@ -195,7 +221,8 @@ public class Storage {
                 reason,
                 name,
                 venue,
-                timing);
+                timing,
+                attendeeCount);
 
         return booking;
     }
