@@ -1,0 +1,78 @@
+@startuml
+skinparam sequenceMessageAlign center
+hide footbox
+
+participant "EduReserve" as App
+
+activate App
+create participant ":Ui" as UI
+App -> UI: new Ui(bookingList)
+
+participant ":Parser" as Parser
+
+App -> UI: processCommand("free t/28/10/2026 14:00")
+activate UI
+
+UI -> Parser: parseCommand(userInput)
+activate Parser
+Parser --> UI: "free"
+deactivate Parser
+
+create participant ":FreeCommand" as Free
+UI -> Free: new FreeCommand(parser)
+
+participant "VenueCatalog" as Catalog
+participant ":BookingList" as Bookings
+
+UI -> Free: execute(bookingList, userInput)
+activate Free
+
+Free -> Parser: parseFreeTime(userInput)
+activate Parser
+Parser --> Free: startTime
+deactivate Parser
+
+Free -> Catalog: findAvailableVenues(bookingList, startTime)
+activate Catalog
+
+loop For each preset venue
+    Catalog -> Bookings: isVenueAvailable(venue, startTime)
+    activate Bookings
+
+    note right of Bookings
+        Check for the same venue
+        and exact start time
+    end note
+
+    Bookings --> Catalog: available
+    deactivate Bookings
+
+    opt available
+        note right of Catalog
+            Add venue to results
+        end note
+    end
+end
+
+Catalog --> Free: venues
+deactivate Catalog
+
+alt venues is empty
+    note right of Free
+        Print no availability message
+    end note
+else venues is not empty
+    loop For each available venue
+        note right of Free
+            Print display number and venue
+        end note
+    end
+end
+
+Free --> UI
+deactivate Free
+
+UI --> App: false
+deactivate UI
+deactivate App
+@enduml

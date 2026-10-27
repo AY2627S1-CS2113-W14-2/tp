@@ -1,6 +1,7 @@
 package tasks;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Locale;
@@ -162,5 +163,27 @@ public class BookingList {
         matches.sort(Comparator.comparing(Booking::getStartTime));
         assert matches.size() <= bookings.size() : "Cannot find more bookings than exist";
         return matches;
+    }
+
+    /**
+     * Checks if a venue has no booking at the requested start time
+     * @author Kytersaurus
+     * @param venue string name of venue to be checked
+     * @param startTime time in which booking must be checked
+     * @return true if no booking exists at the specified time and location, false otherwise
+     */
+    public boolean isVenueAvailable(String venue, LocalDateTime startTime) {
+        assert venue != null && !venue.isBlank() : "Venue must be valid, not null or empty";
+        assert startTime != null : "Start time must be valid";
+
+        for (Booking booking : bookings) {
+            boolean sameVenue = booking.getVenue().equalsIgnoreCase(venue.strip());
+            boolean sameTime = startTime.equals(booking.getStartTime());
+            if (sameVenue && sameTime) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

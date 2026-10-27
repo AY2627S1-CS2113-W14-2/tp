@@ -20,6 +20,58 @@ import tasks.BookingList;
  */
 class UiTest {
     @Test
+    void processCommand_free_excludesOccupiedVenueWithoutFallthroughOrMutation() {
+        BookingList bookings = new BookingList();
+        Booking occupied = new Booking("exam", "Occupied", "lt19", "28/10/2026 14:00", 80);
+        bookings.add(occupied);
+        Ui ui = new Ui(bookings);
+
+        String response = captureListOutput(ui, "free t/28/10/2026 14:00");
+
+        assertTrue(response.contains("Venues with no bookings starting at 28/10/2026 14:00:"));
+        assertTrue(response.contains("1. COM1-0201"));
+        assertFalse(response.lines().anyMatch(line -> line.matches("\\d+\\. LT19")));
+        assertFalse(response.contains("Unknown command"));
+        assertFalse(response.contains(HelpText.COMMAND_LIST));
+        assertEquals(1, bookings.size());
+        assertEquals(occupied, bookings.get(0));
+        assertEquals(80, bookings.get(0).getAttendeeCount());
+    }
+
+    @Test
+    void processCommand_freeInvalidInput_showsHelpAndAllowsNextSearch() {
+        BookingList bookings = new BookingList();
+        Ui ui = new Ui(bookings);
+
+        for (String command : new String[]{"free", "free t/31/02/2026 14:00"}) {
+            String response = captureListOutput(ui, command);
+            assertTrue(response.contains(HelpText.COMMAND_LIST), command);
+            assertFalse(response.contains("Venues with no bookings starting at"), command);
+            assertTrue(bookings.isEmpty());
+        }
+
+        String validResponse = captureListOutput(ui, "free t/28/10/2026 14:00");
+        assertTrue(validResponse.contains("1. COM1-0201"));
+        assertFalse(validResponse.contains(HelpText.COMMAND_LIST));
+        assertTrue(bookings.isEmpty());
+    }
+
+    @Test
+    void processCommand_free_doesNotConsumeUndoHistory() {
+        BookingList bookings = new BookingList();
+        Ui ui = new Ui(bookings);
+        captureListOutput(ui, "book r/exam n/Midterm v/LT19 t/28/10/2026 14:00");
+        assertEquals(1, bookings.size());
+
+        captureListOutput(ui, "free t/28/10/2026 14:00");
+        captureListOutput(ui, "/undo");
+
+        assertTrue(bookings.isEmpty());
+        String response = captureListOutput(ui, "free t/28/10/2026 14:00");
+        assertTrue(response.lines().anyMatch(line -> line.matches("\\d+\\. LT19")));
+    }
+
+    @Test
     void processCommand_editbooking_routesSelectionAndChangesThenResumesNormalCommands() {
         BookingList bookings = new BookingList();
         bookings.add(new Booking("exam", "Other", "LT0", "05/10/2026 14:00"));

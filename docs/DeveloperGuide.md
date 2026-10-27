@@ -2,11 +2,13 @@
 
 ## Acknowledgements
 
-{list here sources of all reused/adapted ideas, code, documentation, and third-party libraries -- include links to the original source as well}
+Base template code forked from https://github.com/NUS-CS2113-AY2627-S1/tp
+
+This project follows the Java coding standard from https://se-education.org/guides/conventions/java/intermediate.html
 
 ## Design & implementation
 
-{Describe the design and implementation of the product. Use UML diagrams and short code snippets where applicable.}
+![EduReserve Architecture Diagram](UMLDiagrams/ArchitectureDiagram-EduReserve_architecture.png)
 
 ### Creating a booking: book
 
@@ -42,15 +44,15 @@ After `processCommand` returns, `EduReserve` saves the booking list using `Stora
 ### Listing bookings: list
 Displays the bookings, with optional filtering and alphabetical sorting
 
-Format: list [r/REASON] [s/SORT_ORDER]
+Format: `list [r/REASON] [s/SORT_ORDER]`
 
 Square brackets indicate optional arguments, do not type them.
 
-- REASON must be either exams or lectures
-- SORT_ORDER must be either alpha for A to Z or ~alpha for Z to A sorting
+- `REASON` must be either exams or lectures
+- `SORT_ORDER` must be either `alpha` for A to Z or `~alpha` for Z to A sorting
 - Sorting compares booking names, ignoring capitalization
-- Omitting r/REASON shows all bookings
-- Omitting s/SORT_ORDER shows the list with original booking orders preserved
+- Omitting `r/REASON` shows all bookings
+- Omitting `s/SORT_ORDER` shows the list with original booking orders preserved
 - The arguments may be swapped to appear in any order first, and can only be specified once
 
 Examples:
@@ -62,7 +64,31 @@ Examples:
 |       `list s/alpha`       | Show all bookings sorted from A to Z  |
 | `list r/lectures s/~alpha` | Show all lectures sorted from Z to A  |       
 
+Parser.parseViewList() validates the optional reason and sorting arguments, returning a ListOptions record. Ui passes these options to ListCommand.execute().
+
+The command clears lastShownList and populates it with all bookings or only those matching the requested reason. It then sorts this display list by name (s/alpha, s/~alpha) or date and time (s/time, s/~time). Without a sorting option, insertion order is preserved.
+
+Finally, the command prints the selected bookings with consecutive numbers starting from 1. Sorting does not change the stored BookingList. Time sorting is rejected if a selected booking lacks a valid parsed date and time.
+
 ![List command sequence diagram](UMLDiagrams/ListCommandSequenceDiagram.png)
+### List available venues: free
+Displays a list of all available venues at a user specified time
+
+Format: `free [t/TIMING]`
+
+- `TIMING` must use the `dd/MM/yyyy HH:mm` format
+- `TIMING` represents the start time of the booking
+
+Examples:
+
+|          Command          |                      Result                       |
+|:-------------------------:|:-------------------------------------------------:|
+| `free t/28/10/2026 14:00` | Show all available venues on 28th Oct 2026 at 2pm |
+
+The free t/dd/MM/yyyy HH:mm command lists preset venues with no booking starting at the requested date and time. Parser.parseFreeTime() validates the input and returns a LocalDateTime. FreeCommand passes this value to VenueCatalog.findAvailableVenues(), which checks each venue using BookingList.isVenueAvailable().
+The command prints the matching venues with consecutive numbers, or a message if none are available. It does not modify stored bookings. Availability checks compare venue names without case sensitivity and match exact start times; they do not detect overlapping durations.
+
+![Free command sequence diagram](UMLDiagrams/FreeCommandSequenceDiagram.png)
 
 ### View booking: viewbooking
 Displays the details of the bookings under the same name, with optional time filtering
@@ -126,7 +152,7 @@ Format: `checksize`
 The command groups bookings by venue and prints the largest attendee count recorded for each venue.
 Bookings without `a/ATTENDEES` do not contribute to the results.
 
-[Checksize sequence diagram](UMLDiagrams/CheckSizeSequenceDiagram.puml)
+![Checksize sequence diagram](UMLDiagrams/CheckSizeSequenceDiagram.png)
 
 ### Cancelling a booking: cancel
 Removes a booking so that its venue and time can be used again

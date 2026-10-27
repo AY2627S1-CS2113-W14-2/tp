@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -94,6 +95,46 @@ class BookingListTest {
         assertNull(bookings.findClash(new Booking("exam", "Other", "LT1", "05/10/2026 14:01")));
         assertNull(bookings.findClash(new Booking("exam", "Other", "LT1", "06/10/2026 14:00")));
         assertEquals(2, bookings.size());
+    }
+
+    @Test
+    void isVenueAvailable_emptyListAndDifferentStartTimes_areAvailable() {
+        BookingList bookings = new BookingList();
+        LocalDateTime requestedTime = LocalDateTime.of(2026, 10, 5, 14, 0);
+        assertTrue(bookings.isVenueAvailable("LT1", requestedTime));
+        bookings.add(first);
+
+        assertFalse(bookings.isVenueAvailable(" \tlt1 ", requestedTime));
+        assertTrue(bookings.isVenueAvailable("LT2", requestedTime));
+        assertTrue(bookings.isVenueAvailable("LT1", requestedTime.plusMinutes(1)));
+        assertTrue(bookings.isVenueAvailable("LT1", requestedTime.plusDays(1)));
+        assertEquals(1, bookings.size());
+        assertSame(first, bookings.get(0));
+    }
+
+    @Test
+    void isVenueAvailable_legacyTimingIsSkippedAndCancellationFreesVenue() {
+        BookingList bookings = new BookingList();
+        LocalDateTime requestedTime = first.getStartTime();
+        bookings.add(new Booking("exam", "Legacy", "LT1", "14:00"));
+        assertTrue(bookings.isVenueAvailable("LT1", requestedTime));
+        bookings.add(first);
+        assertFalse(bookings.isVenueAvailable("LT1", requestedTime));
+
+        bookings.remove(1);
+
+        assertTrue(bookings.isVenueAvailable("LT1", requestedTime));
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void isVenueAvailable_nullOrBlankArguments_failPreconditions() {
+        BookingList bookings = new BookingList();
+        for (String venue : new String[]{null, "", " \t "}) {
+            assertThrows(AssertionError.class,
+                    () -> bookings.isVenueAvailable(venue, first.getStartTime()));
+        }
+        assertThrows(AssertionError.class, () -> bookings.isVenueAvailable("LT1", null));
     }
 
     @Test

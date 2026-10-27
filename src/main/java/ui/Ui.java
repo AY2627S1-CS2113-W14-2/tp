@@ -2,18 +2,19 @@ package ui;
 
 import static ui.HelpText.LINE_BREAK;
 
+import command.BookCommand;
+import command.EditCommand;
+import command.RedoCommand;
+import command.UndoCommand;
+import command.ListCommand;
+import command.SizeCommand;
+import command.ViewCommand;
+import command.FindCommand;
+import command.CalendarCommand;
+import command.FreeCommand;
 import exceptions.InvalidCommandException;
 import tasks.Booking;
 import tasks.BookingList;
-import command.BookCommand;
-import command.EditCommand;
-import command.ListCommand;
-import command.SizeCommand;
-import command.FindCommand;
-import command.ViewCommand;
-import command.CalendarCommand;
-import command.UndoCommand;
-import command.RedoCommand;
 
 /**
  * Executes commands and displays booking confirmations or input errors.
@@ -101,6 +102,10 @@ public class Ui {
             case "calendar":
                 parser.parseCalendar(userInput);
                 new CalendarCommand().execute(bookingList, "today");
+                System.out.println(LINE_BREAK);
+                break;
+            case "free":
+                new FreeCommand(parser).execute(bookingList, userInput);
                 System.out.println(LINE_BREAK);
                 break;
             default:

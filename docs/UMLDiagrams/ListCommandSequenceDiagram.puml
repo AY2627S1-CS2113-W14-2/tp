@@ -51,10 +51,10 @@ loop i = 0 to listSize - 1
     deactivate Bookings
 
     opt booking.getReason().equals("exam")
-           note right of List
-               Add booking to lastShownList
-           end note
-       end
+       note right of List
+           Add booking to lastShownList
+       end note
+    end
 end
 
 List -> List: sortLastShownList(ALPHABETIC)
