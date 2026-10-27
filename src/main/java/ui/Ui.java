@@ -114,7 +114,7 @@ public class Ui {
 
     /**
      * Cancels the first booking matching the supplied name after validating the input.
-     * @author Maxkedd
+     * @author Pratham-tech
      */
     private void cancelBooking(String userInput) {
         String name = parser.parseCancel(userInput);
