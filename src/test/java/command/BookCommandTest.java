@@ -40,6 +40,43 @@ class BookCommandTest {
         assertSame(original, bookings.getLast());
     }
 
+    /**
+     * Rejects existing names despite differences in case, surrounding spaces, venue, time or reason.
+     * @author Maxkedd
+     */
+    @Test
+    void execute_duplicateName_preservesOriginalBooking() {
+        BookingList bookings = new BookingList();
+        Booking original = new Booking("lecture", "Midterm", "LT2", "06/10/2026 09:00");
+        bookings.add(original);
+        BookCommand command = new BookCommand(new Parser());
+
+        for (String name : new String[]{"Midterm", "midterm", "MIDTERM", "  Midterm  "}) {
+            InvalidCommandException error = assertThrows(InvalidCommandException.class,
+                    () -> command.execute(bookings, "book r/exam n/" + name + " v/LT1 t/05/10/2026 14:00"));
+
+            assertEquals("A booking with the name " + name.strip()
+                    + " already exists. Please use a different booking name.", error.getMessage());
+            assertEquals(1, bookings.size());
+            assertSame(original, bookings.get(0));
+        }
+    }
+
+    /**
+     * Allows a distinct name even when it contains an existing name as a substring.
+     * @author Maxkedd
+     */
+    @Test
+    void execute_similarButDistinctName_addsBooking() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("lecture", "Midterm Review", "LT2", "06/10/2026 09:00"));
+
+        new BookCommand(new Parser()).execute(bookings, VALID_COMMAND);
+
+        assertEquals(2, bookings.size());
+        assertEquals("Midterm", bookings.getLast().getName());
+    }
+
     @Test
     void execute_malformedInput_doesNotAddBooking() {
         BookingList bookings = new BookingList();
