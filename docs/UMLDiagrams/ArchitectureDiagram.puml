@@ -1,0 +1,45 @@
+@startuml
+title EduReserve architecture
+
+top to bottom direction
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultTextAlignment center
+
+actor "School administrator" as User
+
+component "Application entry point\n\nEduReserve" as App #FFF2CC
+component "User interface and parsing (ui)\n\nUi, Parser, HelpText\nListOptions, ViewOptions" as UI #DAE8FC
+component "Commands (command)\n\nCommand and its subclasses\nSortOrder" as Commands #E1D5E7
+component "Booking data (tasks)\n\nBookingList, Booking, Task\nVenueCatalog" as Model #D5E8D4
+component "Persistence (storage)\n\nStorage" as Storage #F8CECC
+component "Input errors (exceptions)\n\nInvalidCommandException" as Errors #F5F5F5
+artifact "data/bookings.txt" as File
+
+User --> App : enters console input
+App --> UI : creates Ui and passes commands
+App --> Storage : loads at startup; saves after commands
+App --> Model : holds the loaded BookingList
+
+UI --> Commands : executes commands; uses sorting options
+UI --> Model : holds and accesses bookings
+Commands ..> UI : uses Parser in book, edit and free
+Commands --> Model : reads or changes bookings; queries venues
+Storage --> Model : reconstructs and serializes bookings
+Storage --> File : reads and writes
+
+UI ..> Errors : throws or catches input errors
+Commands ..> Errors : throws command errors
+
+note bottom of Commands
+  Booking and editing; cancellation via Ui;
+  listing and sorting; finding and viewing;
+  calendar; venue availability; attendee counts;
+  undo and redo.
+end note
+
+legend bottom
+  Arrows show dependencies or use, not execution order.
+  Supporting types are grouped by their actual packages.
+endlegend
+@enduml

@@ -9,12 +9,14 @@ import java.util.Comparator;
 
 /**
  * Displays and filters the current list of bookings without changing it
+ * @author Kytersaurus
  */
 public class ListCommand extends Command {
     public static ArrayList<Booking> lastShownList = new ArrayList<Booking>();
 
     /**
      * Override method which overloads the abstract function with an additional SortOrder parameter
+     * @author Kytersaurus
      * @param bookings Arraylist of Booking changed/read by command
      * @param item Additional variable used by command to select elements from bookings
      */
@@ -24,6 +26,7 @@ public class ListCommand extends Command {
     }
     /**
      * Displays current bookings in a list by their original order with the option to filter
+     * @author Kytersaurus
      * @param bookings Arraylist of Booking read and printed line by line
      * @param item filter used to show only lectures/exams
      * @param sortBy order in which to sort and show the list of bookings
@@ -77,6 +80,7 @@ public class ListCommand extends Command {
 
     /**
      * Sorts the last shown list according to the specified sortorder
+     * @author Kytersaurus
      * @param sortBy sort the list by a user specified order
      */
     private void sortLastShownList(SortOrder sortBy) {
@@ -115,6 +119,7 @@ public class ListCommand extends Command {
 
     /**
      * Prints out the contents of lastShownList line by line, with index, reson and Title of the booking
+     * @author Kytersaurus
      */
     private void printLastShownList() {
         for (int i = 0; i < lastShownList.size(); i++) {

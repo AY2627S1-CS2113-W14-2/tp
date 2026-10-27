@@ -36,6 +36,10 @@ public final class HelpText {
                 time for time ascending and ~time for time descending
                 Omit s/SORT_ORDER to show the list in original order
                 e.g list r/exams s/alpha
+            free t/TIMING:
+                TIMING must use dd/MM/yyyy HH:mm.
+                Limited to check bookings with the exact start time currently.
+                e.g free t/06/10/2026 14:00
 
             checksize: shows the largest recorded attendee count for each venue.
                 Bookings without an attendee count are ignored.

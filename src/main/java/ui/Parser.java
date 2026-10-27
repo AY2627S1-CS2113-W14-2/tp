@@ -1,5 +1,6 @@
 package ui;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -38,7 +39,7 @@ public class Parser {
             return command;
         }
         switch (command) {
-        case "book", "cancel", "list", "bye", "find", "viewbooking", "calendar", "/undo", "/redo", "checksize":
+        case "book", "cancel", "list", "bye", "find", "viewbooking", "calendar", "/undo", "/redo", "checksize", "free":
             return command;
         default:
             throw new InvalidCommandException(originalCommand + " is not a valid command! -_-");
@@ -241,6 +242,7 @@ public class Parser {
      * Parses a view command into 3 separate cases,
      * View lectures and exams, view lectures only and view exams only
      * View the specified lectures or exams by alphabetical order or time order
+     * @author Kytersaurus
      * @param input whole string parsed by program
      */
     public ListOptions parseViewList(String input) {
@@ -388,7 +390,30 @@ public class Parser {
     }
 
     /**
-     * Holds the booking filter and sorting options for the list command
+     * Parses the date and time for an exact start time availability search.
+     * @author Kytersaurus
+     * @param input string command input from user
+     */
+    public LocalDateTime parseFreeTime(String input) {
+        String[] parts = separateInput(input);
+
+        if (!parseCommand(input).equalsIgnoreCase("free") || parts.length < 2
+                || !parts[1].strip().startsWith("t/")) {
+            throw new InvalidCommandException("Please use: free t/dd/MM/yyyy HH:mm");
+        }
+
+        String timing = parts[1].strip().substring(2).strip();
+
+        try {
+            return Booking.parseStartTime(timing);
+        } catch (DateTimeParseException e) {
+            throw new InvalidCommandException("Timing must use t/dd/MM/yyyy HH:mm format");
+        }
+    }
+
+    /**
+     * Holds the booking filter and sorting options for the list command.
+     * @author Kytersaurus
      */
     public record ListOptions(String item, SortOrder sortOrder) {
     }

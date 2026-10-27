@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.Test;
 
 import exceptions.InvalidCommandException;
@@ -17,6 +19,47 @@ import command.SortOrder;
  */
 class ParserTest {
     private final Parser parser = new Parser();
+
+    @Test
+    void parseFreeTime_validInput_returnsExactDateAndTime() {
+        assertEquals("free", parser.parseCommand("FREE t/28/10/2026 14:30"));
+        assertEquals(LocalDateTime.of(2026, 10, 28, 14, 30),
+                parser.parseFreeTime("free t/28/10/2026 14:30"));
+        assertEquals(LocalDateTime.of(2028, 2, 29, 0, 0),
+                parser.parseFreeTime("free t/29/02/2028 00:00"));
+    }
+
+    @Test
+    void parseFreeTime_whitespaceAndCommandCase_areAccepted() {
+        assertEquals(LocalDateTime.of(2026, 10, 28, 14, 0),
+                parser.parseFreeTime("  FrEe\tt/ 28/10/2026 14:00  "));
+    }
+
+    @Test
+    void parseFreeTime_missingPrefixOrWrongCommand_reportsUsage() {
+        String[] commands = {
+            "free", "free   ", "free 28/10/2026 14:00",
+            "free d/28/10/2026", "free T/28/10/2026 14:00", "list t/28/10/2026 14:00"
+        };
+        for (String command : commands) {
+            InvalidCommandException error = assertThrows(InvalidCommandException.class,
+                    () -> parser.parseFreeTime(command), command);
+            assertEquals("Please use: free t/dd/MM/yyyy HH:mm", error.getMessage(), command);
+        }
+    }
+
+    @Test
+    void parseFreeTime_invalidDatesTimesOrExtraArguments_areRejected() {
+        String[] commands = {
+            "free t/", "free t/31/02/2026 14:00", "free t/29/02/2025 14:00",
+            "free t/28/10/2026 24:00", "free t/28/10/2026 14:60",
+            "free t/2026-10-28 14:00", "free t/28/10/2026",
+            "free t/28/10/2026 14:00 extra", "free t/28/10/2026 14:00 t/28/10/2026 15:00"
+        };
+        for (String command : commands) {
+            assertThrows(InvalidCommandException.class, () -> parser.parseFreeTime(command), command);
+        }
+    }
 
     @Test
     void parseEdit_fullName_preservesSpacesAndIgnoresCommandCase() {
