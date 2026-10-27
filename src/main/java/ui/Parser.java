@@ -140,7 +140,8 @@ public class Parser {
         return createValidatedEditedBooking(reason, name, venue, timing, attendeeCount);
     }
 
-    /** Validates edited booking fields while leaving the original booking parser intact.
+    /**
+     * Validates edited booking fields while leaving the original booking parser intact.
      * @author produdepunk
      */
     private Booking createValidatedEditedBooking(String reason, String name, String venue, String timing,
@@ -160,7 +161,8 @@ public class Parser {
         return new Booking(reason, name, venue, timing, attendeeCount);
     }
 
-    /** Parses a positive attendee count and reports a user-facing error for invalid values.
+    /**
+     * Parses a positive attendee count and reports a user-facing error for invalid values.
      * @author produdepunk
      */
     private Integer parsePositiveAttendeeCount(String value) {
@@ -175,20 +177,26 @@ public class Parser {
         throw new InvalidCommandException("Attendee count must be a positive whole number.");
     }
 
-    /** Extracts a trailing attendee field without treating a/ inside a name as a field prefix. */
+    /**
+     * Extracts a trailing attendee field without treating a/ inside a name as a field prefix.
+     */
     private AttendeeSuffix extractTrailingAttendeeField(String input) {
         Matcher matcher = TRAILING_ATTENDEE_FIELD.matcher(input);
         if (!matcher.matches()) {
             return new AttendeeSuffix(input.strip(), null);
         }
-        return new AttendeeSuffix(matcher.group(1).stripTrailing(), parsePositiveAttendeeCount(matcher.group(2).strip()));
+        return new AttendeeSuffix(matcher.group(1).stripTrailing(),
+                parsePositiveAttendeeCount(matcher.group(2).strip()));
     }
 
-    /** Holds ordinary booking fields and an optional attendee count suffix. */
+    /**
+     * Holds ordinary booking fields and an optional attendee count suffix.
+     */
     private record AttendeeSuffix(String fields, Integer attendeeCount) {
     }
 
-    /** Extracts the full booking name to edit; partial-name searches are not accepted.
+    /**
+     * Extracts the full booking name to edit; partial-name searches are not accepted.
      * @author produdepunk
      */
     public String parseEdit(String input) {
@@ -299,6 +307,7 @@ public class Parser {
     /**
      * Extracts the booking name from a command in the form: viewBooking n/BOOKING_NAME.
      * The name is kept as text, so it may contain spaces.
+     * @author produdepunk
      * @param input whole string parsed by program
      * @return the booking name to view
      * @throws InvalidCommandException if the command is not a valid view booking command
@@ -309,7 +318,7 @@ public class Parser {
 
     /**
      * Parses a view booking command with an optional chronological sort option.
-     *
+     * @author produdepunk
      * @param input whole command string entered by the user
      * @return the booking name and whether to sort by time
      */

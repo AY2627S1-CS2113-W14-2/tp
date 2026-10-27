@@ -17,7 +17,9 @@ public class Booking extends Task {
     private final String name;
     private final String timing;
     private final String venue;
-    /** Optional expected attendee count; null means the booking size is unknown. */
+    /**
+     * Optional expected attendee count; null means the booking size is unknown.
+     */
     private final Integer attendeeCount;
     // Null indicates an older saved booking whose timing has no full date.
     private final LocalDateTime startTime;
@@ -30,7 +32,9 @@ public class Booking extends Task {
         this(reason, name, venue, timing, null);
     }
 
-    /** Creates a booking with an optional expected attendee count. */
+    /**
+     * Creates a booking with an optional expected attendee count.
+     */
     public Booking(String reason, String name, String venue, String timing, Integer attendeeCount) {
         super(reason);
         assert "exam".equals(reason) || "lecture".equals(reason) : "Booking reason must be exam or lecture";
@@ -83,7 +87,9 @@ public class Booking extends Task {
         return this.timing;
     }
 
-    /** Returns the expected attendee count, or null when the booking size is unknown. */
+    /**
+     * Returns the expected attendee count, or null when the booking size is unknown.
+     */
     public Integer getAttendeeCount() {
         return attendeeCount;
     }

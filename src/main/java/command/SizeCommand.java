@@ -7,12 +7,15 @@ import exceptions.InvalidCommandException;
 import tasks.Booking;
 import tasks.BookingList;
 
-/** Reports the largest recorded attendee count for each venue.
+/**
+ * Reports the largest recorded attendee count for each venue.
  * @author produdepunk
  */
 public class SizeCommand extends Command {
 
-    /** Prints each venue's maximum attendee count among bookings that include a count. */
+    /**
+     * Prints each venue's maximum attendee count among bookings that include a count.
+     */
     @Override
     public void execute(BookingList bookings, String item) {
         assert bookings != null : "Booking list cannot be null";
