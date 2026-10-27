@@ -13,9 +13,6 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
 
-import Tasks.Booking;
-import Tasks.BookingList;
-
 /** Checks list ownership, search results, and venue/date boundaries. */
 class BookingListTest {
     private final Booking first = new Booking("exam", "CS2113 Midterm", "LT1", "05/10/2026 14:00");

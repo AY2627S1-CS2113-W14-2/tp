@@ -3,7 +3,7 @@ import static ui.HelpText.LINE_BREAK;
 import java.io.IOException;
 import java.util.Scanner;
 
-import Tasks.BookingList;
+import tasks.BookingList;
 import storage.Storage;
 import ui.HelpText;
 import ui.Ui;

@@ -13,8 +13,8 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
-import Tasks.Booking;
-import Tasks.BookingList;
+import tasks.Booking;
+import tasks.BookingList;
 
 /**
  * Tests that the calendar command shows one day's bookings in time order and never changes the list.

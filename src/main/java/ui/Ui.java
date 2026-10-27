@@ -2,9 +2,9 @@ package ui;
 
 import static ui.HelpText.LINE_BREAK;
 
-import Exceptions.InvalidCommandException;
-import Tasks.Booking;
-import Tasks.BookingList;
+import exceptions.InvalidCommandException;
+import tasks.Booking;
+import tasks.BookingList;
 import command.BookCommand;
 import command.EditCommand;
 import command.ListCommand;

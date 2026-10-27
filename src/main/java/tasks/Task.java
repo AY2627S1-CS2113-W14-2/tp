@@ -1,4 +1,4 @@
-package Tasks;
+package tasks;
 
 /**
  * Holds the description shared by all task types.

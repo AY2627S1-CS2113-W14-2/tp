@@ -2,9 +2,9 @@ package command;
 
 import java.util.ArrayList;
 
-import Exceptions.InvalidCommandException;
-import Tasks.Booking;
-import Tasks.BookingList;
+import exceptions.InvalidCommandException;
+import tasks.Booking;
+import tasks.BookingList;
 import ui.Parser;
 
 /**

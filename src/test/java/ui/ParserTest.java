@@ -8,8 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import Exceptions.InvalidCommandException;
-import Tasks.Booking;
+import exceptions.InvalidCommandException;
+import tasks.Booking;
 import command.SortOrder;
 
 /**

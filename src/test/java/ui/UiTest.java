@@ -12,8 +12,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import Tasks.Booking;
-import Tasks.BookingList;
+import tasks.Booking;
+import tasks.BookingList;
 
 /**
  * Checks that commands add bookings only after validation and give useful feedback.
