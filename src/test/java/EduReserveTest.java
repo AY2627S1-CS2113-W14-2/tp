@@ -66,7 +66,7 @@ class EduReserveTest {
         assertTrue(response.contains("Booking added: [B] exam - Midterm"), response);
         assertFalse(response.contains("is not a valid command"), response);
         assertFalse(response.contains("Should Not Run"), response);
-        assertEquals("B | exam | Midterm | LT1 | 05/10/2026 14:00\n",
+        assertEquals("B | exam | Midterm | LT1 | 05/10/2026 14:00 | \n",
                 Files.readString(workingDirectory.resolve("data/bookings.txt")).replace("\r\n", "\n"));
     }
 
@@ -113,8 +113,8 @@ class EduReserveTest {
     @Test
     void main_undoAndRedoBooking_saveRestoredStateBeforeNextCommand() throws Exception {
         Process process = startApplication();
-        String firstBooking = "B | exam | First | LT1 | 05/10/2026 14:00\n";
-        String secondBooking = "B | exam | Second | LT2 | 05/10/2026 14:00\n";
+        String firstBooking = "B | exam | First | LT1 | 05/10/2026 14:00 | \n";
+        String secondBooking = "B | exam | Second | LT2 | 05/10/2026 14:00 | \n";
         try {
             process.getOutputStream().write(("James\n"
                     + "book r/exam n/First v/LT1 t/05/10/2026 14:00\n"
@@ -164,6 +164,9 @@ class EduReserveTest {
         String originalBookings = "B | lecture | First | LT1 | 05/10/2026 09:00\n"
                 + "B | exam | Midterm | LT2 | 05/10/2026 14:00\n"
                 + "B | exam | Midterm | LT3 | 05/10/2026 15:00\n";
+        String savedBookings = "B | lecture | First | LT1 | 05/10/2026 09:00 | \n"
+                + "B | exam | Midterm | LT2 | 05/10/2026 14:00 | \n"
+                + "B | exam | Midterm | LT3 | 05/10/2026 15:00 | \n";
         Files.writeString(dataFile, originalBookings);
 
         String response = runApplication("James\ncancel n/Midterm\n/undo\n");
@@ -171,14 +174,14 @@ class EduReserveTest {
         assertTrue(response.contains("Booking cancelled:"), response);
         assertTrue(response.lines().anyMatch(line -> line.equals("Undid command: cancel n/Midterm")), response);
         assertFalse(response.contains("Unable to save"), response);
-        assertEquals(originalBookings, Files.readString(dataFile).replace("\r\n", "\n"));
+        assertEquals(savedBookings, Files.readString(dataFile).replace("\r\n", "\n"));
 
         String restartedResponse = runApplication("James\nlist\n/undo\nbye\n");
         assertTrue(restartedResponse.contains("1. lecture Title: First"), restartedResponse);
         assertTrue(restartedResponse.contains("2. exam Title: Midterm"), restartedResponse);
         assertTrue(restartedResponse.contains("3. exam Title: Midterm"), restartedResponse);
         assertTrue(restartedResponse.contains("No commands to undo."), restartedResponse);
-        assertEquals(originalBookings, Files.readString(dataFile).replace("\r\n", "\n"));
+        assertEquals(savedBookings, Files.readString(dataFile).replace("\r\n", "\n"));
     }
 
     /**
@@ -305,9 +308,9 @@ class EduReserveTest {
 
         assertTrue(response.contains("Multiple bookings found. Select a booking from this list:"), response);
         assertTrue(response.contains("Booking updated: [B] exam - Midterm (venue: LT3"), response);
-        assertEquals("B | exam | Other | LT0 | 05/10/2026 14:00\n"
-                + "B | exam | Midterm | LT1 | 05/10/2026 14:00\n"
-                + "B | exam | Midterm | LT3 | 05/10/2026 14:00\n",
+        assertEquals("B | exam | Other | LT0 | 05/10/2026 14:00 | \n"
+                + "B | exam | Midterm | LT1 | 05/10/2026 14:00 | \n"
+                + "B | exam | Midterm | LT3 | 05/10/2026 14:00 | \n",
                 Files.readString(dataFile).replace("\r\n", "\n"));
 
         String restarted = runApplication("James\nviewbooking n/Midterm\nbye\n");
