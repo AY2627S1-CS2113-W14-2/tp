@@ -798,4 +798,20 @@ class UiTest {
         assertTrue(extraWords.contains("Please use: calendar"), extraWords);
         assertEquals(1, bookings.size());
     }
+
+    @Test
+    void processCommand_bookOverlappingHour_isRejectedButBackToBackIsAccepted() {
+        BookingList bookings = new BookingList();
+        Ui ui = new Ui(bookings);
+        runAndCapture(ui, "book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00");
+
+        String overlapping = runAndCapture(ui, "book r/lecture n/Week 1 Lecture v/LT1 t/05/10/2026 14:30");
+        String earlierOverlap = runAndCapture(ui, "book r/lecture n/Week 2 Lecture v/LT1 t/05/10/2026 13:01");
+        runAndCapture(ui, "book r/lecture n/Week 3 Lecture v/LT1 t/05/10/2026 15:00");
+        runAndCapture(ui, "book r/lecture n/Week 4 Lecture v/LT1 t/05/10/2026 13:00");
+
+        assertTrue(overlapping.contains("Booking clash: LT1 is already booked at 05/10/2026 14:00"), overlapping);
+        assertTrue(earlierOverlap.contains("Booking clash:"), earlierOverlap);
+        assertEquals(3, bookings.size());
+    }
 }
