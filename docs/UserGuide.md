@@ -2,32 +2,129 @@
 
 ## Introduction
 
-{Give a product intro}
+EduReserve is a single user platform for admins to book venues based on the name of the user
+and input relevant details of the bookings such as the booking purpose, venue, timing or optionally attendee count.
+The following guide will introduce the functions to utilize the platform.
 
 ## Quick Start
 
-{Give steps to get started quickly}
+1. Ensure that Java 25 is installed. Open a terminal and run `java -version` to check that it reports version 25.
+2. Download the application JAR from the [EduReserve releases page](https://github.com/AY2627S1-CS2113-W14-2/tp/releases).
+   The JAR is named `EduReserve.jar`.
+3. Place `EduReserve.jar` in a folder where you want to keep your booking data.
+4. Open a terminal in that folder and run:
 
-1. Ensure that you have Java 25 or above installed.
-1. Down the latest version of `EduReserve` from [here](http://link.to/duke).
+   ```text
+   java -jar EduReserve.jar
+   ```
+
+5. When prompted with `What is your name?`, enter your name and press Enter. The application displays a welcome
+   message and the available commands.
+6. Try the following commands, pressing Enter after each line:
+
+   ```text
+   book r/exam n/CS2113 Midterm v/LT1 t/05/11/2026 14:00 a/80
+   list
+   viewbooking n/CS2113 Midterm
+   checksize
+   ```
+
+   These commands create an exam booking for 80 attendees, list your bookings, display the booking's purpose,
+   venue and timing, and show the largest recorded attendee count for each venue. Booking times use
+   `dd/MM/yyyy HH:mm` with a 24-hour clock. New booking names must be unique, ignoring capitalization.
+7. Enter `bye` to exit. Bookings are saved automatically to `data/bookings.txt` inside the folder from which
+   you run the application. Run it from the same folder next time to load your saved bookings.
 
 ## Features 
 
-{Give detailed description of each feature}
+Words in uppercase, such as `BOOKING_NAME`, are placeholders to replace with your own values.
+Square brackets indicate optional fields; do not type the brackets.
 
-### Adding a todo: `todo`
-Adds a new item to the list of todo items.
+### Viewing a booking: `viewbooking`
 
-Format: `todo n/TODO_NAME d/DEADLINE`
+Displays the purpose, venue and timing of every booking with the specified full name.
 
-* The `DEADLINE` can be in a natural language format.
-* The `TODO_NAME` cannot contain punctuation.  
+Format: `viewbooking n/BOOKING_NAME [s/time]`
 
-Example of usage: 
+* The name is required and may contain spaces or punctuation. Matching ignores capitalization but requires
+  the full name, rather than part of it.
+* If several bookings share the same name, all matches are displayed in their original booking order.
+* Add `s/time` to display matches in chronological order, earliest first. This is the only supported sort
+  option for `viewbooking`.
+* If a matching booking has an older saved timing without a full date and time, sorting shows an error.
+  Omit `s/time` to view it, or use `editbooking` to update its timing.
+* If no booking matches, the application displays `No booking found with the name: BOOKING_NAME`.
+  Viewing does not change any bookings.
 
-`todo n/Write the rest of the User Guide d/next week`
+Examples:
 
-`todo n/Refactor the User Guide to remove passive voice d/13/04/2020`
+| Command | Result |
+|---------|--------|
+| `viewbooking n/CS2113 Midterm` | Shows all bookings named "CS2113 Midterm" in booking order. |
+| `viewbooking n/cs2113 midterm s/time` | Shows the same matches in chronological order. |
+
+### Checking attendee counts by venue: `checksize`
+
+Shows the largest recorded attendee count for each venue across your saved bookings. This value describes
+the recorded group sizes; it does not indicate the venue's actual capacity or available seats.
+
+Format: `checksize`
+
+* The command takes no arguments.
+* Record an attendee count using the optional `a/ATTENDEES` field when creating or editing a booking.
+  The count must be a positive whole number.
+* Bookings without an attendee count are ignored. Venues with no recorded counts are omitted.
+* Venue names are grouped without regard to capitalization, so `LT1` and `lt1` refer to the same venue.
+  Results are displayed alphabetically by venue.
+* If no booking has an attendee count, the application displays `No bookings include an attendee count.`
+
+Example: if LT1 has bookings for 40 and 80 attendees, and LT2 has a booking for 65 attendees, entering
+`checksize` displays:
+
+```text
+Largest recorded attendee count by venue:
+LT1: 80 attendees
+LT2: 65 attendees
+```
+
+### Editing a booking: `editbooking`
+
+Updates an existing booking's purpose, name, venue, timing or attendee count.
+
+Start editing with: `editbooking n/BOOKING_NAME`
+
+1. Enter the full booking name. Matching ignores capitalization. If no booking matches, an error is displayed.
+2. If several bookings match, enter the number of the booking from the displayed matching list and press Enter.
+   If only one booking matches, it is selected automatically.
+3. At the edit prompt, enter at least one of `r/`, `n/`, `v/` or `t/` on a single line and press Enter.
+   You may also append an attendee count:
+
+   ```text
+   [r/BOOKING_REASON] [n/NEW_NAME] [v/VENUE] [t/TIMING] [a/ATTENDEES]
+   ```
+
+   The `r/`, `n/`, `v/` and `t/` fields may appear in any order, at most once each. If supplied,
+   `a/ATTENDEES` must go last and cannot be entered on its own. To change only the attendee count,
+   repeat an existing field, for example `v/LT1 a/100`. Omitted fields keep their existing values.
+
+* `BOOKING_REASON` must be `exam` or `lecture`.
+* Names, venues and timings cannot be blank. Timings must use `dd/MM/yyyy HH:mm` with a 24-hour clock,
+  and attendee counts must be positive whole numbers.
+* An edit is rejected if another booking uses the same venue, ignoring capitalization, at exactly the
+  same date and time. Invalid changes leave the original booking unchanged, and you can retry at the edit prompt.
+* Type `abort` during selection or editing to cancel without applying changes. Type `bye` to exit without
+  applying the pending changes. Finish or abort editing before entering other commands.
+* A successful edit displays `Booking updated:` followed by the updated booking and is saved automatically.
+
+Example, assuming the booking from Quick Start exists: enter each line separately.
+
+```text
+editbooking n/CS2113 Midterm
+v/LT2 t/06/11/2026 15:00 a/100
+```
+
+This moves the booking to LT2 on 6 November 2026 at 15:00 and changes the attendee count to 100.
+Its name and purpose stay the same.
 
 ## FAQ
 
@@ -37,6 +134,10 @@ Example of usage:
 
 ## Command Summary
 
-{Give a 'cheat sheet' of commands here}
+| Action | Command |
+|--------|---------|
+| View a booking | `viewbooking n/BOOKING_NAME [s/time]` |
+| Check attendee counts by venue | `checksize` |
+| Edit a booking | `editbooking n/BOOKING_NAME`, then enter the fields to change at the edit prompt. |
+| Cancel a pending edit | `abort` (during selection or editing) |
 
-* Add todo `todo n/TODO_NAME d/DEADLINE`
