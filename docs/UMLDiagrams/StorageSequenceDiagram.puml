@@ -3,35 +3,34 @@ scale 2
 skinparam sequenceMessageAlign center
 hide footbox
 
-participant "EduReserve" as App
+actor User
 participant ":Storage" as Storage
 participant ":BookingList" as Bookings
 participant ":Booking" as Booking
 
-activate App
 
 group Load saved username
-    App -> Storage: loadUserName()
+    User -> Storage: loadUserName()
     activate Storage
 
-    Storage --> App: username or null
+    Storage --> User: username or null
     deactivate Storage
 
     alt no username is saved
-        App -> Storage: saveUserName(userName)
+        User -> Storage: saveUserName(userName)
         activate Storage
-        Storage --> App
+        Storage --> User
         deactivate Storage
     end
 end
 
 group Load saved bookings
-    App -> Storage: loadBookings()
+    User -> Storage: loadBookings()
     activate Storage
 
     alt data file does not exist
         Storage -> Storage: createEmptyDataFile()
-        Storage --> App: empty booking list
+        Storage --> User: empty booking list
     else data file exists
         Storage -> Storage: read saved lines
 
@@ -60,19 +59,19 @@ group Load saved bookings
             deactivate Bookings
         end
 
-        Storage --> App: booking list
+        Storage --> User: booking list
     end
 
     deactivate Storage
 end
 
-note over App
+note over User
     A command is processed and may
     change the current booking list.
 end note
 
 group Save current bookings
-    App -> Storage: saveBookings(bookings)
+    User -> Storage: saveBookings(bookings)
     activate Storage
 
     loop for each booking
@@ -94,9 +93,8 @@ group Save current bookings
 
     Storage -> Storage: write lines to bookings.txt
     Storage -> Storage: getLastModifiedTime()
-    Storage --> App: last modified time
+    Storage --> User: last modified time
     deactivate Storage
 end
 
-deactivate App
 @enduml

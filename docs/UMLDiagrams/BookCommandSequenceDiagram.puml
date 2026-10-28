@@ -2,16 +2,14 @@
 skinparam sequenceMessageAlign center
 hide footbox
 
-participant "EduReserve" as App
+actor User
 
-activate App
-create participant ":Ui" as UI
-App -> UI: new Ui(bookingList)
+participant ":Ui" as UI
 
 participant ":Parser" as Parser
 participant ":BookingList" as Bookings
 
-App -> UI: processCommand("book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00")
+User -> UI: processCommand("book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00")
 activate UI
 
 UI -> Parser: parseCommand(userInput)
@@ -32,22 +30,15 @@ Bookings --> UI: clash
 deactivate Bookings
 
 alt clash != null
-    note right of UI
-        Throw InvalidCommandException
-        "Booking clash: venue is already booked"
-    end note
+    UI --> User: Booking clash: venue is already booked
 else no clash
     UI -> Bookings: add(booking)
     activate Bookings
     Bookings --> UI
     deactivate Bookings
 
-    note right of UI
-        Print "Booking added: ..."
-    end note
+    UI --> User: "Booking added: ..."
 end
 
-UI --> App: false
 deactivate UI
-deactivate App
 @enduml

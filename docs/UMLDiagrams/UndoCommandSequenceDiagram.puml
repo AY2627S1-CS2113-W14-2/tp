@@ -3,16 +3,15 @@
 skinparam sequenceMessageAlign center
 hide footbox
 
-participant "EduReserve" as App
+actor User
 participant ":Ui" as UI
 participant ":Parser" as Parser
 participant "undoCommand:UndoCommand" as Undo
 participant "history:Deque<UndoEntry>" as History
+participant "redoHistory:Deque<UndoEntry>" as RedoHistory
 participant ":BookingList" as Bookings
-participant ":Storage" as Storage
 
-activate App
-App -> UI: processCommand(userInput)
+User -> UI: processCommand("/undo")
 activate UI
 UI -> Parser: parseCommand(userInput)
 activate Parser
@@ -27,7 +26,7 @@ History --> Undo: empty
 deactivate History
 
 alt empty == true
-    note right of Undo: Print "No commands to undo."
+    Undo --> User: "No commands to undo."
 else history contains an undoable command
     Undo -> History: peek()
     activate History
@@ -57,24 +56,13 @@ else history contains an undoable command
     History --> Undo: removed entry
     deactivate History
 
-    note right of Undo: Push lastCommand onto redoHistory\nso /redo can restore its after snapshot.
+    Undo -> RedoHistory: push(lastCommand)
 
-    note right of Undo
-        Print "Undid command: " + lastCommand.userInput()
-        The full original command is shown.
-        Undo itself is not added to history.
-    end note
+    Undo --> User: "Undid command: " + lastCommand.userInput()
 end
 
 Undo --> UI
 deactivate Undo
-UI --> App: false
 deactivate UI
 
-App -> Storage: saveBookings(bookingList)
-activate Storage
-note right of Storage: Write current bookings\nto data/bookings.txt.
-Storage --> App
-deactivate Storage
-deactivate App
 @enduml

@@ -2,16 +2,14 @@
 skinparam sequenceMessageAlign center
 hide footbox
 
-participant "EduReserve" as App
+actor User
 
-activate App
-create participant ":Ui" as UI
-App -> UI: new Ui(bookingList)
-
+participant ":Ui" as UI
 
 participant ":Parser" as Parser
+participant "lastShownList:ArrayList<Booking>" as Shown
 
-App -> UI: processCommand("list r/exams s/alpha")
+User -> UI: processCommand("list r/exams s/alpha")
 activate UI
 
 UI -> Parser: parseCommand(userInput)
@@ -24,9 +22,7 @@ activate Parser
 Parser --> UI: ListOptions("exams", ALPHABETIC)
 deactivate Parser
 
-note right of UI
-    Print the listing heading
-end note
+UI --> User: the listing heading
 
 create participant ":ListCommand" as List
 UI -> List: new ListCommand()
@@ -40,9 +36,7 @@ activate Bookings
 Bookings --> List: listSize
 deactivate Bookings
 
-note right of List
-    Clear lastShownList
-end note
+List -> Shown: clear()
 
 loop i = 0 to listSize - 1
     List -> Bookings: get(i)
@@ -51,9 +45,7 @@ loop i = 0 to listSize - 1
     deactivate Bookings
 
     opt booking.getReason().equals("exam")
-       note right of List
-           Add booking to lastShownList
-       end note
+       List -> Shown: addLast(booking)
     end
 end
 
@@ -63,16 +55,11 @@ deactivate List
 
 List -> List: printLastShownList()
 activate List
-note right of List
-    Print numbered bookings
-    in alphabetical order
-end note
+List --> User: numbered bookings in alphabetical order
 deactivate List
 
 List --> UI
 deactivate List
 
-UI --> App: false
 deactivate UI
-deactivate App
 @enduml

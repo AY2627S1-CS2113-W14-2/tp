@@ -2,16 +2,14 @@
 skinparam sequenceMessageAlign center
 hide footbox
 
-participant "EduReserve" as App
+actor User
 
-activate App
-create participant ":Ui" as UI
-App -> UI: new Ui(bookingList)
+participant ":Ui" as UI
 
 participant ":Parser" as Parser
 participant ":BookingList" as Bookings
 
-App -> UI: processCommand("find n/CS2")
+User -> UI: processCommand("find n/CS2")
 activate UI
 
 UI -> Parser: parseCommand(userInput)
@@ -36,20 +34,13 @@ Bookings --> Find: matches
 deactivate Bookings
 
 alt matches is empty
-    note right of Find
-        Print "No bookings found matching: CS2"
-    end note
+    Find --> User: "No bookings found matching: CS2"
 else matches found
-    note right of Find
-        Print numbered matches
-        in original order
-    end note
+    Find --> User: numbered matches in original order
 end
 
 Find --> UI
 deactivate Find
 
-UI --> App: false
 deactivate UI
-deactivate App
 @enduml

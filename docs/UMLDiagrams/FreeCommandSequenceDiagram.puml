@@ -2,15 +2,14 @@
 skinparam sequenceMessageAlign center
 hide footbox
 
-participant "EduReserve" as App
+actor User
 
-activate App
-create participant ":Ui" as UI
-App -> UI: new Ui(bookingList)
+participant ":Ui" as UI
 
 participant ":Parser" as Parser
+participant "available:List<String>" as Available
 
-App -> UI: processCommand("free t/28/10/2026 14:00")
+User -> UI: processCommand("free t/28/10/2026 14:00")
 activate UI
 
 UI -> Parser: parseCommand(userInput)
@@ -39,18 +38,11 @@ loop For each preset venue
     Catalog -> Bookings: isVenueAvailable(venue, startTime)
     activate Bookings
 
-    note right of Bookings
-        Check for the same venue
-        and exact start time
-    end note
-
     Bookings --> Catalog: available
     deactivate Bookings
 
     opt available
-        note right of Catalog
-            Add venue to results
-        end note
+        Catalog -> Available: add(venue)
     end
 end
 
@@ -58,21 +50,15 @@ Catalog --> Free: venues
 deactivate Catalog
 
 alt venues is empty
-    note right of Free
-        Print no availability message
-    end note
+    Free --> User: no availability message
 else venues is not empty
     loop For each available venue
-        note right of Free
-            Print display number and venue
-        end note
+        Free --> User: display number and venue
     end
 end
 
 Free --> UI
 deactivate Free
 
-UI --> App: false
 deactivate UI
-deactivate App
 @enduml

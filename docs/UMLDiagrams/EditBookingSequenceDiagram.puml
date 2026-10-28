@@ -3,21 +3,13 @@ scale 2
 skinparam sequenceMessageAlign center
 hide footbox
 
-participant "EduReserve" as App
+actor User
 participant ":Ui" as UI
 participant ":Parser" as Parser
 participant ":EditCommand" as Edit
 participant ":BookingList" as Bookings
-participant ":Storage" as Storage
 
-activate App
-note over App, Storage
-    Successful edit where several bookings have the same name.
-    The user selects one entry from the filtered list, then changes its venue and attendee count.
-    Invalid input, clashes, cancellation and the single-match path are omitted.
-end note
-
-App -> UI: processCommand("editbooking n/Midterm")
+User -> UI: processCommand("editbooking n/Midterm")
 activate UI
 UI -> Parser: parseCommand(userInput)
 activate Parser
@@ -35,16 +27,12 @@ Edit -> Bookings: findAllByName("Midterm")
 activate Bookings
 Bookings --> Edit: matchingBookings
 deactivate Bookings
-note right of Edit
-    Print the filtered matches
-    with numbers for selection
-end note
+Edit --> User: the filtered matches with numbers for selection
 Edit --> UI
 deactivate Edit
-UI --> App: false
 deactivate UI
 
-App -> UI: processCommand("2")
+User -> UI: processCommand("2")
 activate UI
 UI -> Edit: isPending()
 activate Edit
@@ -53,13 +41,12 @@ deactivate Edit
 UI -> Edit: processInput(bookings, "2")
 activate Edit
 Edit -> Edit: selectBooking(matches, 2)
-note right of Edit: Print the selected booking and edit prompt
+Edit --> User: the selected booking and edit prompt
 Edit --> UI
 deactivate Edit
-UI --> App: false
 deactivate UI
 
-App -> UI: processCommand("v/LT3 a/80")
+User -> UI: processCommand("v/LT3 a/80")
 activate UI
 UI -> Edit: isPending()
 activate Edit
@@ -70,11 +57,6 @@ activate Edit
 
 Edit -> Parser: parseEditedBooking(selectedBooking, input)
 activate Parser
-note right of Parser
-    Keep omitted fields from the original.
-    Validate reason, nonblank fields,
-    date/time and attendee count.
-end note
 Parser --> Edit: replacementBooking
 deactivate Parser
 
@@ -87,26 +69,18 @@ loop each booking except selectedBooking
 end
 
 alt venue and time clash found
-    note right of Edit
-        Throw InvalidCommandException.
-        Keep the original booking unchanged.
-    end note
+    Edit --> UI: InvalidCommandException
+    UI --> User: Booking clash error
 else no clash
     Edit -> Bookings: replace(selectedBooking, replacementBooking)
     activate Bookings
     Bookings --> Edit
     deactivate Bookings
-    note right of Edit: Print "Booking updated: ..."
+    Edit --> User: "Booking updated: ..."
+    Edit --> UI
 end
 
-Edit --> UI
 deactivate Edit
-UI --> App: false
 deactivate UI
 
-App -> Storage: saveBookings(bookings)
-activate Storage
-Storage --> App
-deactivate Storage
-deactivate App
 @enduml
