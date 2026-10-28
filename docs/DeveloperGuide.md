@@ -154,6 +154,51 @@ Bookings without `a/ATTENDEES` do not contribute to the results.
 
 ![Checksize sequence diagram](UMLDiagrams/CheckSizeSequenceDiagram.png)
 
+### Saving and loading bookings: storage
+
+Saves the booking list to a text file and loads it again when EduReserve starts.
+
+Data format:
+
+`B | BOOKING_REASON | BOOKING_NAME | VENUE | TIMING | ATTENDEES`
+
+Example:
+
+`B | exam | Midterm | LT1 | 05/10/2026 14:00 | 80`
+
+- Each booking is stored on one line.
+- The attendee count is optional.
+- Bookings are stored in `data/bookings.txt`.
+- The file uses UTF-8.
+
+When EduReserve starts, it creates a `Storage` object and calls `loadBookings`. If the data file
+does not exist, an empty file is created. `Storage` reads each nonblank line and passes it to
+`parseBooking`. The method checks the fields and creates a `Booking`. The booking is then added
+to the `BookingList`.
+
+After a command is processed, EduReserve calls `saveBookings`. The method goes through the current
+booking list and passes each booking to `bookingToLine`. This method gets the reason, name, venue,
+timing and attendee count from the booking. The completed lines are then written to
+`data/bookings.txt`.
+
+The storage also supports booking files created before attendee counts were added. An older line
+has five parts while a new line has six parts. For an older booking, the attendee count is set to
+`null`. When the booking list is saved again, it is written using the new format. A saved attendee
+count must be a positive whole number. Invalid booking data causes an `IOException`, which
+EduReserve catches and reports to the user.
+
+A plain-text file was used because the booking data has a small and fixed format. It is also easy
+to read and does not need another library. JSON was considered, but it would add extra parsing for
+the current amount of data. Requiring only the new format was also considered, but older booking
+files would no longer load.
+
+![Storage sequence diagram](UMLDiagrams/StorageSequenceDiagram.png)
+
+The diagram shows the loading and saving of bookings. File operations, validation details and
+exception handling are omitted for clarity.
+
+[Editable PlantUML source](UMLDiagrams/StorageSequenceDiagram.puml)
+
 ### Cancelling a booking: cancel
 Removes a booking so that its venue and time can be used again
 

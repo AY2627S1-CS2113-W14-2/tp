@@ -1,0 +1,86 @@
+@startuml
+scale 2
+skinparam sequenceMessageAlign center
+hide footbox
+
+participant "EduReserve" as App
+participant ":Storage" as Storage
+participant ":BookingList" as Bookings
+participant ":Booking" as Booking
+
+activate App
+
+group Load saved bookings
+    App -> Storage: loadBookings()
+    activate Storage
+
+    alt data file does not exist
+        Storage -> Storage: createEmptyDataFile()
+        Storage --> App: empty booking list
+    else data file exists
+        Storage -> Storage: read saved lines
+
+        loop for each nonblank line
+            Storage -> Storage: parseBooking(line, lineNumber)
+
+            alt old five-part line
+                note right of Storage
+                    Set attendee count to null.
+                end note
+            else new six-part line
+                note right of Storage
+                    Parse and validate
+                    the attendee count.
+                end note
+            end
+
+            Storage -> Booking: new Booking(...)
+            activate Booking
+            Booking --> Storage: booking
+            deactivate Booking
+
+            Storage -> Bookings: add(booking)
+            activate Bookings
+            Bookings --> Storage
+            deactivate Bookings
+        end
+
+        Storage --> App: booking list
+    end
+
+    deactivate Storage
+end
+
+note over App
+    A command is processed and may
+    change the current booking list.
+end note
+
+group Save current bookings
+    App -> Storage: saveBookings(bookings)
+    activate Storage
+
+    loop for each booking
+        Storage -> Bookings: get(index)
+        activate Bookings
+        Bookings --> Storage: booking
+        deactivate Bookings
+
+        Storage -> Booking: get booking details
+        activate Booking
+        Booking --> Storage: reason, name, venue,\ntiming and attendee count
+        deactivate Booking
+
+        note right of Storage
+            Convert the booking
+            into one line.
+        end note
+    end
+
+    Storage -> Storage: write lines to bookings.txt
+    Storage --> App
+    deactivate Storage
+end
+
+deactivate App
+@enduml
