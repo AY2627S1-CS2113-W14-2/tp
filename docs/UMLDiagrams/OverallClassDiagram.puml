@@ -1,0 +1,120 @@
+@startuml OverallClassDiagram
+title EduReserve overall class diagram
+
+top to bottom direction
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam groupInheritance 2
+skinparam nodesep 30
+skinparam ranksep 45
+hide empty members
+hide circle
+
+class EduReserve #FFF2CC {
+  {static} +main(args: String[]): void
+}
+
+package ui #DAE8FC {
+  class Ui {
+    +processCommand(userInput: String): boolean
+    -cancelBooking(userInput: String): void
+  }
+  class Parser {
+    +parseCommand(input: String): String
+    +parseBooking(input: String): Booking
+    +parseEditedBooking(original: Booking, input: String): Booking
+  }
+  Ui --> "1" Parser : parser
+}
+
+package storage #F8CECC {
+  class Storage {
+    +loadBookings(): BookingList
+    +saveBookings(bookings: BookingList): void
+  }
+}
+
+package tasks #D5E8D4 {
+  class BookingList {
+    +add(booking: Booking): void
+    +remove(index: int): void
+    +replace(original: Booking, replacement: Booking): void
+    +findClash(newBooking: Booking): Booking
+  }
+  abstract class Task {
+    #description: String
+    +getDescription(): String
+  }
+  class Booking {
+    -name: String
+    -venue: String
+    -timing: String
+    -startTime: LocalDateTime
+    -attendeeCount: Integer
+    +getReason(): String
+  }
+  class VenueCatalog {
+    {static} -VENUES: List<String>
+  }
+  BookingList --> "0..*" Booking : bookings
+  Task <|-- Booking
+  VenueCatalog ..> BookingList : checks availability
+}
+
+package command #E1D5E7 {
+  abstract class Command {
+    {abstract} +execute(bookings: BookingList, item: String): void
+  }
+  class BookCommand {
+    -parser: Parser
+  }
+  class EditCommand {
+    -parser: Parser
+    +isPending(): boolean
+    +processInput(bookings: BookingList, input: String): void
+  }
+  class FreeCommand {
+    -parser: Parser
+  }
+  class ListCommand
+  class ViewCommand
+  class FindCommand
+  class CalendarCommand
+  class SizeCommand
+  class UndoCommand {
+    ~redo(bookings: BookingList): void
+  }
+  class RedoCommand
+
+  Command <|-- BookCommand
+  Command <|-- EditCommand
+  Command <|-- FreeCommand
+  Command <|-- ListCommand
+  Command <|-- ViewCommand
+  Command <|-- FindCommand
+  Command <|-- CalendarCommand
+  Command <|-- SizeCommand
+  Command <|-- UndoCommand
+  Command <|-- RedoCommand
+  BookCommand -[hidden]down-> ListCommand
+  ListCommand -[hidden]down-> CalendarCommand
+  CalendarCommand -[hidden]down-> UndoCommand
+  EditCommand -[hidden]down-> ViewCommand
+  ViewCommand -[hidden]down-> SizeCommand
+  SizeCommand -[hidden]down-> RedoCommand
+  FreeCommand -[hidden]down-> FindCommand
+  RedoCommand --> "1" UndoCommand : undoCommand
+}
+
+EduReserve ..> Ui : creates / calls
+EduReserve ..> Storage : creates / calls
+Ui --> "1" BookingList : bookingList
+Ui ..> command : creates / executes concrete commands
+Storage ..> BookingList : loads / saves
+Parser ..> Booking : creates
+Command ..> BookingList : execute parameter
+FreeCommand ..> VenueCatalog : queries
+
+@enduml

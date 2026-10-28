@@ -2,21 +2,13 @@
 skinparam sequenceMessageAlign center
 hide footbox
 
-participant "EduReserve" as App
+actor User
 participant ":Ui" as UI
 participant ":Parser" as Parser
 participant ":BookingList" as Bookings
 
-note over App, Bookings
-    Successful book command; existing application objects are already initialized.
-    userInput = "book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00"
-    Parser validation internals, assertions and storage are omitted.
-end note
-
-activate App
-App -> UI: processCommand(userInput)
+User -> UI: processCommand("book r/exam n/Midterm v/LT1 t/05/10/2026 14:00")
 activate UI
-note right of UI: Print LINE_BREAK
 
 UI -> Parser: parseCommand(userInput)
 activate Parser
@@ -26,7 +18,6 @@ deactivate Parser
 create participant ":BookCommand" as Book
 UI -> Book: new BookCommand(parser)
 activate Book
-note right of Book: Store the existing parser
 Book --> UI
 deactivate Book
 
@@ -34,10 +25,6 @@ UI -> Book: execute(bookingList, userInput)
 activate Book
 Book -> Parser: parseBooking(userInput)
 activate Parser
-note right of Parser
-    Validate prefix order r/, n/, v/, t/,
-    reason, nonblank fields and date/time.
-end note
 
 create participant "booking:Booking" as Booking
 Parser -> Booking: new Booking(reason, name, venue, timing)
@@ -56,12 +43,9 @@ Book -> Booking: toString()
 activate Booking
 Booking --> Book: booking text
 deactivate Booking
-note right of Book: Print "Booking added: " + booking text
+Book --> User: "Booking added: " + booking text
 Book --> UI
 deactivate Book
 
-note right of UI: Print LINE_BREAK
-UI --> App: false
 deactivate UI
-deactivate App
 @enduml

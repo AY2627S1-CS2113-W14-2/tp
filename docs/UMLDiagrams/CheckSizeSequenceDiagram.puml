@@ -3,20 +3,22 @@ scale 2
 skinparam sequenceMessageAlign center
 hide footbox
 
-participant "EduReserve" as App
+actor User
 participant ":Ui" as UI
 participant ":Parser" as Parser
+participant ":SizeCommand" as Size
+participant "maximumByVenue:Map<String, Integer>" as Maxima
 participant ":BookingList" as Bookings
 participant ":Booking" as Booking
 
-App -> UI: processCommand("checksize")
+User -> UI: processCommand("checksize")
 activate UI
 UI -> Parser: parseCommand(userInput)
 activate Parser
 Parser --> UI: "checksize"
 deactivate Parser
 
-create participant ":SizeCommand" as Size
+create Size
 UI -> Size: new SizeCommand()
 UI -> Size: execute(bookings, userInput)
 activate Size
@@ -40,16 +42,12 @@ loop for each booking in the list
         activate Booking
         Booking --> Size: venue
         deactivate Booking
-        note right of Size
-            Keep the greatest recorded attendee
-            count for this venue.
-        end note
+        Size -> Maxima: merge(venue, attendeeCount, Math::max)
     end
 end
 
-Size -> Size: print maxima by venue
+Size --> User: Maximum attendee count for each venue
 Size --> UI
 deactivate Size
-UI --> App: false
 deactivate UI
 @enduml

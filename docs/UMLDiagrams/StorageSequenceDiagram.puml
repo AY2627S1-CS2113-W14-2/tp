@@ -3,20 +3,17 @@ scale 2
 skinparam sequenceMessageAlign center
 hide footbox
 
-participant "EduReserve" as App
 participant ":Storage" as Storage
 participant ":BookingList" as Bookings
 participant ":Booking" as Booking
 
-activate App
-
 group Load saved bookings
-    App -> Storage: loadBookings()
+    [-> Storage: loadBookings()
     activate Storage
 
     alt data file does not exist
         Storage -> Storage: createEmptyDataFile()
-        Storage --> App: empty booking list
+        Storage -->[: empty booking list
     else data file exists
         Storage -> Storage: read saved lines
 
@@ -24,14 +21,9 @@ group Load saved bookings
             Storage -> Storage: parseBooking(line, lineNumber)
 
             alt old five-part line
-                note right of Storage
-                    Set attendee count to null.
-                end note
+                Storage -> Storage: attendeeCount = null
             else new six-part line
-                note right of Storage
-                    Parse and validate
-                    the attendee count.
-                end note
+                Storage -> Storage: parse and validate attendee count
             end
 
             Storage -> Booking: new Booking(...)
@@ -45,19 +37,14 @@ group Load saved bookings
             deactivate Bookings
         end
 
-        Storage --> App: booking list
+        Storage -->[: booking list
     end
 
     deactivate Storage
 end
 
-note over App
-    A command is processed and may
-    change the current booking list.
-end note
-
 group Save current bookings
-    App -> Storage: saveBookings(bookings)
+    [-> Storage: saveBookings(bookings)
     activate Storage
 
     loop for each booking
@@ -66,21 +53,19 @@ group Save current bookings
         Bookings --> Storage: booking
         deactivate Bookings
 
+        Storage -> Storage: bookingToLine(booking)
+        activate Storage
         Storage -> Booking: get booking details
         activate Booking
         Booking --> Storage: reason, name, venue,\ntiming and attendee count
         deactivate Booking
 
-        note right of Storage
-            Convert the booking
-            into one line.
-        end note
+        deactivate Storage
     end
 
     Storage -> Storage: write lines to bookings.txt
-    Storage --> App
+    Storage -->[
     deactivate Storage
 end
 
-deactivate App
 @enduml

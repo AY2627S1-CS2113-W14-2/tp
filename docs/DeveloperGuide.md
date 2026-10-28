@@ -10,6 +10,36 @@ This project follows the Java coding standard from https://se-education.org/guid
 
 ![EduReserve Architecture Diagram](UMLDiagrams/ArchitectureDiagram-EduReserve_architecture.png)
 
+### Overall class diagram
+
+The diagram below shows the main application classes, their inheritance relationships and
+selected dependencies. Classes are grouped by their Java packages.
+
+![EduReserve overall class diagram](UMLDiagrams/OverallClassDiagram.png)
+
+`EduReserve` creates the UI and storage objects and passes the loaded `BookingList` to `Ui`.
+`Ui` uses `Parser` to interpret input and creates or retains concrete command objects to execute
+operations. All ten command classes extend `Command`; cancellation is handled directly in `Ui`.
+`RedoCommand` refers to the same `UndoCommand` retained by `Ui`, so both use one session history.
+
+`BookingList` holds references to `Booking` objects, which inherit their reason (the `description`
+field) from `Task`. `Storage` loads and saves these bookings, while `VenueCatalog` supplies the
+preset venues and checks their availability against the booking list. The plain association
+between `BookingList` and `Booking` allows the same immutable booking objects to also appear
+in search results and undo/redo snapshots.
+
+For readability, only selected members and relationships are shown. Help text, parsing option
+types, sorting options, exceptions, private history records and Java library classes are omitted.
+Parser fields in the command classes denote retained references; each concrete command overrides
+`execute(BookingList, String)`.
+
+[Editable PlantUML source](UMLDiagrams/OverallClassDiagram.puml)
+
+The command sequence diagrams below show the user calling `Ui` directly, with the application
+entry point omitted. Arrows back to the user represent console output. Loading and saving are
+shown separately in the storage diagram, where incoming arrows represent calls from the
+application loop outside the diagram.
+
 ### Creating a booking: book
 
 Adds a named exam or lecture booking.
@@ -322,8 +352,8 @@ current session. A save failure is reported by `EduReserve` as `Unable to save y
 
 ![Undo command sequence diagram](UMLDiagrams/UndoCommandSequenceDiagram.png)
 
-The diagram covers a valid `/undo` request, including empty history, and a successful save. Validation
-details, separator output, collection accessors and storage internals are omitted for clarity.
+The diagram covers a valid `/undo` request, including empty history and the transfer to redo history.
+Validation details, separator output and persistence are omitted for clarity.
 
 [Editable PlantUML source](UMLDiagrams/UndoCommandSequenceDiagram.puml)
 
@@ -346,21 +376,21 @@ option to redo C. A failed command or a read-only command such as `list` leaves 
 
 ![Redo command sequence diagram](UMLDiagrams/RedoCommandSequenceDiagram.png)
 
-The diagram covers a valid `/redo` request, including empty redo history, and a successful save.
+The diagram covers a valid `/redo` request, including empty redo history and the transfer back to undo history.
 The two loops expand `restoreBookings`: first clear the current list, then restore the saved **after**
 state from `resultingBookings()`. Undo instead restores the **before** state from `previousBookings()`.
-Input validation, snapshot helper calls, separator output and storage internals are omitted for clarity.
+Input validation, snapshot helper calls, separator output and persistence are omitted for clarity.
 
 [Editable PlantUML source](UMLDiagrams/RedoCommandSequenceDiagram.puml)
 
 ## Product scope
 ### Target user profile
 
-{Describe the target user profile}
+University educators, School admins
 
 ### Value proposition
 
-{Describe the value proposition: what problem does it solve?}
+Exam/room venue booking system for lecturers/School admins to easily avoid/resolve clashes, users can retrieve the info of room status (who has booked the room -on a first come first serve basis)
 
 ## User Stories
 

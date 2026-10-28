@@ -2,16 +2,14 @@
 skinparam sequenceMessageAlign center
 hide footbox
 
-participant "EduReserve" as App
+actor User
 
-activate App
-create participant ":Ui" as UI
-App -> UI: new Ui(bookingList)
+participant ":Ui" as UI
 
 participant ":Parser" as Parser
 participant ":BookingList" as Bookings
 
-App -> UI: processCommand("calendar")
+User -> UI: processCommand("calendar")
 activate UI
 
 UI -> Parser: parseCommand(userInput)
@@ -39,14 +37,9 @@ Bookings --> Calendar: dayBookings
 deactivate Bookings
 
 alt dayBookings is empty
-    note right of Calendar
-        Print "No bookings on dd/MM/yyyy."
-    end note
+    Calendar --> User: "No bookings on dd/MM/yyyy."
 else bookings found
-    note right of Calendar
-        Print numbered bookings
-        with start time, earliest first
-    end note
+    Calendar --> User: numbered bookings with start time, earliest first
 end
 
 deactivate Calendar
@@ -54,7 +47,5 @@ deactivate Calendar
 Calendar --> UI
 deactivate Calendar
 
-UI --> App: false
 deactivate UI
-deactivate App
 @enduml

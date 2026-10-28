@@ -2,16 +2,14 @@
 skinparam sequenceMessageAlign center
 hide footbox
 
-participant "EduReserve" as App
+actor User
 
-activate App
-create participant ":Ui" as UI
-App -> UI: new Ui(bookingList)
+participant ":Ui" as UI
 
 participant ":Parser" as Parser
 participant ":BookingList" as Bookings
 
-App -> UI: processCommand("cancel n/CS2113 Midterm")
+User -> UI: processCommand("cancel n/CS2113 Midterm")
 activate UI
 
 UI -> Parser: parseCommand(userInput)
@@ -30,10 +28,7 @@ Bookings --> UI: index
 deactivate Bookings
 
 alt index == -1
-    note right of UI
-        Throw InvalidCommandException
-        "No booking found with the name"
-    end note
+    UI --> User: No booking found with the name
 else booking found
     UI -> Bookings: get(index)
     activate Bookings
@@ -45,12 +40,8 @@ else booking found
     Bookings --> UI
     deactivate Bookings
 
-    note right of UI
-        Print "Booking cancelled: ..."
-    end note
+    UI --> User: "Booking cancelled: ..."
 end
 
-UI --> App: false
 deactivate UI
-deactivate App
 @enduml

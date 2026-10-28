@@ -5,15 +5,13 @@ scale 2
 skinparam sequenceMessageAlign center
 hide footbox
 
-participant "EduReserve" as App
+actor User
 
-activate App
-create participant ":Ui" as UI
-App -> UI: new Ui(bookingList)
+participant ":Ui" as UI
 
 participant ":Parser" as Parser
 
-App -> UI: processCommand("viewbooking n/CS2113 Midterm s/time")
+User -> UI: processCommand("viewbooking n/CS2113 Midterm s/time")
 activate UI
 
 UI -> Parser: parseCommand(userInput)
@@ -26,9 +24,7 @@ activate Parser
 Parser --> UI: ViewOptions("CS2113 Midterm", true)
 deactivate Parser
 
-note right of UI
-    Print the matching bookings heading
-end note
+UI --> User: the matching bookings heading
 
 create participant ":ViewCommand" as View
 UI -> View: new ViewCommand()
@@ -47,16 +43,11 @@ opt sortByTime is true
 end
 
 loop each matching booking
-    note right of View
-        Print booking number, purpose,
-        venue, and timing
-    end note
+    View --> User: booking number, purpose, venue, and timing
 end
 
 View --> UI
 deactivate View
 
-UI --> App: false
 deactivate UI
-deactivate App
 @enduml
