@@ -1,0 +1,282 @@
+%PDF-1.4
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R /F3 4 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/BaseFont /Courier /Encoding /WinAnsiEncoding /Name /F3 /Subtype /Type1 /Type /Font
+>>
+endobj
+5 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/blob/master/src/main/java/command/BookCommand.java)
+>> /Border [ 0 0 0 ] /Rect [ 86.22 589.0898 155.13 601.0898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+6 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/blob/master/src/main/java/tasks/Booking.java)
+>> /Border [ 0 0 0 ] /Rect [ 160.69 589.0898 196.82 601.0898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+7 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/blob/master/src/main/java/tasks/BookingList.java)
+>> /Border [ 0 0 0 ] /Rect [ 202.38 589.0898 254.07 601.0898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+8 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/commit/b3ef19f)
+>> /Border [ 0 0 0 ] /Rect [ 304.63 589.0898 337.99 601.0898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+9 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/commit/e87b63c)
+>> /Border [ 0 0 0 ] /Rect [ 343.55 589.0898 381.91 601.0898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+10 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/commit/6c28965)
+>> /Border [ 0 0 0 ] /Rect [ 387.47 589.0898 425.83 601.0898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+11 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/blob/master/src/main/java/command/UndoCommand.java)
+>> /Border [ 0 0 0 ] /Rect [ 86.22 460.2898 156.24 472.2898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+12 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/blob/master/src/main/java/ui/Ui.java)
+>> /Border [ 0 0 0 ] /Rect [ 161.8 460.2898 171.24 472.2898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+13 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/commit/ba3ce61)
+>> /Border [ 0 0 0 ] /Rect [ 221.8 460.2898 260.16 472.2898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+14 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/commit/14e325c)
+>> /Border [ 0 0 0 ] /Rect [ 265.72 460.2898 304.08 472.2898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+15 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/blob/master/src/main/java/command/RedoCommand.java)
+>> /Border [ 0 0 0 ] /Rect [ 86.22 344.0898 156.24 356.0898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+16 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/blob/master/src/main/java/command/UndoCommand.java)
+>> /Border [ 0 0 0 ] /Rect [ 161.8 344.0898 231.82 356.0898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+17 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/commit/5315d6f)
+>> /Border [ 0 0 0 ] /Rect [ 277.38 344.0898 313.52 356.0898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+18 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/blob/master/src/main/java/ui/Parser.java)
+>> /Border [ 0 0 0 ] /Rect [ 455.13 284.2898 484.58 296.2898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+19 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/commit/b3ef19f)
+>> /Border [ 0 0 0 ] /Rect [ 490.14 284.2898 523.5 296.2898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+20 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/commit/e87b63c)
+>> /Border [ 0 0 0 ] /Rect [ 58 271.6898 96.36 283.6898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+21 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/blob/master/src/main/java/command/BookCommand.java)
+>> /Border [ 0 0 0 ] /Rect [ 96.91 219.2898 165.82 231.2898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+22 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/commit/ebf1c6f)
+>> /Border [ 0 0 0 ] /Rect [ 171.38 219.2898 204.18 231.2898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+23 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/commit/ba3ce61)
+>> /Border [ 0 0 0 ] /Rect [ 209.74 219.2898 248.1 231.2898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+24 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/blob/master/src/main/java/EduReserve.java)
+>> /Border [ 0 0 0 ] /Rect [ 333.78 192.0898 388.8 204.0898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+25 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/blob/master/src/main/java/ui/HelpText.java)
+>> /Border [ 0 0 0 ] /Rect [ 394.36 192.0898 434.37 204.0898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+26 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/commit/b3ef19f)
+>> /Border [ 0 0 0 ] /Rect [ 439.93 192.0898 473.29 204.0898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+27 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/blob/master/src/main/java/tasks/BookingList.java)
+>> /Border [ 0 0 0 ] /Rect [ 493.12 164.8898 543.7736 176.8898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+28 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/blob/master/build.gradle)
+>> /Border [ 0 0 0 ] /Rect [ 58 152.2898 109.69 164.2898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+29 0 obj
+<<
+/A <<
+/S /URI /Type /Action /URI (https://github.com/AY2627S1-CS2113-W14-2/tp/commit/a16e04e)
+>> /Border [ 0 0 0 ] /Rect [ 115.25 152.2898 154.17 164.2898 ] /Subtype /Link /Type /Annot
+>>
+endobj
+30 0 obj
+<<
+/Annots [ 5 0 R 6 0 R 7 0 R 8 0 R 9 0 R 10 0 R 11 0 R 12 0 R 13 0 R 14 0 R 
+  15 0 R 16 0 R 17 0 R 18 0 R 19 0 R 20 0 R 21 0 R 22 0 R 23 0 R 24 0 R 
+  25 0 R 26 0 R 27 0 R 28 0 R 29 0 R ] /Contents 34 0 R /MediaBox [ 0 0 595.2756 841.8898 ] /Parent 33 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 
+  /Trans <<
+
+>> /Type /Page
+>>
+endobj
+31 0 obj
+<<
+/PageMode /UseNone /Pages 33 0 R /Type /Catalog
+>>
+endobj
+32 0 obj
+<<
+/Author (Maxkedd) /CreationDate (D:20261028195807+08'00') /Creator (\(unspecified\)) /Keywords () /ModDate (D:20261028195807+08'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (EduReserve functional code contributions) /Title (Maxkedd - Project Portfolio Page) /Trapped /False
+>>
+endobj
+33 0 obj
+<<
+/Count 1 /Kids [ 30 0 R ] /Type /Pages
+>>
+endobj
+34 0 obj
+<<
+/Filter [ /ASCII85Decode /FlateDecode ] /Length 2950
+>>
+stream
+Gb!#^gN)%.&q0LUo\4&f,arq7a]"^M17?8'j(N17;RH[lTS,$gEX:$t[eAaZ)n_!<Ra,YQ.@4mK+G!#Bo]ag)/MQ_8dXS#<^sriGhcX@?0MB3%%2WUuiHf\;f7afi^)9V\Qo^fZ](k0l"4r1[pD4^W%QFqL_=MK\%QpAd;YYRcF>p&Q6Gm_&1E7dH4V%t!l-a\VdgMk>dfWW\')$$D0O)EX3j*A2jQ-K!s1p)VGgGCe5M_S"T0-"jPF!c@;j%(gZThml0,gS:O66_ee.2Db2lh/Wml7Ri]F]YpDk2V]F9TqA$sh%Co;or:CMGo(]jmoG/p2O:c3>epH.ia&F4Ao(fs_W4fUQk_Z"o-XIYSrPiH:GgoU/`Vg[aG,SL=3tjHu6CR*Qif*EE].TJ?,$G.l3"<>,u^r5p&t7/:lFZ?VOiMutSf<('E:4G+n4!F+2]A96[iC^G>*V!,:fjRBskMSi_khd`uLi6rU-.Z<L^QF=+<7<tb&EECQ>&k!M3<ST_@;9A-tW8e,KMHF5GTuuBmZK-!h#.6^+1SFqE\#bdnXL'9`rH-M"Dr@oh9/A1H6jk'l9B28;rQtNb=!(`)Y8'++>XP*uQ4$IA&G2=dcp3o:Yo_2lLVj?Nk0ZLS1p,+0_]pM4cr(^/jss!L_<@XqE4,$&D^0,BjZ<]hN/Yi1bu^D68)JbZBsJNlmNIc]d$S%S,fK"OggP/Sb2Z6Od0+c]BKQ4,?j_R=39Tj4e(F@NK"!Qe:6<cRP/fF`&\]i!>JLhK@NgYoXV$Ob6Hg/Xklr)d[0Pm[g-#Z8-g1>A-'_">T^P\M,=fX%$tBSLn[sg#g3raWI]EE>.&sSo,t8/cA__qiq*9c_\O0nhA'd.C0ZXR_&WDGbn!qQ/^PM\0`F!aq]rroJW\%u<!V;8lqq\0i]/O$gSC[/"4EUALO$]k[gS:!)alU%+2iY.'*ol6fh"(bGT9f:?mJ/061:?0+;-r`i0/iCbRlKPW_e5<;?bZI3iUcsHI"(\OqT4T=\b_78riM1:h8p6Kg,LeEqGEM/;EAW=Uj3<FU@LZ8G[!OHc[q1$93t3\!3Ju38jmA6F?JZ+S0GBeA\Qseq@Bjcj%6]QVUHUR*90:9K:K`]&Q4ADTbaq-+0emSOVZ*$[OoB-]6:;L[b<mbE2IKaD0gpSCten\&pTndHlr.[Mc6Fd]1Ah(*=qJ=%?^7(eV2ALmL5aK+@3bg]&,T)-WZV)_aHZtmX-BC7ot.M:IF#dHDUd8fCQnt=nWiPi")&UqdSKH'\IKWJEL*jI5j5hSmfC(*4SGg7I$!XX!g:<QrJD=U8N00&q@j*Lo:-??\]J]4sa%4Ki(Uq<%h6X[L@ta:d&<7g6&9RnWts`:K*hO)ubnk3o6ZH^8_nQ3d4lY3/\smo1Y9)O(2%fI+2H0f?u"D%=kr-\At9&RYL];]&LW58GNlGKZOeq,:O?["Kgl+<^JB!+Xo3Ja@2+UN%i^4ErueHr)"@$!W/9p@d!:L\l35-lVXOR"_";O)&qo4B+0/jW:cr,IY%6jm5(i6=(GpHBJSKd.Tq.dg//@#P<;Li]m?U]Cg@$[aRX4XSE^b_,ojhVN*sgNYt8")]lf!'V.fbY?-8YAW#H]nTBsZ"eC>Fcfa]2]WMhU\M'>Xo94#nhUPrXjjc`R"H=8H6Ss/[6b2#hfW8bF$gYQ]E!V8>!o,7.F,IGa^H^POeh`?O(QHL<'HTLm2@M@g]K;<dQKR(`O-;<-qG](B?D=;-qooeG./_<'7QnTucQap)6o>h=(>0$K:7bk/>(%iL<d((Sg2$4=k.Wj4all\EgWn-_AkLr^Nj9V:Znk'L,o)1,s3GFN72e;WB2a%@qQV;aKc$@>CjRLE^TXPRS"+iHSKh(k[(TaM219]hu]i&a'Ykg5JNZA7$PAtcP+sr;LbQ'.hmHZ*A)";[Ci\HJ2+\E5%aRb')<q2]Foe`.h?UHRsUD@FQVn//bTh4h86Q*VpgDl=6]A\((rY21gY4J3\n``_-[C7XG+#$V+[a(9iT94BQPW9jrHB.++rmTE_+SN%q!Gd*ue%/+LFZ(4f5r's;]D0:QY3j$Yg-.`P3k*dpEK$!0jZ9!l9q0<hA=]1mDgK!aQXsJe;$03[nd.oiSk1JN*]@_ob+O#,g=(rV/72tP9d:Z2;:@_HrDa.J:ZRI&4G'a9l7KP/]1Z:M%uK4Y/;Yi&qECq$Jk7GnO;M\Aqm,&.?7h81>5HWH8\pK:FcmA?T/eBMChN9*VMV-8qXn@:$aT\<BrjI@\_q0&Qii7=eH-lLA532ba=;'i*=+TMF7@:2G^[R@T[k@NfE+**_R;<B>->Ad&R$3u>5iN-4a/H!-UO;dZ=D$b0+?j?5)A54]p7@R*c";Pc>=A[.?f\d&8jEJC<8c\+YUH[^pYTV#2*P8m2HXSM("_8C#uR9AXK0*[7)X;UN09@IBM6lb=9_KCYqV[_i!Ir`>M.'C';cE-WoKlrG,N<[gBCT=Yt^q1I^?iFopJH)\"@!U<#tb+EX3]a#bDmpg%>t"&dQtUcGe'4;g:_BFU4\p=(sO:8BjEfIE1j_Dn]23.BIA`N*L\pU_B/'@X1%PMW=,Xo@ccHa@jpNiRW)#-!Y<j/mqcd`Q>REl?A8Q/:=LPeu/]<LM&c';Tn[1kALO,,4AJeL&P:%D51#;oYdIroLgA$6<Wgnp8RTm)77OF[jGK'IQE\PRLao3WR!c(D4rD\mKEF1TWNB17=Y%Y\+F-J!UXE$)F[G$5(]PpI,PPmY&_A]Aoo>)1L]M=HWlb@$tb9TK$+6enCReje?0\+8e"#TYjXOfl@Ki>"Ol<PH7ATKX:Gl]na[dJeN%p33^d_Rp\Y-D0hU_Fneea@.Aego/`XPb.))9I];FWa^P[F*MAbLT'CU'A^)K/&OkHO!lMeeBhF?tA"f#YEZfE64TcXA"n"t+<[*N_\Xq>3@XqTF2r1CDg5Q-Cp`$FH!s&~>endstream
+endobj
+xref
+0 35
+0000000000 65535 f 
+0000000061 00000 n 
+0000000112 00000 n 
+0000000219 00000 n 
+0000000331 00000 n 
+0000000436 00000 n 
+0000000677 00000 n 
+0000000913 00000 n 
+0000001153 00000 n 
+0000001359 00000 n 
+0000001565 00000 n 
+0000001772 00000 n 
+0000002014 00000 n 
+0000002242 00000 n 
+0000002448 00000 n 
+0000002655 00000 n 
+0000002897 00000 n 
+0000003139 00000 n 
+0000003346 00000 n 
+0000003579 00000 n 
+0000003785 00000 n 
+0000003987 00000 n 
+0000004229 00000 n 
+0000004436 00000 n 
+0000004642 00000 n 
+0000004875 00000 n 
+0000005110 00000 n 
+0000005317 00000 n 
+0000005560 00000 n 
+0000005773 00000 n 
+0000005980 00000 n 
+0000006374 00000 n 
+0000006444 00000 n 
+0000006763 00000 n 
+0000006824 00000 n 
+trailer
+<<
+/ID 
+[<cbbe89e416af0d1e7fd8373d7a6459b9><cbbe89e416af0d1e7fd8373d7a6459b9>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 32 0 R
+/Root 31 0 R
+/Size 35
+>>
+startxref
+9866
+%%EOF
