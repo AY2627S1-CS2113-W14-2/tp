@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,37 @@ class StorageTest {
     void constructor_nullDirectory_rejectsInvalidConfiguration() {
         IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> new Storage(null));
         assertEquals("Storage directory must not be null", error.getMessage());
+    }
+
+    @Test
+    void loadUserName_missingFile_returnsNull() throws IOException {
+        Storage storage = new Storage(tempDirectory);
+
+        assertNull(storage.loadUserName());
+        try (Stream<Path> files = Files.list(tempDirectory)) {
+            assertEquals(0, files.count());
+        }
+    }
+
+    @Test
+    void saveAndLoadUserName_validName_returnsSameName() throws IOException {
+        Storage storage = new Storage(tempDirectory);
+
+        storage.saveUserName("  James  ");
+
+        assertEquals("James", storage.loadUserName());
+        assertEquals("James", Files.readString(tempDirectory.resolve("username.txt")));
+    }
+
+    @Test
+    void saveUserName_blankName_rejectsInvalidName() {
+        Storage storage = new Storage(tempDirectory);
+
+        IllegalArgumentException error = assertThrows(
+                IllegalArgumentException.class,
+                () -> storage.saveUserName("  "));
+
+        assertEquals("Username must not be blank", error.getMessage());
     }
 
     @Test
@@ -88,6 +120,17 @@ class StorageTest {
 
         assertEquals("", Files.readString(tempDirectory.resolve("bookings.txt")));
         assertTrue(storage.loadBookings().isEmpty());
+    }
+
+    @Test
+    void saveBookings_validList_returnsFileModifiedTime() throws IOException {
+        Storage storage = new Storage(tempDirectory);
+
+        FileTime saveTime = storage.saveBookings(new BookingList());
+
+        FileTime fileTime = Files.getLastModifiedTime(
+                tempDirectory.resolve("bookings.txt"));
+        assertEquals(fileTime, saveTime);
     }
 
     @Test
