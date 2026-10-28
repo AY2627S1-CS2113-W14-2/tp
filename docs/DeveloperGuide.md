@@ -156,7 +156,11 @@ Bookings without `a/ATTENDEES` do not contribute to the results.
 
 ### Saving and loading bookings: storage
 
-Saves the booking list to a text file and loads it again when EduReserve starts.
+Saves one username and the booking list to text files. It loads them again when EduReserve starts.
+
+The first time EduReserve starts, `loadUserName` returns `null` because `data/username.txt` does not exist.
+EduReserve asks for a username and calls `saveUserName`. Later runs load this username and skip the question.
+Only one username is stored because EduReserve is a single-user application.
 
 Data format:
 
@@ -179,7 +183,8 @@ to the `BookingList`.
 After a command is processed, EduReserve calls `saveBookings`. The method goes through the current
 booking list and passes each booking to `bookingToLine`. This method gets the reason, name, venue,
 timing and attendee count from the booking. The completed lines are then written to
-`data/bookings.txt`.
+`data/bookings.txt`. `saveBookings` reads the file's last modified time after writing and returns it.
+EduReserve formats this time and displays it so the user can confirm that the booking file was saved.
 
 The storage also supports booking files created before attendee counts were added. An older line
 has five parts while a new line has six parts. For an older booking, the attendee count is set to
@@ -410,7 +415,8 @@ Input validation, snapshot helper calls, separator output and storage internals 
 | v2.0    | School Admin | Get a calendar view of today's bookings                              | Quickly be updated on what's scheduled for today without going through the whole list |
 | v2.0    | School Admin | View a list of the bookings sorted by time                           | I can clearly see which bookings come after which time                                |
 | v2.0    | School Admin | View a list of available venues                                      | I can clearly see which booking slots are free                                        |
-
+| v2.0    | School Admin | Store my username                                                     | I do not have to enter my username every time the program starts                      |
+| v2.0    | School Admin | Keep track of when the storage file was last changed                  | I can confirm that my booking changes were saved                                      |
 
 ## Non-Functional Requirements
 

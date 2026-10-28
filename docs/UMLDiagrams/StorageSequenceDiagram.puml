@@ -10,6 +10,21 @@ participant ":Booking" as Booking
 
 activate App
 
+group Load saved username
+    App -> Storage: loadUserName()
+    activate Storage
+
+    Storage --> App: username or null
+    deactivate Storage
+
+    alt no username is saved
+        App -> Storage: saveUserName(userName)
+        activate Storage
+        Storage --> App
+        deactivate Storage
+    end
+end
+
 group Load saved bookings
     App -> Storage: loadBookings()
     activate Storage
@@ -78,7 +93,8 @@ group Save current bookings
     end
 
     Storage -> Storage: write lines to bookings.txt
-    Storage --> App
+    Storage -> Storage: getLastModifiedTime()
+    Storage --> App: last modified time
     deactivate Storage
 end
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +17,10 @@ import tasks.BookingList;
 public class Storage {
     private static final String DELIMITER = " | ";
     private static final String FILE_NAME = "bookings.txt";
+    private static final String USER_NAME_FILE = "username.txt";
 
     private final Path filePath;
+    private final Path userNamePath;
 
     /**
      * Uses the default data folder.
@@ -38,6 +41,50 @@ public class Storage {
         }
 
         filePath = dataDirectory.resolve(FILE_NAME);
+        userNamePath = dataDirectory.resolve(USER_NAME_FILE);
+    }
+
+    /**
+     * Loads the saved username.
+     *
+     * @return the username, or null when none is saved
+     * @throws IOException if the file cannot be read
+     */
+    public String loadUserName() throws IOException {
+        if (!Files.exists(userNamePath)) {
+            return null;
+        }
+
+        String userName = Files.readString(
+                userNamePath,
+                StandardCharsets.UTF_8).trim();
+
+        if (userName.isBlank()) {
+            return null;
+        }
+
+        return userName;
+    }
+
+    /**
+     * Saves one username.
+     *
+     * @param userName the username to save
+     * @throws IOException if the file cannot be written
+     */
+    public void saveUserName(String userName) throws IOException {
+        if (userName == null || userName.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Username must not be blank");
+        }
+
+        Path dataFolder = userNamePath.getParent();
+
+        Files.createDirectories(dataFolder);
+        Files.writeString(
+                userNamePath,
+                userName.trim(),
+                StandardCharsets.UTF_8);
     }
 
     /**
@@ -81,9 +128,10 @@ public class Storage {
      * Saves the bookings.
      *
      * @param bookings the bookings to save
+     * @return the time when the file was saved
      * @throws IOException if the file cannot be written
      */
-    public void saveBookings(BookingList bookings)
+    public FileTime saveBookings(BookingList bookings)
             throws IOException {
         if (bookings == null) {
             throw new IllegalArgumentException(
@@ -108,6 +156,8 @@ public class Storage {
                 filePath,
                 lines,
                 StandardCharsets.UTF_8);
+
+        return Files.getLastModifiedTime(filePath);
     }
 
     /**
