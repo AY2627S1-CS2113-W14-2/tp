@@ -4,12 +4,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
+import java.time.Duration;
 
 /**
  * A named exam or lecture reservation with a venue and user-supplied timing.
  * @author Maxkedd
  */
 public class Booking extends Task {
+    /** Only a start time is recorded, so every booking is assumed to last this long. */
+    public static final Duration DEFAULT_DURATION = Duration.ofHours(1);
     private static final DateTimeFormatter TIMING_FORMAT =
             DateTimeFormatter.ofPattern("dd/MM/uuuu HH:mm")
                     .withResolverStyle(ResolverStyle.STRICT);
@@ -99,6 +102,37 @@ public class Booking extends Task {
      */
     public LocalDateTime getStartTime() {
         return startTime;
+    }
+
+    /**
+     * Returns when this booking ends, which is {@link #DEFAULT_DURATION} after it starts.
+     * @author Pratham-tech
+     * @return the end time, or null when this is an older booking without a full date
+     */
+    public LocalDateTime getEndTime() {
+        if (startTime == null) {
+            return null;
+        }
+        return startTime.plus(DEFAULT_DURATION);
+    }
+
+    /**
+     * Checks whether this booking uses the given venue during any part of the hour starting at the given time.
+     * A booking that starts exactly when this one ends does not overlap it.
+     * Older bookings without a full date never overlap, because their time cannot be compared.
+     * @author Pratham-tech
+     * @param otherVenue venue of the other booking, compared ignoring case and surrounding spaces
+     * @param otherStart start time of the other booking, never null
+     * @return true if the venue matches and the two one-hour slots overlap
+     */
+    public boolean overlaps(String otherVenue, LocalDateTime otherStart) {
+        assert otherVenue != null && !otherVenue.isBlank() : "Venue to compare must not be blank";
+        assert otherStart != null : "Start time to compare must not be null";
+        if (startTime == null || !venue.equalsIgnoreCase(otherVenue.strip())) {
+            return false;
+        }
+        LocalDateTime otherEnd = otherStart.plus(DEFAULT_DURATION);
+        return otherStart.isBefore(getEndTime()) && startTime.isBefore(otherEnd);
     }
 
     /**

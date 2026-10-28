@@ -14,7 +14,8 @@ public final class HelpText {
                 e.g. book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00
                 Add optional a/ATTENDEES after the timing to record the expected group size.
                 e.g. book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00 a/80
-                A booking is rejected if that venue is already booked at the same date and time.
+                Each booking lasts 1 hour from its start time, e.g. 14:00 to 15:00.
+                A booking is rejected if that venue is already booked at any time during that hour.
 
             editbooking n/BOOKING_NAME: edit an existing booking (full name, not case sensitive).
                 If several bookings match, enter the number from the displayed filtered list.

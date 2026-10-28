@@ -125,19 +125,17 @@ public class BookingList {
 
     /**
      * Returns an existing booking that clashes with the new booking, or null if the venue is free.
-     * A clash means the same venue (ignoring case) starting at exactly the same date and time.
+     * A clash means the same venue (ignoring case) at overlapping times, where every booking lasts one hour.
      * Older saved bookings without a full date are skipped because their time cannot be compared.
      * @author Pratham-tech
      * @param newBooking booking about to be added, never null and with a valid start time
-     * @return the booking already using that venue and time, or null if there is none
+     * @return the booking already using that venue at an overlapping time, or null if there is none
      */
     public Booking findClash(Booking newBooking) {
         assert newBooking != null : "Booking to check for a clash must not be null";
         assert newBooking.getStartTime() != null : "Booking to check for a clash must have a start time";
         for (Booking existing : bookings) {
-            boolean sameVenue = existing.getVenue().equalsIgnoreCase(newBooking.getVenue());
-            boolean sameTime = newBooking.getStartTime().equals(existing.getStartTime());
-            if (sameVenue && sameTime) {
+            if (existing.overlaps(newBooking.getVenue(), newBooking.getStartTime())) {
                 return existing;
             }
         }

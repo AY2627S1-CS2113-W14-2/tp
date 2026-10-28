@@ -3,6 +3,8 @@ package tasks;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -54,5 +56,31 @@ class BookingTest {
     void parseStartTime_impossibleDate_isRejectedInsteadOfAdjusted() {
         assertThrows(DateTimeParseException.class, () -> Booking.parseStartTime("31/04/2026 14:00"));
         assertEquals(LocalDateTime.of(2028, 2, 29, 23, 59), Booking.parseStartTime("29/02/2028 23:59"));
+    }
+
+    @Test
+    void getEndTime_isOneHourAfterStart_orNullForLegacyTiming() {
+        Booking booking = new Booking("exam", "Midterm", "LT1", "05/10/2026 23:30");
+        Booking legacy = new Booking("exam", "Legacy", "LT1", "10AM-12PM");
+
+        assertEquals(LocalDateTime.of(2026, 10, 6, 0, 30), booking.getEndTime());
+        assertEquals(Booking.DEFAULT_DURATION, java.time.Duration.ofHours(1));
+        assertNull(legacy.getEndTime());
+    }
+
+    @Test
+    void overlaps_sameVenueOnlyWhenOneHourSlotsIntersect() {
+        Booking booking = new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00");
+        LocalDateTime start = booking.getStartTime();
+
+        assertTrue(booking.overlaps(" lt1 ", start));
+        assertTrue(booking.overlaps("LT1", start.plusMinutes(59)));
+        assertTrue(booking.overlaps("LT1", start.minusMinutes(59)));
+        assertFalse(booking.overlaps("LT1", start.plusMinutes(60)));
+        assertFalse(booking.overlaps("LT1", start.minusMinutes(60)));
+        assertFalse(booking.overlaps("LT2", start));
+        assertFalse(new Booking("exam", "Legacy", "LT1", "14:00").overlaps("LT1", start));
+        assertThrows(AssertionError.class, () -> booking.overlaps(" ", start));
+        assertThrows(AssertionError.class, () -> booking.overlaps("LT1", null));
     }
 }
