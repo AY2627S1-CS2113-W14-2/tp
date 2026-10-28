@@ -28,6 +28,18 @@ class EduReserveTest {
         assertTrue(response.contains("Hello, James! Welcome to EduReserve."), response);
         assertFalse(response.contains("Duke"), response);
         assertTrue(Files.isRegularFile(workingDirectory.resolve("data/bookings.txt")));
+        assertEquals("James", Files.readString(workingDirectory.resolve("data/username.txt")));
+        assertTrue(response.contains("Bookings saved at: "), response);
+    }
+
+    @Test
+    void main_savedName_skipsNameQuestionOnNextRun() throws Exception {
+        runApplication("James\nbye\n");
+
+        String response = runApplication("bye\n");
+
+        assertFalse(response.contains("What is your name?"), response);
+        assertTrue(response.contains("Hello, James! Welcome to EduReserve."), response);
     }
 
     @Test
@@ -176,7 +188,7 @@ class EduReserveTest {
         assertFalse(response.contains("Unable to save"), response);
         assertEquals(savedBookings, Files.readString(dataFile).replace("\r\n", "\n"));
 
-        String restartedResponse = runApplication("James\nlist\n/undo\nbye\n");
+        String restartedResponse = runApplication("list\n/undo\nbye\n");
         assertTrue(restartedResponse.contains("1. lecture Title: First"), restartedResponse);
         assertTrue(restartedResponse.contains("2. exam Title: Midterm"), restartedResponse);
         assertTrue(restartedResponse.contains("3. exam Title: Midterm"), restartedResponse);
@@ -313,7 +325,7 @@ class EduReserveTest {
                 + "B | exam | Midterm | LT3 | 05/10/2026 14:00 | \n",
                 Files.readString(dataFile).replace("\r\n", "\n"));
 
-        String restarted = runApplication("James\nviewbooking n/Midterm\nbye\n");
+        String restarted = runApplication("viewbooking n/Midterm\nbye\n");
         assertTrue(restarted.contains("venue: LT3"), restarted);
         assertFalse(restarted.contains("venue: LT2"), restarted);
     }

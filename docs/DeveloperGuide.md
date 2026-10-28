@@ -37,8 +37,8 @@ Parser fields in the command classes denote retained references; each concrete c
 
 The command sequence diagrams below show the user calling `Ui` directly, with the application
 entry point omitted. Arrows back to the user represent console output. Loading and saving are
-shown separately in the storage diagram, where incoming arrows represent calls from the
-application loop outside the diagram.
+shown separately in the storage diagram. Its `User` actor represents user-triggered application
+activity; `EduReserve` performs the actual storage calls and is omitted from the diagram.
 
 ### Creating a booking: book
 
@@ -186,7 +186,11 @@ Bookings without `a/ATTENDEES` do not contribute to the results.
 
 ### Saving and loading bookings: storage
 
-Saves the booking list to a text file and loads it again when EduReserve starts.
+Saves one username and the booking list to text files. It loads them again when EduReserve starts.
+
+The first time EduReserve starts, `loadUserName` returns `null` because `data/username.txt` does not exist.
+EduReserve asks for a username and calls `saveUserName`. Later runs load this username and skip the question.
+Only one username is stored because EduReserve is a single-user application.
 
 Data format:
 
@@ -209,7 +213,8 @@ to the `BookingList`.
 After a command is processed, EduReserve calls `saveBookings`. The method goes through the current
 booking list and passes each booking to `bookingToLine`. This method gets the reason, name, venue,
 timing and attendee count from the booking. The completed lines are then written to
-`data/bookings.txt`.
+`data/bookings.txt`. `saveBookings` reads the file's last modified time after writing and returns it.
+EduReserve formats this time and displays it so the user can confirm that the booking file was saved.
 
 The storage also supports booking files created before attendee counts were added. An older line
 has five parts while a new line has six parts. For an older booking, the attendee count is set to
@@ -235,7 +240,7 @@ Removes a booking so that its venue and time can be used again
 Format: cancel n/BOOKING_NAME
 
 - BOOKING_NAME is not case sensitive and may contain spaces
-- If several bookings share the same name, only the first one in the list is cancelled
+- If several bookings share the same name, only the first one in the list is cancelled. `book` rejects duplicate names, so this mainly affects older saved data.
 - An error is shown if no booking has that name, and the list is left unchanged
 
 Examples:
@@ -245,9 +250,15 @@ Examples:
 |   `cancel n/CS2113 Midterm`    |        Cancel the booking named "CS2113 Midterm"          |
 |   `cancel n/cs2113 midterm`    | Same booking as above, as capitalization is ignored       |
 
-Implementation: `Parser#parseCancel` extracts the name, `BookingList#findByName` returns the index of the first
-match (or -1), and `BookingList#remove` deletes it. Assertions check that the index is inside the list and that the
-list shrinks by exactly one, while user mistakes such as a missing name throw `InvalidCommandException`.
+Implementation: `Ui#cancelBooking` calls `Parser#parseCancel` to extract the name, `BookingList#findByName` to get the
+index of the first match (or -1), and `BookingList#remove` to delete it. Assertions check that the index is inside the
+list and that the list shrinks by exactly one, while user mistakes such as a missing name throw
+`InvalidCommandException`.
+
+Design consideration: cancelling by name instead of by list number. `viewbooking`, `editbooking` and `find` already
+identify bookings by name, so `cancel` works the same way. A list number is risky because it changes whenever the list
+is filtered, sorted, cancelled from or undone, so a number read from an old `list` could cancel the wrong booking.
+The trade-off is that the full name must be typed, which is acceptable because `book` requires names to be unique.
 ![Cancel command sequence diagram](UMLDiagrams/CancelCommandSequenceDiagram.png)
 
 ### Finding bookings: find
@@ -271,29 +282,49 @@ Examples:
 Implementation: `Parser#parseFind` extracts the keyword, `Ui` passes it to `FindCommand`, and `FindCommand` calls
 `BookingList#findByKeyword` and prints each match. Assertions check that the keyword is not blank, that every result
 contains the keyword and that the list size is unchanged.
+
+Design consideration: partial, case-insensitive matching instead of matching the full name. Admins often remember only
+part of a booking name, such as the module code `CS2113`, and exact lookup by full name is already covered by
+`viewbooking`, `cancel` and `editbooking`. The trade-off is that a very short keyword can match many bookings, which is
+acceptable because the results are only displayed and the list is never changed.
 ![Find command sequence diagram](UMLDiagrams/FindCommandSequenceDiagram.png)
 
 ### Preventing booking clashes: book
-A new booking is rejected if its venue is already booked at the same time
+A new booking is rejected if its venue is already booked at an overlapping time
 
 Format: book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING (same as before)
 
-- A clash means an existing booking with the same venue (not case sensitive) and exactly the same TIMING
-- A booking only has a start time, so two bookings in the same venue that start at different times never clash
+- Every booking lasts 1 hour from its start time, so a booking at 12:00 occupies 12:00 to 13:00
+- A clash means an existing booking with the same venue (not case sensitive) whose hour overlaps the new booking's hour
+- A booking that starts exactly when another ends does not clash, so 12:00 and 13:00 can both be booked
 - Older saved bookings without a full dd/MM/yyyy HH:mm timing are not checked
 - Cancelling the existing booking frees the venue and time again
+- `editbooking` and `free` use the same rule, so all three commands always agree
 
-Examples, assuming `book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 14:00` already exists:
+Examples, assuming `book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 12:00` already exists (it occupies 12:00 to 13:00):
 
-|                       Command                       |            Result             |
-|:---------------------------------------------------:|:-----------------------------:|
-| `book r/lecture n/Week 1 v/lt1 t/05/10/2026 14:00`  | Rejected: LT1 is already booked |
-| `book r/lecture n/Week 1 v/LT1 t/05/10/2026 15:00`  |            Added              |
-| `book r/lecture n/Week 1 v/LT2 t/05/10/2026 14:00`  |            Added              |
+|                       Command                       |                Result                |
+|:---------------------------------------------------:|:------------------------------------:|
+| `book r/lecture n/Week 1 v/lt1 t/05/10/2026 12:00`  |  Rejected: LT1 is already booked     |
+| `book r/lecture n/Week 1 v/LT1 t/05/10/2026 12:01`  |  Rejected: overlaps 12:00 to 13:00   |
+| `book r/lecture n/Week 1 v/LT1 t/05/10/2026 11:01`  |  Rejected: runs into 12:00           |
+| `book r/lecture n/Week 1 v/LT1 t/05/10/2026 13:00`  |  Added: starts as the first ends     |
+| `book r/lecture n/Week 1 v/LT1 t/05/10/2026 11:00`  |  Added: ends as the first starts     |
+| `book r/lecture n/Week 1 v/LT2 t/05/10/2026 12:00`  |  Added: different venue              |
 
-Implementation: after `Parser#parseBooking` succeeds, `Ui` calls `BookingList#findClash`. It returns the booking that
-already uses the venue and time, or null. A clash is reported as an `InvalidCommandException`, so the new booking is
-never added.
+Implementation: `BookCommand` calls `BookingList#findClash` once `Parser#parseBooking` succeeds. `findClash` asks each
+existing booking whether `Booking#overlaps(venue, startTime)`, which is true when the venue matches (ignoring case) and
+the new start is before the existing end and the existing start is before the new end. A booking's end is its start plus
+`Booking.DEFAULT_DURATION` (1 hour). The first overlapping booking is returned, or null if the venue is free. A clash is
+reported as an `InvalidCommandException`, so the new booking is never added. `BookingList#isVenueAvailable` (used by
+`free`) and `EditCommand` call the same `Booking#overlaps` method, so the rule is defined in one place.
+
+Design consideration: a fixed 1-hour duration instead of an end time entered by the user. A booking only stores its
+start time, so letting the user type an end time or duration would change the `book` format and the saved file format,
+and older saved bookings would need converting. With a fixed duration the end time is calculated, nothing new is saved,
+and `Booking.DEFAULT_DURATION` is the only value to change if the length ever changes. The trade-off is that a longer
+exam cannot block its venue for its full length. An optional duration field could be added later by storing it in
+`Booking` and using it in `Booking#getEndTime`.
 ![Book command sequence diagram](UMLDiagrams/BookCommandSequenceDiagram.png)
 
 ### Daily calendar: calendar
@@ -304,6 +335,7 @@ Format: calendar
 - Takes no arguments, and extra words are rejected
 - Today is read from the computer's clock
 - Bookings are shown earliest first, with start time, purpose, name and venue
+- A booking appears on the day it starts, even if its 1-hour slot runs past midnight
 - Older saved bookings without a full date are skipped
 - If nothing starts today, "No bookings on dd/MM/yyyy." is shown
 
@@ -413,7 +445,8 @@ Exam/room venue booking system for lecturers/School admins to easily avoid/resol
 | v2.0    | School Admin | Get a calendar view of today's bookings                              | Quickly be updated on what's scheduled for today without going through the whole list |
 | v2.0    | School Admin | View a list of the bookings sorted by time                           | I can clearly see which bookings come after which time                                |
 | v2.0    | School Admin | View a list of available venues                                      | I can clearly see which booking slots are free                                        |
-
+| v2.0    | School Admin | Store my username                                                     | I do not have to enter my username every time the program starts                      |
+| v2.0    | School Admin | Keep track of when the storage file was last changed                  | I can confirm that my booking changes were saved                                      |
 
 ## Non-Functional Requirements
 

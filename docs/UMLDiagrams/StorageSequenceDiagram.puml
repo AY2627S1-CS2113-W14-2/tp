@@ -3,17 +3,34 @@ scale 2
 skinparam sequenceMessageAlign center
 hide footbox
 
+actor User
 participant ":Storage" as Storage
 participant ":BookingList" as Bookings
 participant ":Booking" as Booking
 
+
+group Load saved username
+    User -> Storage: loadUserName()
+    activate Storage
+
+    Storage --> User: username or null
+    deactivate Storage
+
+    alt no username is saved
+        User -> Storage: saveUserName(userName)
+        activate Storage
+        Storage --> User
+        deactivate Storage
+    end
+end
+
 group Load saved bookings
-    [-> Storage: loadBookings()
+    User -> Storage: loadBookings()
     activate Storage
 
     alt data file does not exist
         Storage -> Storage: createEmptyDataFile()
-        Storage -->[: empty booking list
+        Storage --> User: empty booking list
     else data file exists
         Storage -> Storage: read saved lines
 
@@ -21,9 +38,14 @@ group Load saved bookings
             Storage -> Storage: parseBooking(line, lineNumber)
 
             alt old five-part line
-                Storage -> Storage: attendeeCount = null
+                note right of Storage
+                    Set attendee count to null.
+                end note
             else new six-part line
-                Storage -> Storage: parse and validate attendee count
+                note right of Storage
+                    Parse and validate
+                    the attendee count.
+                end note
             end
 
             Storage -> Booking: new Booking(...)
@@ -37,14 +59,19 @@ group Load saved bookings
             deactivate Bookings
         end
 
-        Storage -->[: booking list
+        Storage --> User: booking list
     end
 
     deactivate Storage
 end
 
+note over User
+    A command is processed and may
+    change the current booking list.
+end note
+
 group Save current bookings
-    [-> Storage: saveBookings(bookings)
+    User -> Storage: saveBookings(bookings)
     activate Storage
 
     loop for each booking
@@ -53,18 +80,20 @@ group Save current bookings
         Bookings --> Storage: booking
         deactivate Bookings
 
-        Storage -> Storage: bookingToLine(booking)
-        activate Storage
         Storage -> Booking: get booking details
         activate Booking
         Booking --> Storage: reason, name, venue,\ntiming and attendee count
         deactivate Booking
 
-        deactivate Storage
+        note right of Storage
+            Convert the booking
+            into one line.
+        end note
     end
 
     Storage -> Storage: write lines to bookings.txt
-    Storage -->[
+    Storage -> Storage: getLastModifiedTime()
+    Storage --> User: last modified time
     deactivate Storage
 end
 

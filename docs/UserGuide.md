@@ -18,8 +18,8 @@ The following guide will introduce the functions to utilize the platform.
    java -jar EduReserve.jar
    ```
 
-5. When prompted with `What is your name?`, enter your name and press Enter. The application displays a welcome
-   message and the available commands.
+5. The first time you run EduReserve, enter your name when prompted with `What is your name?`. EduReserve saves
+   one username in `data/username.txt`. Later runs use the saved username automatically.
 6. Try the following commands, pressing Enter after each line:
 
    ```text
@@ -32,8 +32,8 @@ The following guide will introduce the functions to utilize the platform.
    These commands create an exam booking for 80 attendees, list your bookings, display the booking's purpose,
    venue and timing, and show the largest recorded attendee count for each venue. Booking times use
    `dd/MM/yyyy HH:mm` with a 24-hour clock. New booking names must be unique, ignoring capitalization.
-7. Enter `bye` to exit. Bookings are saved automatically to `data/bookings.txt` inside the folder from which
-   you run the application. Run it from the same folder next time to load your saved bookings.
+7. After each command, EduReserve saves your bookings to `data/bookings.txt` and displays the time of the save.
+   Enter `bye` to exit. Run the application from the same folder next time to load the saved username and bookings.
 
 ## Features 
 

@@ -92,7 +92,10 @@ class BookingListTest {
 
         assertSame(first, bookings.findClash(new Booking("lecture", "Other", "lt1", "05/10/2026 14:00")));
         assertNull(bookings.findClash(new Booking("exam", "Other", "LT2", "05/10/2026 14:00")));
-        assertNull(bookings.findClash(new Booking("exam", "Other", "LT1", "05/10/2026 14:01")));
+        assertSame(first, bookings.findClash(new Booking("exam", "Other", "LT1", "05/10/2026 14:59")));
+        assertSame(first, bookings.findClash(new Booking("exam", "Other", "LT1", "05/10/2026 13:01")));
+        assertNull(bookings.findClash(new Booking("exam", "Other", "LT1", "05/10/2026 15:00")));
+        assertNull(bookings.findClash(new Booking("exam", "Other", "LT1", "05/10/2026 13:00")));
         assertNull(bookings.findClash(new Booking("exam", "Other", "LT1", "06/10/2026 14:00")));
         assertEquals(2, bookings.size());
     }
