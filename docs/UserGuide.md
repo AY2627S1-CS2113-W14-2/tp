@@ -110,8 +110,10 @@ Start editing with: `editbooking n/BOOKING_NAME`
 * `BOOKING_REASON` must be `exam` or `lecture`.
 * Names, venues and timings cannot be blank. Timings must use `dd/MM/yyyy HH:mm` with a 24-hour clock,
   and attendee counts must be positive whole numbers.
-* An edit is rejected if another booking uses the same venue, ignoring capitalization, at exactly the
-  same date and time. Invalid changes leave the original booking unchanged, and you can retry at the edit prompt.
+* Each booking lasts one hour from its start time. An edit is rejected if that hour overlaps another booking
+  in the same venue, ignoring capitalization. For example, a booking from 14:00 to 15:00 prevents an edit to
+  14:30 in that venue, but allows one starting at 15:00. Invalid changes leave the original booking unchanged,
+  and you can retry at the edit prompt.
 * Type `abort` during selection or editing to cancel without applying changes. Type `bye` to exit without
   applying the pending changes. Finish or abort editing before entering other commands.
 * A successful edit displays `Booking updated:` followed by the updated booking and is saved automatically.

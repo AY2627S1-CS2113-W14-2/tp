@@ -78,17 +78,17 @@ public class EditCommand extends Command {
         System.out.println("Booking updated: " + replacement);
     }
 
-    /** Checks the edited booking against every other booking, excluding its current list entry. */
+    /**
+     * Checks the edited booking using the shared one-hour overlap rule.
+     * Skips its original list entry so an unchanged venue and time do not clash with themselves.
+     */
     private Booking findClashExceptSelected(BookingList bookings, Booking replacement) {
         for (int i = 0; i < bookings.size(); i++) {
             Booking existing = bookings.get(i);
             if (existing == selectedBooking) {
                 continue;
             }
-            boolean sameVenue = existing.getVenue().equalsIgnoreCase(replacement.getVenue());
-            boolean sameTime = replacement.getStartTime() != null
-                    && replacement.getStartTime().equals(existing.getStartTime());
-            if (sameVenue && sameTime) {
+            if (existing.overlaps(replacement.getVenue(), replacement.getStartTime())) {
                 return existing;
             }
         }

@@ -119,6 +119,77 @@ class EditCommandTest {
     }
 
     @Test
+    void processInput_overlappingHour_preservesOriginalAndAllowsRetry() {
+        Booking original = addBooking("Midterm", "LT1");
+        Booking occupied = addBooking("Other", "LT2");
+        command.execute(bookings, "Midterm");
+
+        for (String time : new String[]{"13:01", "13:59", "14:00", "14:01", "14:59"}) {
+            String fields = "v/lt2 t/05/10/2026 " + time;
+            InvalidCommandException error = assertThrows(InvalidCommandException.class,
+                    () -> command.processInput(bookings, fields), fields);
+
+            assertTrue(error.getMessage().contains("Booking clash:"));
+            assertEquals(2, bookings.size());
+            assertSame(original, bookings.get(0));
+            assertSame(occupied, bookings.get(1));
+            assertTrue(command.isPending());
+        }
+
+        command.processInput(bookings, "v/lt2 t/05/10/2026 15:00");
+        assertEquals("05/10/2026 15:00", bookings.get(0).getTiming());
+        assertFalse(command.isPending());
+    }
+
+    @Test
+    void processInput_adjacentHourBeforeOrAfterExistingBooking_succeeds() {
+        addBooking("Midterm", "LT1");
+        Booking occupied = addBooking("Other", "LT2");
+
+        for (String time : new String[]{"13:00", "15:00"}) {
+            command.execute(bookings, "Midterm");
+            command.processInput(bookings, "v/lt2 t/05/10/2026 " + time);
+
+            assertEquals(2, bookings.size());
+            assertEquals("05/10/2026 " + time, bookings.get(0).getTiming());
+            assertSame(occupied, bookings.get(1));
+            assertFalse(command.isPending());
+        }
+    }
+
+    @Test
+    void processInput_overlapAcrossMidnight_rejectsUntilExistingBookingEnds() {
+        Booking original = addBooking("Midterm", "LT1");
+        Booking occupied = new Booking("exam", "Other", "LT2", "05/10/2026 23:30");
+        bookings.add(occupied);
+        command.execute(bookings, "Midterm");
+
+        assertThrows(InvalidCommandException.class,
+                () -> command.processInput(bookings, "v/LT2 t/06/10/2026 00:15"));
+        assertSame(original, bookings.get(0));
+        assertSame(occupied, bookings.get(1));
+        assertTrue(command.isPending());
+
+        command.processInput(bookings, "v/LT2 t/06/10/2026 00:30");
+        assertEquals("06/10/2026 00:30", bookings.get(0).getTiming());
+        assertFalse(command.isPending());
+    }
+
+    @Test
+    void processInput_legacyBookingWithoutFullDate_doesNotPreventEdit() {
+        addBooking("Midterm", "LT1");
+        Booking legacy = new Booking("exam", "Legacy", "LT2", "14:00");
+        bookings.add(legacy);
+        command.execute(bookings, "Midterm");
+
+        command.processInput(bookings, "v/LT2");
+
+        assertEquals("LT2", bookings.get(0).getVenue());
+        assertSame(legacy, bookings.get(1));
+        assertFalse(command.isPending());
+    }
+
+    @Test
     void processInput_abortDuringSelectionOrEditing_preservesBookingsAndClearsPendingEdit() {
         Booking first = addBooking("Midterm", "LT1");
         Booking second = addBooking("Midterm", "LT2");
