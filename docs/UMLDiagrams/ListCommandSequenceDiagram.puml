@@ -7,7 +7,6 @@ actor User
 participant ":Ui" as UI
 
 participant ":Parser" as Parser
-participant "lastShownList:ArrayList<Booking>" as Shown
 
 User -> UI: processCommand("list r/exams s/alpha")
 activate UI
@@ -23,9 +22,11 @@ Parser --> UI: ListOptions("exams", ALPHABETIC)
 deactivate Parser
 
 UI --> User: the listing heading
+note right of UI: Print the listing heading
 
 create participant ":ListCommand" as List
 UI -> List: new ListCommand()
+participant "lastShownList:ArrayList<Booking>" as Shown
 participant ":BookingList" as Bookings
 
 UI -> List: execute(bookingList, "exams", ALPHABETIC)
@@ -37,6 +38,7 @@ Bookings --> List: listSize
 deactivate Bookings
 
 List -> Shown: clear()
+note right of Shown: Clear lastShownList
 
 loop i = 0 to listSize - 1
     List -> Bookings: get(i)
@@ -46,6 +48,7 @@ loop i = 0 to listSize - 1
 
     opt booking.getReason().equals("exam")
        List -> Shown: addLast(booking)
+       note right of Shown: Add booking to lastShownList
     end
 end
 
@@ -56,9 +59,12 @@ deactivate List
 List -> List: printLastShownList()
 activate List
 List --> User: numbered bookings in alphabetical order
+note right of List
+Print numbered bookings
+in alphabetical order
+end note
 deactivate List
 
-List --> UI
 deactivate List
 
 deactivate UI

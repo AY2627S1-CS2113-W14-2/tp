@@ -40,6 +40,47 @@ The following guide will introduce the functions to utilize the platform.
 Words in uppercase, such as `BOOKING_NAME`, are placeholders to replace with your own values.
 Square brackets indicate optional fields; do not type the brackets.
 
+### Listing bookings: `list`
+Displays the bookings, with optional filtering and sorting by name or time and date
+
+Format: `list [r/REASON] [s/SORT_ORDER]`
+
+Square brackets indicate optional arguments, do not type them.
+
+- `REASON` must be either exams or lectures
+- `SORT_ORDER` must be the following options `alpha` for A to Z, `~alpha` for Z to A, `time` for earliest to latest time and `~time` for latest to earliest time.
+- Alphabetical sorting compares booking names, ignoring capitalization.
+- Omitting `r/REASON` shows all bookings.
+- Omitting `s/SORT_ORDER` shows the list with original booking orders preserved.
+- The arguments may be swapped to appear in any order first, and can only be specified once.
+- Time sorting is unavailable if a selected booking lacks a valid date and time.
+
+Examples:
+
+|          Command           |                    Result                     |
+|:--------------------------:|:---------------------------------------------:|
+|           `list`           |               Show all bookings               |
+|       `list r/exams`       |            Show all exam bookings             |
+|       `list s/alpha`       |     Show all bookings sorted from A to Z      |
+| `list r/lectures s/~alpha` |     Show all lectures sorted from Z to A      |
+|   `list r/exams s/time`    | Show all exams sorted from earliest to latest |
+
+### List available venues: `free`
+Displays a list of all available venues at a user specified time
+
+Format: `free t/TIMING`
+
+- `TIMING` must use the `dd/MM/yyyy HH:mm` format.
+- `TIMING` is the start of the one-hour slot being checked.
+- A venue is excluded if an existing booking overlaps the requested hour.
+- Bookings ending exactly when the requested slot starts are allowed.
+
+Examples:
+
+|          Command          |                              Result                              |
+|:-------------------------:|:----------------------------------------------------------------:|
+| `free t/28/10/2026 14:00` | Show all available venues from 14:00 to 15:00 on 28 October 2026 |
+
 ### Viewing a booking: `viewbooking`
 
 Displays the purpose, venue and timing of every booking with the specified full name.
@@ -136,10 +177,12 @@ Its name and purpose stay the same.
 
 ## Command Summary
 
-| Action | Command |
-|--------|---------|
-| View a booking | `viewbooking n/BOOKING_NAME [s/time]` |
-| Check attendee counts by venue | `checksize` |
-| Edit a booking | `editbooking n/BOOKING_NAME`, then enter the fields to change at the edit prompt. |
-| Cancel a pending edit | `abort` (during selection or editing) |
+| Action                         | Command                                                                           |
+|--------------------------------|-----------------------------------------------------------------------------------|
+| View a booking                 | `viewbooking n/BOOKING_NAME [s/time]`                                             |
+| Check attendee counts by venue | `checksize`                                                                       |
+| Edit a booking                 | `editbooking n/BOOKING_NAME`, then enter the fields to change at the edit prompt. |
+| Cancel a pending edit          | `abort` (during selection or editing)                                             |
+| List bookings                  | `list [r/REASON] [s/SORT_ORDER]`                                                  |
+| Find available venues          | `free t/dd/MM/yyyy HH:mm`                                                         |
 

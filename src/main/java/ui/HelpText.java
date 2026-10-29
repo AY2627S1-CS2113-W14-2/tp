@@ -39,7 +39,7 @@ public final class HelpText {
                 e.g list r/exams s/alpha
             free t/TIMING:
                 TIMING must use dd/MM/yyyy HH:mm.
-                Limited to check bookings with the exact start time currently.
+                Limited to check bookings free for 1 hr within the start time.
                 e.g free t/06/10/2026 14:00
 
             checksize: shows the largest recorded attendee count for each venue.

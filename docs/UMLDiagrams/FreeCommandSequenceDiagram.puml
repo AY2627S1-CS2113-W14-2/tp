@@ -7,7 +7,6 @@ actor User
 participant ":Ui" as UI
 
 participant ":Parser" as Parser
-participant "available:List<String>" as Available
 
 User -> UI: processCommand("free t/28/10/2026 14:00")
 activate UI
@@ -21,6 +20,7 @@ create participant ":FreeCommand" as Free
 UI -> Free: new FreeCommand(parser)
 
 participant "VenueCatalog" as Catalog
+participant "available:List<String>" as Available
 participant ":BookingList" as Bookings
 
 UI -> Free: execute(bookingList, userInput)
@@ -38,11 +38,18 @@ loop For each preset venue
     Catalog -> Bookings: isVenueAvailable(venue, startTime)
     activate Bookings
 
+    note right of Bookings
+    Check the same venue (ignoring case)
+    for overlapping one-hour slots.
+    Adjacent slots are allowed.
+    end note
+
     Bookings --> Catalog: available
     deactivate Bookings
 
     opt available
         Catalog -> Available: add(venue)
+        note right of Available: Add venue to the available list
     end
 end
 
@@ -51,13 +58,14 @@ deactivate Catalog
 
 alt venues is empty
     Free --> User: no availability message
+    note right of Free: Print no availability message
 else venues is not empty
     loop For each available venue
         Free --> User: display number and venue
+        note right of Free: Print numbered available venues
     end
 end
 
-Free --> UI
 deactivate Free
 
 deactivate UI

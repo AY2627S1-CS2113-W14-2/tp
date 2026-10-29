@@ -40,7 +40,7 @@ class VenueCatalogTest {
     }
 
     @Test
-    void findAvailableVenues_excludesOnlyMatchingVenueAndExactStartTime() {
+    void findAvailableVenues_excludesOverlappingVenuesAndSkipsOtherDatesAndLegacyTiming() {
         BookingList bookings = new BookingList();
         Booking occupied = new Booking("exam", "Occupied", "lt19", "28/10/2026 14:00");
         bookings.add(occupied);
@@ -51,7 +51,8 @@ class VenueCatalogTest {
         List<String> available = VenueCatalog.findAvailableVenues(bookings, REQUESTED_TIME);
 
         assertFalse(available.contains("LT19"));
-        assertTrue(available.containsAll(List.of("LT17", "LT15", "LT14")));
+        assertFalse(available.contains("LT17"));
+        assertTrue(available.containsAll(List.of("LT15", "LT14")));
         assertEquals(4, bookings.size());
         assertSame(occupied, bookings.get(0));
     }

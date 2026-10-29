@@ -1,5 +1,6 @@
 package command;
 
+import tasks.Booking;
 import tasks.BookingList;
 import tasks.VenueCatalog;
 import ui.Parser;
@@ -40,8 +41,9 @@ public class FreeCommand extends Command {
 
         DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-        System.out.println("Venues with no bookings starting at "
-                + startTime.format(format) + ":");
+        System.out.println("Available venues from "
+                + startTime.format(format) + " to "
+                + startTime.plus(Booking.DEFAULT_DURATION).format(format) + ":");
 
         if (venues.isEmpty()) {
             System.out.println("No venues are available at specified time");

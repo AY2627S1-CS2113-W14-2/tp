@@ -19,7 +19,7 @@ import tasks.BookingList;
 import tasks.VenueCatalog;
 import ui.Parser;
 
-/** Checks exact-start-time venue searches, printed numbering and preservation of bookings. */
+/** Checks one-hour venue searches, printed numbering and preservation of bookings. */
 class FreeCommandTest {
     private static final LocalDateTime REQUESTED_TIME = LocalDateTime.of(2026, 10, 28, 14, 0);
     private final FreeCommand command = new FreeCommand(new Parser());
@@ -45,6 +45,7 @@ class FreeCommandTest {
         List<String> expectedVenues = new ArrayList<>(
                 VenueCatalog.findAvailableVenues(new BookingList(), REQUESTED_TIME));
         expectedVenues.remove("LT19");
+        expectedVenues.remove("LT17");
 
         String output = captureOutput(() -> command.execute(bookings, "free t/28/10/2026 14:00"));
 
@@ -65,9 +66,46 @@ class FreeCommandTest {
 
         String output = captureOutput(() -> command.execute(bookings, "free t/28/10/2026 14:00"));
 
-        assertEquals("Venues with no bookings starting at 28/10/2026 14:00:\n"
+        assertEquals("Available venues from 28/10/2026 14:00 to 28/10/2026 15:00:\n"
                 + "No venues are available at specified time\n", output);
         assertEquals(venues.size(), bookings.size());
+    }
+
+    @Test
+    void execute_oneHourSlots_excludesOverlapsAndAllowsTouchingBoundaries() {
+        for (String timing : new String[]{"28/10/2026 13:00", "28/10/2026 13:01",
+            "28/10/2026 14:00", "28/10/2026 14:59", "28/10/2026 15:00"}) {
+            BookingList bookings = new BookingList();
+            Booking existing = new Booking("exam", "Existing", "lt19", timing);
+            bookings.add(existing);
+            List<String> expectedVenues = new ArrayList<>(
+                    VenueCatalog.findAvailableVenues(new BookingList(), REQUESTED_TIME));
+            if (!timing.equals("28/10/2026 13:00") && !timing.equals("28/10/2026 15:00")) {
+                expectedVenues.remove("LT19");
+            }
+
+            String output = captureOutput(() -> command.execute(bookings, "free t/28/10/2026 14:00"));
+
+            assertEquals(expectedOutput(expectedVenues), output, timing);
+            assertEquals(1, bookings.size(), timing);
+            assertSame(existing, bookings.get(0), timing);
+        }
+    }
+
+    @Test
+    void execute_slotCrossingMidnight_excludesNextDayOverlapAndPrintsEndDate() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "Next day", "LT19", "29/10/2026 00:00"));
+        List<String> expectedVenues = new ArrayList<>(VenueCatalog.findAvailableVenues(
+                new BookingList(), LocalDateTime.of(2026, 10, 28, 23, 30)));
+        expectedVenues.remove("LT19");
+
+        String output = captureOutput(() -> command.execute(bookings, "free t/28/10/2026 23:30"));
+
+        String expected = expectedOutput(expectedVenues).replace(
+                "28/10/2026 14:00 to 28/10/2026 15:00", "28/10/2026 23:30 to 29/10/2026 00:30");
+        assertEquals(expected, output);
+        assertEquals(1, bookings.size());
     }
 
     @Test
@@ -89,7 +127,8 @@ class FreeCommandTest {
 
     /** Builds the expected numbered output without duplicating the preset venue catalogue. */
     private String expectedOutput(List<String> venues) {
-        StringBuilder expected = new StringBuilder("Venues with no bookings starting at 28/10/2026 14:00:\n");
+        StringBuilder expected = new StringBuilder(
+                "Available venues from 28/10/2026 14:00 to 28/10/2026 15:00:\n");
         for (int i = 0; i < venues.size(); i++) {
             expected.append(i + 1).append(". ").append(venues.get(i)).append('\n');
         }

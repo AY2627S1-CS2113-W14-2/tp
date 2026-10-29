@@ -1,10 +1,105 @@
-# Developer Guide
+# EduReserve Developer Guide
 
+## Table of contents
+
+- [Acknowledgements](#acknowledgements)
+- [Setup](#setting-up-getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Setting up the project](#setting-up-the-project)
+- [Design & implementation](#design--implementation)
+  - [Overall class diagram](#overall-class-diagram)
+  - [Creating a booking: book](#creating-a-booking-book)
+  - [Listing bookings: list](#listing-bookings-list)
+  - [List available venues: free](#list-available-venues-free)
+  - [View booking: viewbooking](#view-booking-viewbooking)
+  - [Editing a booking: editbooking](#editing-a-booking-editbooking)
+  - [Checking attendee counts: checksize](#checking-attendee-counts-checksize)
+  - [Saving and loading bookings: storage](#saving-and-loading-bookings-storage)
+  - [Cancelling a booking: cancel](#cancelling-a-booking-cancel)
+  - [Finding bookings: find](#finding-bookings-find)
+  - [Preventing booking clashes: book](#preventing-booking-clashes-book)
+  - [Daily calendar: calendar](#daily-calendar-calendar)
+  - [Undoing a command: /undo](#undoing-a-command-undo)
+  - [Redoing a command: /redo](#redoing-a-command-redo)
+- [Product scope](#product-scope)
+  - [Target user profile](#target-user-profile)
+  - [Value proposition](#value-proposition)
+- [User Stories](#user-stories)
+- [Non-Functional Requirements](#non-functional-requirements)
+- [Glossary](#glossary)
+- [Instructions for manual testing](#instructions-for-manual-testing)
+## Setting up, getting started
+### Prerequisites
+
+Install the following tools:
+  - **JDK 25** to compile and run EduReserve.
+  - **Git** to manage the source code.
+  - **IntelliJ IDEA** with Java 25 support.
+
+A separate Gradle installation is unnecessary because the project includes
+the Gradle Wrapper.
+
+### Setting up the project
+
+1. Fork the [EduReserve repository](https://github.com/AY2627S1-CS2113-W14-2/tp)
+   into your GitHub account.
+
+2. Clone your fork onto your computer:
+
+   ```git clone https://github.com/YOUR_USERNAME/tp.git```
+
+3. Open the cloned tp folder in IntelliJ IDEA and import it as a
+Gradle project. Allow Gradle to finish downloading dependencies.
+
+4. Configure Java 25:
+   - Under File → Project Structure → Project, select JDK 25 as the Project SDK.
+   - Under Settings → Build, Execution, Deployment → Build Tools → Gradle,
+    select JDK 25 as the Gradle JVM.
+   - Use the project's Gradle Wrapper as the Gradle distribution.
+
+5. Verifying the setup
+
+    Run the following commands from the project root, which contains build.gradle.
+
+    Windows PowerShell:
+
+    `.\gradlew.bat run`
+
+    macOS or Linux:
+
+    `./gradlew run`
+
+    Enter a username if prompted, then try the inputs listed in [manual testing](#instructions-for-manual-testing)
+6. Storage
+
+    Bookings and the username are saved in the data folder relative to
+    the application's working directory. 
+7. Running automated checks
+
+    Run the tests and Checkstyle checks before submitting changes.
+
+    Windows PowerShell:
+
+    `.\gradlew.bat check`
+
+    macOS or Linux:
+
+    `./gradlew check`
+
+    A successful run ends with BUILD SUCCESSFUL.
+
+    The test report is generated at build/reports/tests/test/index.html.
+   
 ## Acknowledgements
-
-Base template code forked from https://github.com/NUS-CS2113-AY2627-S1/tp
-
-This project follows the Java coding standard from https://se-education.org/guides/conventions/java/intermediate.html
+- [CS2113 Java project template](https://github.com/NUS-CS2113-AY2627-S1/tp): Initial project structure, Gradle wrapper, build and CI configuration, Checkstyle configuration, and documentation templates adapted for EduReserve.
+- [AddressBook Level 3 Developer Guide](https://se-education.org/addressbook-level3/DeveloperGuide.html#proposed-undoredo-feature): Organizational structure adapted for this guide.
+- [SE-EDU Java coding standard (basic + intermediate)](https://se-education.org/guides/conventions/java/intermediate.html): The coding standard followed by all collaborators on the project
+- [SE-EDU Git conventions](https://se-education.org/guides/conventions/git.html): Referenced for commit message formatting.
+- [Gradle](https://gradle.org/): Used to automate building, testing and checking the project.
+- [PlantUML](https://se-education.org/guides/tutorials/plantUml.html) for creating UML diagrams to document the project’s design.
+- [JUnit](https://junit.org/): Used to write and run automated tests for commands, parsing, storage and UI behaviour.
+- [Checkstyle](https://checkstyle.org/): Used to check Java source code against the project's coding standards.
+- [NUSMods](https://nusmods.com/venues): Referenced when compiling the preset venue names in VenueCatalog.
 
 ## Design & implementation
 
@@ -72,27 +167,29 @@ After `processCommand` returns, `EduReserve` saves the booking list using `Stora
 [Editable PlantUML source](UMLDiagrams/BookingSequenceDiagram.puml)
 
 ### Listing bookings: list
-Displays the bookings, with optional filtering and alphabetical sorting
+Displays the bookings, with optional filtering and sorting by name or date and time
 
 Format: `list [r/REASON] [s/SORT_ORDER]`
 
 Square brackets indicate optional arguments, do not type them.
 
 - `REASON` must be either exams or lectures
-- `SORT_ORDER` must be either `alpha` for A to Z or `~alpha` for Z to A sorting
-- Sorting compares booking names, ignoring capitalization
+- `SORT_ORDER` must be the following options `alpha` for A to Z, `~alpha` for Z to A, `time` for earliest to latest time and `~time` for latest to earliest time
+- Alphabetical sorting compares booking names, ignoring capitalization
 - Omitting `r/REASON` shows all bookings
 - Omitting `s/SORT_ORDER` shows the list with original booking orders preserved
 - The arguments may be swapped to appear in any order first, and can only be specified once
+- Time sorting is unavailable if a selected booking lacks a valid date and time
 
 Examples:
 
-|          Command           |                Result                 |
-|:--------------------------:|:-------------------------------------:|
-|           `list`           |           Show all bookings           |
-|       `list r/exams`       |        Show all exam bookings         |
-|       `list s/alpha`       | Show all bookings sorted from A to Z  |
-| `list r/lectures s/~alpha` | Show all lectures sorted from Z to A  |       
+|          Command           |                    Result                     |
+|:--------------------------:|:---------------------------------------------:|
+|           `list`           |               Show all bookings               |
+|       `list r/exams`       |            Show all exam bookings             |
+|       `list s/alpha`       |     Show all bookings sorted from A to Z      |
+| `list r/lectures s/~alpha` |     Show all lectures sorted from Z to A      |
+|   `list r/exams s/time`    | Show all exams sorted from earliest to latest |
 
 Parser.parseViewList() validates the optional reason and sorting arguments, returning a ListOptions record. Ui passes these options to ListCommand.execute().
 
@@ -104,19 +201,20 @@ Finally, the command prints the selected bookings with consecutive numbers start
 ### List available venues: free
 Displays a list of all available venues at a user specified time
 
-Format: `free [t/TIMING]`
+Format: `free t/TIMING`
 
 - `TIMING` must use the `dd/MM/yyyy HH:mm` format
-- `TIMING` represents the start time of the booking
-
+- `TIMING` is the start of the one-hour slot being checked
+- The command searches preset venues and does not create a booking
+- A venue is excluded if an existing booking overlaps the requested hour
+- Bookings ending exactly when the requested slot starts are allowed
 Examples:
 
-|          Command          |                      Result                       |
-|:-------------------------:|:-------------------------------------------------:|
-| `free t/28/10/2026 14:00` | Show all available venues on 28th Oct 2026 at 2pm |
+|          Command          |                              Result                              |
+|:-------------------------:|:----------------------------------------------------------------:|
+| `free t/28/10/2026 14:00` | Show all available venues from 14:00 to 15:00 on 28 October 2026 |
 
-The free t/dd/MM/yyyy HH:mm command lists preset venues with no booking starting at the requested date and time. Parser.parseFreeTime() validates the input and returns a LocalDateTime. FreeCommand passes this value to VenueCatalog.findAvailableVenues(), which checks each venue using BookingList.isVenueAvailable().
-The command prints the matching venues with consecutive numbers, or a message if none are available. It does not modify stored bookings. Availability checks compare venue names without case sensitivity and match exact start times; they do not detect overlapping durations.
+Parser.parseFreeTime() validates the requested date and time. FreeCommand passes it to VenueCatalog.findAvailableVenues(), which checks each preset venue through BookingList.isVenueAvailable(). This method uses Booking.overlaps() to exclude venues with bookings overlapping the requested one-hour slot. Venue matching ignores capitalization, and adjacent slots are allowed. Results are numbered, and stored bookings remain unchanged.
 
 ![Free command sequence diagram](UMLDiagrams/FreeCommandSequenceDiagram.png)
 

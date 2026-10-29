@@ -101,7 +101,7 @@ class BookingListTest {
     }
 
     @Test
-    void isVenueAvailable_emptyListAndDifferentStartTimes_areAvailable() {
+    void isVenueAvailable_emptyListAndNonOverlappingSlots_areAvailable() {
         BookingList bookings = new BookingList();
         LocalDateTime requestedTime = LocalDateTime.of(2026, 10, 5, 14, 0);
         assertTrue(bookings.isVenueAvailable("LT1", requestedTime));
@@ -109,7 +109,11 @@ class BookingListTest {
 
         assertFalse(bookings.isVenueAvailable(" \tlt1 ", requestedTime));
         assertTrue(bookings.isVenueAvailable("LT2", requestedTime));
-        assertTrue(bookings.isVenueAvailable("LT1", requestedTime.plusMinutes(1)));
+        assertFalse(bookings.isVenueAvailable("LT1", requestedTime.minusMinutes(59)));
+        assertFalse(bookings.isVenueAvailable("LT1", requestedTime.plusMinutes(1)));
+        assertFalse(bookings.isVenueAvailable("LT1", requestedTime.plusMinutes(59)));
+        assertTrue(bookings.isVenueAvailable("LT1", requestedTime.minusHours(1)));
+        assertTrue(bookings.isVenueAvailable("LT1", requestedTime.plusHours(1)));
         assertTrue(bookings.isVenueAvailable("LT1", requestedTime.plusDays(1)));
         assertEquals(1, bookings.size());
         assertSame(first, bookings.get(0));
