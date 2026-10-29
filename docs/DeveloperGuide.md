@@ -109,6 +109,9 @@ Gradle project. Allow Gradle to finish downloading dependencies.
 
 The diagram below shows the main application classes, their inheritance relationships and
 selected dependencies. Classes are grouped by their Java packages.
+`Task` and `Command` are abstract classes, marked with `{abstract}`. The same label on
+`Command.execute` denotes an abstract method. Solid lines with hollow triangles point to
+superclasses; directed solid lines show navigable associations, and dashed arrows show dependencies.
 
 ![EduReserve overall class diagram](UMLDiagrams/OverallClassDiagram.png)
 

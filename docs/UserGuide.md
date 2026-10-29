@@ -47,6 +47,31 @@ EduReserve saves one username and all bookings automatically.
 - After every command, the bookings are saved and the latest save time is shown.
 - Run EduReserve from the same folder again to load the saved username and bookings.
 
+### Creating a booking: `book`
+
+Creates an exam or lecture booking for a named event at a venue.
+
+Format: `book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING [a/ATTENDEES]`
+
+* The required fields must appear once each, in the order `r/`, `n/`, `v/`, `t/`.
+  The optional `a/ATTENDEES` field must go last. Use lowercase field prefixes.
+* `BOOKING_REASON` must be `exam` or `lecture`.
+* Names and venues cannot be blank and may contain spaces. The booking name must be unique,
+  ignoring capitalization. A duplicate name is rejected without adding a booking.
+* `TIMING` must use `dd/MM/yyyy HH:mm` with a 24-hour clock. Each booking lasts one hour.
+* A booking is rejected if its hour overlaps another booking in the same venue, ignoring
+  capitalization. Starting exactly when the other booking ends is allowed.
+* `ATTENDEES`, if supplied, must be a positive whole number.
+* A successful booking displays `Booking added:` followed by its details and is saved automatically.
+  You can undo it with `/undo` during the same session.
+
+Examples, assuming the names and venue slots are available:
+
+| Command | Result |
+|---------|--------|
+| `book r/exam n/CS2113 Midterm v/LT1 t/05/11/2026 14:00 a/80` | Books LT1 from 14:00 to 15:00 on 5 November 2026 for an exam with 80 attendees. |
+| `book r/lecture n/Week 1 Lecture v/LT1 t/05/11/2026 15:00` | Books the next hour in LT1 for a lecture without an attendee count. |
+
 ### Listing bookings: `list`
 Displays the bookings, with optional filtering and sorting by name or time and date
 
@@ -196,6 +221,56 @@ Examples:
 | `cancel n/CS2113 Midterm` | Cancels the booking named "CS2113 Midterm". |
 | `cancel n/cs2113 midterm` | Cancels the same booking, as capitalization is ignored. |
 
+### Undoing a command: `/undo`
+
+Restores the booking list to its state before the latest successful `book` or `cancel` command.
+
+Format: `/undo`
+
+* Include the leading `/`. The command takes no arguments.
+* Only successful `book` and `cancel` commands are recorded. Failed commands and viewing commands
+  do not add entries to the history. `editbooking` is not recorded.
+* Repeat `/undo` to undo earlier recorded commands, most recent first. Cancelled bookings return
+  to their original positions in the list.
+* Undo restores the entire saved booking list. Any edits made with `editbooking` after that
+  saved state are also lost; edits cannot be undone individually.
+* A successful undo displays `Undid command:` followed by the original command and saves the restored list.
+* If the history is empty, the application displays `No commands to undo.` and leaves bookings unchanged.
+* History is available only during the current session and is cleared when you exit. Finish or abort
+  any pending edit before using `/undo`.
+
+Examples (each row is a separate scenario):
+
+| Command | Result |
+|---------|--------|
+| `/undo` after a successful `book` | Restores the list from before that booking was added. |
+| `/undo` after `cancel n/CS2113 Midterm` succeeds | Restores the list including the cancelled booking. |
+
+### Redoing a command: `/redo`
+
+Restores the booking list to its state after the most recently undone command.
+
+Format: `/redo`
+
+* Include the leading `/`. The command takes no arguments.
+* Use `/undo` first. Repeat `/redo` to reapply multiple undone commands in the reverse order
+  in which they were undone. A redone command can be undone again.
+* A successful new `book` or `cancel` clears all remaining redo history. Failed commands and
+  viewing commands do not clear it.
+* Redo restores the entire saved booking list, including the booking order. Edits made with
+  `editbooking` since the saved state can be overwritten; editing does not clear redo history.
+* A successful redo displays `Redid command:` followed by the original command and saves the restored list.
+* If there is nothing to redo, the application displays `No commands to redo.` and leaves bookings unchanged.
+* Redo history is available only during the current session. Finish or abort any pending edit
+  before using `/redo`.
+
+Examples (each row is a separate scenario):
+
+| Command | Result |
+|---------|--------|
+| `/redo` after undoing a successful `book` | Restores the list including the added booking. |
+| `/redo` after undoing a successful `cancel` | Restores the list with that booking removed again. |
+
 ### Finding bookings: `find`
 
 Shows every booking whose name contains a keyword. Use it when you only remember part of a name.
@@ -270,6 +345,9 @@ Examples, assuming `book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 12:00` alrea
 
 | Action                         | Command                                                                           |
 |--------------------------------|-----------------------------------------------------------------------------------|
+| Create a booking               | `book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING [a/ATTENDEES]`                 |
+| Undo a booking or cancellation | `/undo`                                                                           |
+| Redo an undone command         | `/redo`                                                                           |
 | View a booking                 | `viewbooking n/BOOKING_NAME [s/time]`                                             |
 | Check attendee counts by venue | `checksize`                                                                       |
 | Edit a booking                 | `editbooking n/BOOKING_NAME`, then enter the fields to change at the edit prompt. |
