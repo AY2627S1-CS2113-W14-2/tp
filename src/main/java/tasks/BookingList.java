@@ -167,7 +167,7 @@ public class BookingList {
      * Checks if a venue has no booking at the requested start time
      * @author Kytersaurus
      * @param venue string name of venue to be checked
-     * @param startTime time in which booking must be checked
+     * @param startTime starting time of the requested 1 hr slot
      * @return true if no booking exists at the specified time and location, false otherwise
      */
     public boolean isVenueAvailable(String venue, LocalDateTime startTime) {
@@ -175,9 +175,7 @@ public class BookingList {
         assert startTime != null : "Start time must be valid";
 
         for (Booking booking : bookings) {
-            boolean sameVenue = booking.getVenue().equalsIgnoreCase(venue.strip());
-            boolean sameTime = startTime.equals(booking.getStartTime());
-            if (sameVenue && sameTime) {
+            if (booking.overlaps(venue, startTime)) {
                 return false;
             }
         }

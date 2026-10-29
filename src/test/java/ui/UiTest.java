@@ -28,7 +28,7 @@ class UiTest {
 
         String response = captureListOutput(ui, "free t/28/10/2026 14:00");
 
-        assertTrue(response.contains("Venues with no bookings starting at 28/10/2026 14:00:"));
+        assertTrue(response.contains("Available venues from 28/10/2026 14:00 to 28/10/2026 15:00:"));
         assertTrue(response.contains("1. COM1-0201"));
         assertFalse(response.lines().anyMatch(line -> line.matches("\\d+\\. LT19")));
         assertFalse(response.contains("Unknown command"));
@@ -46,7 +46,7 @@ class UiTest {
         for (String command : new String[]{"free", "free t/31/02/2026 14:00"}) {
             String response = captureListOutput(ui, command);
             assertTrue(response.contains(HelpText.COMMAND_LIST), command);
-            assertFalse(response.contains("Venues with no bookings starting at"), command);
+            assertFalse(response.contains("Available venues from"), command);
             assertTrue(bookings.isEmpty());
         }
 
@@ -54,6 +54,27 @@ class UiTest {
         assertTrue(validResponse.contains("1. COM1-0201"));
         assertFalse(validResponse.contains(HelpText.COMMAND_LIST));
         assertTrue(bookings.isEmpty());
+    }
+
+    @Test
+    void processCommand_free_checksWholeHourAndAllowsAdjacentSlots() {
+        BookingList bookings = new BookingList();
+        Booking existing = new Booking("exam", "Existing", "LT19", "28/10/2026 14:00");
+        bookings.add(existing);
+        Ui ui = new Ui(bookings);
+
+        for (String time : new String[]{"13:01", "14:59"}) {
+            String response = captureListOutput(ui, "free t/28/10/2026 " + time);
+            assertFalse(response.lines().anyMatch(line -> line.matches("\\d+\\. LT19")), time);
+            assertFalse(response.contains(HelpText.COMMAND_LIST), time);
+        }
+        for (String time : new String[]{"13:00", "15:00"}) {
+            String response = captureListOutput(ui, "free t/28/10/2026 " + time);
+            assertTrue(response.lines().anyMatch(line -> line.matches("\\d+\\. LT19")), time);
+            assertFalse(response.contains(HelpText.COMMAND_LIST), time);
+        }
+        assertEquals(1, bookings.size());
+        assertEquals(existing, bookings.get(0));
     }
 
     @Test

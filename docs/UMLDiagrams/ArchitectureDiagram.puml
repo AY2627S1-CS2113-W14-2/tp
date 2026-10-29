@@ -1,45 +1,27 @@
 @startuml
-title EduReserve architecture
+title EduReserve Architecture
 
-top to bottom direction
 skinparam componentStyle rectangle
 skinparam shadowing false
 skinparam defaultTextAlignment center
+top to bottom direction
 
-actor "School administrator" as User
+component "EduReserve\nApplication entry point" as App #FFF2CC
+component "UI\nUi, Parser, HelpText" as UI #DAE8FC
+component "Commands\nBook, List, Free, etc." as Commands #E1D5E7
+component "Model\nBooking, BookingList,\nVenueCatalog" as Model #D5E8D4
+component "Storage" as Storage #F8CECC
+artifact "Data files\nbookings.txt, username.txt" as Files #F5F5F5
 
-component "Application entry point\n\nEduReserve" as App #FFF2CC
-component "User interface and parsing (ui)\n\nUi, Parser, HelpText\nListOptions, ViewOptions" as UI #DAE8FC
-component "Commands (command)\n\nCommand and its subclasses\nSortOrder" as Commands #E1D5E7
-component "Booking data (tasks)\n\nBookingList, Booking, Task\nVenueCatalog" as Model #D5E8D4
-component "Persistence (storage)\n\nStorage" as Storage #F8CECC
-component "Input errors (exceptions)\n\nInvalidCommandException" as Errors #F5F5F5
-artifact "data/bookings.txt" as File
+App --> UI : processes input
+App --> Storage : loads and saves data
+App --> Model : holds booking list
 
-User --> App : enters console input
-App --> UI : creates Ui and passes commands
-App --> Storage : loads at startup; saves after commands
-App --> Model : holds the loaded BookingList
+UI --> Commands : executes commands
+UI --> Model : reads and updates bookings
 
-UI --> Commands : executes commands; uses sorting options
-UI --> Model : holds and accesses bookings
-Commands ..> UI : uses Parser in book, edit and free
-Commands --> Model : reads or changes bookings; queries venues
-Storage --> Model : reconstructs and serializes bookings
-Storage --> File : reads and writes
+Commands --> Model : reads and updates bookings
+Storage --> Model : loads and saves bookings
+Storage --> Files : reads and writes
 
-UI ..> Errors : throws or catches input errors
-Commands ..> Errors : throws command errors
-
-note bottom of Commands
-  Booking and editing; cancellation via Ui;
-  listing and sorting; finding and viewing;
-  calendar; venue availability; attendee counts;
-  undo and redo.
-end note
-
-legend bottom
-  Arrows show dependencies or use, not execution order.
-  Supporting types are grouped by their actual packages.
-endlegend
 @enduml
