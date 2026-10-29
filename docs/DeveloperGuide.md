@@ -27,7 +27,7 @@
 - [User Stories](#user-stories)
 - [Non-Functional Requirements](#non-functional-requirements)
 - [Glossary](#glossary)
-- [Instructions for manual testing](#instructions-for-manual-testing)
+- [Appendix E: Instructions for Manual Testing](#appendix-e-instructions-for-manual-testing)
 ## Setting up, getting started
 ### Prerequisites
 
@@ -637,6 +637,210 @@ Exam/room venue booking system for lecturers/School admins to easily avoid/resol
 * *`viewbooking`* - Command that shows the purpose, venue and timing of every booking with a given full name,
   optionally sorted by time.
 
-## Instructions for manual testing
+## Appendix E: Instructions for Manual Testing
 
-{Give instructions on how to do a manual product testing e.g., how to load sample data to be used for testing}
+Perform the tests below in order.
+
+### Launching EduReserve
+
+1. Install Java 25.
+2. Create an empty folder and place the released JAR file in it.
+3. Open a terminal in that folder and run the following command, replacing `<JAR_FILE>` with the actual file name:
+
+   ```bash
+   java -jar <JAR_FILE>.jar
+   ```
+
+   **Expected:** The EduReserve banner, a prompt asking for your name, and no error message are shown.
+
+4. Enter the following name:
+
+   ```text
+   Alex
+   ```
+
+   **Expected:** EduReserve greets `Alex` and displays the command help. A `data` folder containing
+   `username.txt` and `bookings.txt` is created beside the JAR file.
+
+### Adding bookings
+
+Copy and paste the following commands one at a time:
+
+```text
+book r/exam n/CS2113 Midterm v/MPSH1 t/15/11/2026 14:00 a/80
+book r/lecture n/CS2100 Lecture v/LT17 t/15/11/2026 09:00 a/120
+book r/lecture n/CS2040S Revision v/LT17 t/16/11/2026 10:00 a/60
+book r/lecture n/CS2113 Practice v/COM1-0201 t/15/11/2026 16:00
+```
+
+**Expected:** Each command reports `Booking added` with the entered details. A message beginning with
+`Bookings saved at:` is shown after every command. The first three bookings show their attendee counts, while
+`CS2113 Practice` has no attendee count.
+
+To check that booking names are unique regardless of capitalization, enter:
+
+```text
+book r/exam n/cs2113 midterm v/LT19 t/15/11/2026 18:00
+```
+
+**Expected:** The booking is rejected because the name already exists. The original `CS2113 Midterm` remains
+unchanged.
+
+### Preventing booking clashes
+
+Enter:
+
+```text
+book r/lecture n/Clashing Lecture v/MPSH1 t/15/11/2026 14:30
+```
+
+**Expected:** The booking is rejected with a booking clash message because `MPSH1` is already occupied by
+`CS2113 Midterm` from 14:00 to 15:00. `Clashing Lecture` is not added.
+
+### Listing and sorting bookings
+
+1. Enter `list`.
+
+   **Expected:** All four sample bookings are shown in the order in which they were added.
+
+2. Enter `list r/exams`.
+
+   **Expected:** Only `CS2113 Midterm` is shown.
+
+3. Enter `list r/lectures`.
+
+   **Expected:** The three lecture bookings are shown.
+
+4. Enter the following commands one at a time:
+
+   ```text
+   list s/alpha
+   list s/~alpha
+   list s/time
+   list s/~time
+   ```
+
+   **Expected:** The bookings are displayed in alphabetical, reverse alphabetical, chronological, and reverse
+   chronological order respectively. Sorting changes only the displayed order and does not change the stored order.
+
+### Finding bookings by keyword
+
+1. Enter `find n/2113`.
+
+   **Expected:** `CS2113 Midterm` and `CS2113 Practice` are shown.
+
+2. Enter `find n/no such module`.
+
+   **Expected:** EduReserve reports that no matching bookings were found.
+
+### Viewing booking details
+
+Enter:
+
+```text
+viewbooking n/cs2113 midterm s/time
+```
+
+**Expected:** The exam purpose, `MPSH1` venue, and `15/11/2026 14:00` timing of `CS2113 Midterm` are shown.
+The lowercase input still matches the booking name.
+
+### Checking available venues
+
+Enter:
+
+```text
+free t/15/11/2026 14:30
+```
+
+**Expected:** EduReserve lists the preset venues available from 14:30 to 15:30. `MPSH1` is not included because
+its existing booking overlaps this period, while unused venues such as `COM1-0203` are included.
+
+### Editing a booking
+
+1. Enter:
+
+   ```text
+   editbooking n/CS2113 Practice
+   ```
+
+   **Expected:** EduReserve displays the existing booking and asks for the fields to change.
+
+2. Enter:
+
+   ```text
+   v/COM1-0203 t/15/11/2026 17:00 a/40
+   ```
+
+   **Expected:** EduReserve reports `Booking updated`. The name and reason remain unchanged, while the venue,
+   timing, and attendee count are updated.
+
+### Checking attendee counts
+
+Enter:
+
+```text
+checksize
+```
+
+**Expected:** The largest recorded attendee count for each venue is shown in venue-name order. The output includes
+`COM1-0203: 40 attendees`, `LT17: 120 attendees`, and `MPSH1: 80 attendees`. The smaller attendee count of 60 at
+`LT17` does not replace its maximum of 120.
+
+### Cancelling, undoing, and redoing
+
+1. Enter:
+
+   ```text
+   cancel n/CS2113 Practice
+   ```
+
+   **Expected:** The updated `CS2113 Practice` booking is cancelled.
+
+2. Enter `/undo`, followed by `viewbooking n/CS2113 Practice`.
+
+   **Expected:** EduReserve reports that the cancel command was undone. The booking is restored with venue
+   `COM1-0203` and timing `15/11/2026 17:00`.
+
+3. Enter `/redo`, followed by `find n/CS2113 Practice`.
+
+   **Expected:** EduReserve reports that the cancel command was redone, and the search finds no matching booking.
+
+### Viewing today's calendar
+
+1. Replace `<TODAY>` below with the current date in `dd/MM/yyyy` format, then enter the completed command. For
+   example, use `29/10/2026` if the test date is 29 October 2026.
+
+   ```text
+   book r/lecture n/Today Briefing v/COM1-0204 t/<TODAY> 08:00 a/30
+   ```
+
+2. Enter `calendar`.
+
+   **Expected:** A calendar for the current date is shown. It contains `Today Briefing` at 08:00 in `COM1-0204`.
+   Any other bookings on the current date are shown in chronological order. Bookings on other dates are omitted.
+
+### Saving and loading data
+
+1. Enter `bye`.
+
+   **Expected:** EduReserve prints the latest `Bookings saved at:` time and exits normally. The `data/bookings.txt`
+   file contains the bookings that remain after the earlier tests, and `data/username.txt` contains `Alex`.
+
+2. Start EduReserve again using the same JAR command from the same folder.
+
+   **Expected:** EduReserve does not ask for a name again. It greets `Alex` automatically.
+
+3. Enter `list`.
+
+   **Expected:** The saved bookings are loaded. `CS2113 Midterm`, `CS2100 Lecture`, `CS2040S Revision`, and
+   `Today Briefing` are present. `CS2113 Practice` remains absent because its cancellation was redone before the
+   previous session ended.
+
+4. Enter `/undo`.
+
+   **Expected:** EduReserve reports `No commands to undo.` because undo and redo history is kept only for the
+   current session.
+
+5. Enter `bye` to finish the test.
+
+   **Expected:** EduReserve exits normally.
