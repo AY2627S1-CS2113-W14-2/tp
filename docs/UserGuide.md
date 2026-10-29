@@ -40,6 +40,13 @@ The following guide will introduce the functions to utilize the platform.
 Words in uppercase, such as `BOOKING_NAME`, are placeholders to replace with your own values.
 Square brackets indicate optional fields; do not type the brackets.
 
+### Saving and loading data
+
+EduReserve saves one username and all bookings automatically.
+- Enter your username on the first launch. The same username is used the next time EduReserve starts.
+- After every command, the bookings are saved and the latest save time is shown.
+- Run EduReserve from the same folder again to load the saved username and bookings.
+
 ### Listing bookings: `list`
 Displays the bookings, with optional filtering and sorting by name or time and date
 
