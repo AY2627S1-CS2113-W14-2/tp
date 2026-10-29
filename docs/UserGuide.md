@@ -169,6 +169,90 @@ v/LT2 t/06/11/2026 15:00 a/100
 This moves the booking to LT2 on 6 November 2026 at 15:00 and changes the attendee count to 100.
 Its name and purpose stay the same.
 
+### Cancelling a booking: `cancel`
+
+Removes a booking so that its venue and time can be used again, for example when a class is cancelled.
+
+Format: `cancel n/BOOKING_NAME`
+
+* The name is required and may contain spaces. Matching ignores capitalization but requires the full name.
+* If several bookings share the same name, only the first one in the list is cancelled.
+* If no booking has that name, the application displays `No booking found with the name: BOOKING_NAME`
+  and your bookings are left unchanged.
+* A successful cancellation displays `Booking cancelled:` followed by the cancelled booking. You can restore it
+  with `/undo` during the same session.
+
+Examples:
+
+| Command | Result |
+|---------|--------|
+| `cancel n/CS2113 Midterm` | Cancels the booking named "CS2113 Midterm". |
+| `cancel n/cs2113 midterm` | Cancels the same booking, as capitalization is ignored. |
+
+### Finding bookings: `find`
+
+Shows every booking whose name contains a keyword. Use it when you only remember part of a name.
+
+Format: `find n/KEYWORD`
+
+* The keyword is required and may contain spaces. Matching ignores capitalization.
+* A booking matches if its name contains the keyword anywhere, not only at the start. This differs from
+  `viewbooking`, which needs the full name.
+* Matches are numbered and shown in their original booking order, with each booking's details.
+* If nothing matches, the application displays `No bookings found matching: KEYWORD`.
+  Finding never changes your bookings.
+
+Examples, assuming bookings named "CS2113 Midterm" and "CS2445 Final Exam" exist:
+
+| Command | Result |
+|---------|--------|
+| `find n/CS2` | Shows both "CS2113 Midterm" and "CS2445 Final Exam". |
+| `find n/CS2113` | Shows only "CS2113 Midterm". |
+| `find n/final exam` | Shows only "CS2445 Final Exam". |
+
+### Viewing today's bookings: `calendar`
+
+Shows the bookings that start today, so you can see the day at a glance.
+
+Format: `calendar`
+
+* The command takes no arguments. Extra words are rejected.
+* Today's date is read from your computer's clock.
+* Bookings are shown earliest first, with their start time, purpose, name and venue.
+* A booking appears on the day it starts, even if its one-hour slot runs past midnight.
+* Bookings saved with an older timing that has no full date are not shown.
+* If nothing starts today, the application displays `No bookings on dd/MM/yyyy.`
+
+Example: if you have two bookings today, entering `calendar` displays:
+
+```text
+Calendar for 05/10/2026:
+1. 09:00 - lecture - Week 1 Lecture (venue: LT2)
+2. 14:00 - exam - CS2113 Midterm (venue: LT1)
+```
+
+### Avoiding booking clashes
+
+EduReserve stops two bookings from using the same venue at the same time when you use `book`.
+
+* Every booking lasts one hour from its start time. A booking at 12:00 uses its venue from 12:00 to 13:00.
+* A new booking is rejected if it is in the same venue, ignoring capitalization, and its hour overlaps an
+  existing booking's hour. The application displays `Booking clash:` followed by the venue, time and name of the
+  existing booking, and nothing is added.
+* A booking that starts exactly when another ends is allowed, so 12:00 and 13:00 can both be booked in `LT1`.
+* The same rule applies when you change a booking with `editbooking`, and `free` uses it when it lists
+  available venues.
+* Cancelling the existing booking frees its venue and time again.
+
+Examples, assuming `book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 12:00` already exists:
+
+| Command | Result |
+|---------|--------|
+| `book r/lecture n/Week 1 v/lt1 t/05/10/2026 12:00` | Rejected: LT1 is already booked at that time. |
+| `book r/lecture n/Week 1 v/LT1 t/05/10/2026 12:01` | Rejected: overlaps the 12:00 to 13:00 booking. |
+| `book r/lecture n/Week 1 v/LT1 t/05/10/2026 13:00` | Added: starts as the first booking ends. |
+| `book r/lecture n/Week 1 v/LT2 t/05/10/2026 12:00` | Added: a different venue. |
+
 ## FAQ
 
 **Q**: How do I transfer my data to another computer? 
