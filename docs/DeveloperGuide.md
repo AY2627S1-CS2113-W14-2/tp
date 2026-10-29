@@ -589,7 +589,53 @@ Exam/room venue booking system for lecturers/School admins to easily avoid/resol
 
 ## Glossary
 
-* *glossary item* - Definition
+* *Assertion* - A Java `assert` statement that checks something that must always be true in correct code, such as a
+  list index being in range. Assertions catch programmer errors, while user mistakes throw `InvalidCommandException`.
+  They are enabled when running with Gradle and in tests.
+* *Attendees* - The optional expected group size of a booking, given with `a/ATTENDEES`. It must be a positive whole
+  number and is used by `checksize`.
+* *Back-to-back bookings* - Two bookings in the same venue where the second starts exactly when the first ends,
+  for example 12:00 and 13:00. They do not clash.
+* *`book`* - Command that creates a booking from a reason, name, venue and timing, with optional attendees.
+  Duplicate names (ignoring capitalization) and clashes are rejected.
+* *Booking* - A reservation of a venue by name, with a reason (`exam` or `lecture`), a venue, a start timing and
+  optional attendees. Represented by the `Booking` class and stored in the `BookingList`.
+* *Booking clash* - A new or edited booking whose venue matches an existing booking (ignoring capitalization) and
+  whose one-hour slot overlaps that booking's slot. `book` and `editbooking` reject clashes, and `free` treats a
+  venue with a clash as unavailable.
+* *Booking name* - The name given with `n/` when a booking is created. `cancel`, `viewbooking` and `editbooking` match
+  the full name, `find` matches part of it, and all of them ignore capitalization.
+* *`bye`* - Command that exits the application. Bookings are already saved after each command.
+* *`calendar`* - Command that lists the bookings starting today in order of start time, with start time, purpose,
+  name and venue.
+* *`cancel`* - Command that removes the first booking with a given name so its venue and time can be reused.
+  It can be reversed with `/undo`.
+* *`checksize`* - Command that shows the largest recorded attendee count for each venue.
+* *Command* - An instruction typed by the user, such as `book` or `list`. Each command is handled by a class that
+  extends `Command`, except `cancel`, which is handled in `Ui`.
+* *`editbooking`* - Command that changes a booking's reason, name, venue, timing or attendees through a short
+  selection step and an edit prompt. It can be abandoned with `abort`.
+* *`find`* - Command that lists every booking whose name contains a keyword, ignoring capitalization.
+* *`free`* - Command that lists the preset venues with no booking overlapping the one-hour slot that starts at the
+  given time.
+* *Keyword* - The text given to `find n/KEYWORD`. A booking matches if its name contains the keyword anywhere,
+  ignoring capitalization.
+* *Legacy booking* - A booking saved with an older timing that has no full `dd/MM/yyyy HH:mm` date and time, so its
+  start time is null. Clash checks and the calendar skip legacy bookings because their time cannot be compared.
+* *`list`* - Command that shows bookings, optionally filtered by reason (`r/`) and sorted (`s/`) by name or time.
+* *Overlap* - Two one-hour slots overlap when each starts before the other ends, as checked by `Booking#overlaps`.
+  Slots that only touch at an end time do not overlap.
+* *Slot* - The one-hour period a booking occupies, starting at its start time. The end time is calculated from
+  `Booking.DEFAULT_DURATION` and is not stored.
+* *Storage* - The `Storage` class, which saves the username to `data/username.txt` and the bookings to
+  `data/bookings.txt`, and loads them again when the application starts.
+* *`/undo` and `/redo`* - Commands that reverse the most recent successful `book` or `cancel` in the current
+  session, and reapply it. History is cleared when the application exits.
+* *Username* - The single name entered the first time EduReserve runs and saved in `data/username.txt`.
+* *Venue* - The place being booked, such as `LT1`. Venue names are compared ignoring capitalization.
+* *`VenueCatalog`* - The preset list of venues that `free` searches through.
+* *`viewbooking`* - Command that shows the purpose, venue and timing of every booking with a given full name,
+  optionally sorted by time.
 
 ## Instructions for manual testing
 
