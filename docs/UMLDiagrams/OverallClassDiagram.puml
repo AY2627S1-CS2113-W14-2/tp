@@ -43,7 +43,7 @@ package tasks #D5E8D4 {
     +replace(original: Booking, replacement: Booking): void
     +findClash(newBooking: Booking): Booking
   }
-  abstract class Task {
+  abstract class "Task\n{abstract}" as Task {
     #description: String
     +getDescription(): String
   }
@@ -64,8 +64,8 @@ package tasks #D5E8D4 {
 }
 
 package command #E1D5E7 {
-  abstract class Command {
-    {abstract} +execute(bookings: BookingList, item: String): void
+  abstract class "Command\n{abstract}" as Command {
+    {abstract} +execute(bookings: BookingList, item: String): void <U+007B>abstract<U+007D>
   }
   class BookCommand {
     -parser: Parser
