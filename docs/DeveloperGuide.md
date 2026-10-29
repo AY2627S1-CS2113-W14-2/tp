@@ -152,6 +152,8 @@ Format: `editbooking n/BOOKING_NAME`
   These fields may appear in any order, once each. Omitted fields keep their existing values.
 - Add optional `a/ATTENDEES` at the end to update the booking size.
 - Reasons must be `exam` or `lecture`; timing must use `dd/MM/yyyy HH:mm`.
+- Each booking lasts one hour. Edited bookings must not overlap another booking in the same venue;
+  a booking starting exactly when another ends is allowed, including across midnight.
 - Invalid input or a venue/time clash leaves the original booking unchanged and allows a retry.
 - Type `abort` to cancel editing, or `bye` to exit without applying changes.
 
@@ -166,8 +168,9 @@ v/LT3 t/06/10/2026 15:00
 `Ui` retains an `EditCommand` between input lines. The command uses `BookingList.findAllByName`
 to build the filtered selection and retains the selected booking object, so filtered numbers
 cannot accidentally select an unrelated booking in the full list. `Parser.parseEditedBooking`
-validates a replacement using the same constraints as creating a booking. Clash checking excludes
-the selected original booking, and `BookingList.replace` applies the change in its original position
+validates a replacement using the same constraints as creating a booking. Clash checking calls
+`Booking.overlaps` to use the same one-hour rule as `book`, while excluding the selected original booking
+so it cannot clash with itself. `BookingList.replace` applies the change in its original position
 only after validation succeeds. The existing application loop saves the updated list.
 
 [Editable edit booking sequence diagram](UMLDiagrams/EditBookingSequenceDiagram.puml)
@@ -450,7 +453,41 @@ Exam/room venue booking system for lecturers/School admins to easily avoid/resol
 
 ## Non-Functional Requirements
 
-{Give non-functional requirements}
+### Portability
+
+* EduReserve shall run on Windows, macOS and Linux using Java 25 and a terminal. Users shall be able to run
+  the same application JAR without installing an IDE or rebuilding the project for their operating system.
+* File access shall use platform-independent paths relative to the application's working directory, rather
+  than absolute paths tied to a developer's computer. Text files shall use UTF-8 encoding.
+* Users shall be able to transfer their saved data to another supported computer by copying the `data`
+  folder and launching the application from its parent folder. Normal operation shall not require an
+  internet connection or an external database.
+
+### Data persistence
+
+* The application shall automatically save the current booking list after processing each nonblank command,
+  including successful additions, cancellations, edits, undo and redo operations. Saving shall not require
+  a separate user command.
+* Bookings shall be stored locally in `data/bookings.txt`, preserving their purpose, name, venue, timing,
+  optional attendee count and list order. The username shall be stored separately in `data/username.txt`.
+  Both shall be restored when the application is restarted from the same working directory.
+* Missing data folders and booking files shall be created automatically on the first run. Invalid or
+  unreadable saved booking data shall produce an error and stop loading without overwriting the existing
+  bookings file. A failed save shall display an error rather than report success.
+* Successfully saved changes shall survive a normal application restart. Undo and redo history and pending
+  edits shall remain limited to the current session. Recovery from an interrupted file write or unexpected
+  power loss is outside the current persistence guarantee.
+
+### Efficiency
+
+* For a dataset of up to 1,000 bookings, the target processing time for a single command, including its
+  automatic save, shall be at most one second. Measure from submission of a complete command or edit input
+  until processing finishes; exclude time spent waiting for user input and rendering terminal output.
+* Loading up to 1,000 bookings at startup shall have a target duration of at most two seconds, measured from
+  the start of file loading until the booking list is ready. Exclude JVM startup and the username prompt.
+* These response-time targets require performance testing on a supported computer using Java 25 and local
+  storage. Record the test machine's specifications and dataset when checking them; the current unit tests
+  do not establish that the targets have been met.
 
 ## Glossary
 
