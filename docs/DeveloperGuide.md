@@ -105,6 +105,29 @@ Gradle project. Allow Gradle to finish downloading dependencies.
 
 ![EduReserve Architecture Diagram](UMLDiagrams/ArchitectureDiagram-EduReserve_architecture.png)
 
+### UI and parsing
+
+The `ui` package interprets user commands, coordinates their execution and displays feedback.
+
+**Ui**
+
+`Ui` receives command text from `EduReserve` and routes it to the appropriate operation. It holds the shared booking list and coordinates ongoing interactions, including editing and undo/redo. It displays command results and handles invalid input by showing an error and usage guidance.
+
+**Parser**
+
+`Parser` recognises command names, extracts arguments and validates their syntax and values. It returns the information needed to execute the requested operation. It does not display output or modify stored bookings.
+
+For commands with multiple options or search modes, the parser groups the validated arguments into records:
+
+- `parseViewList()` returns a `ListOptions` record containing the booking filter and sorting order.
+- `parseFreeOptions()` returns a `FreeOptions` record containing either a start time for finding available venues, or a venue and date for finding available daily slots.
+
+The command classes use these records to select the requested behaviour without parsing the input themselves.
+
+**Interaction**
+
+`EduReserve` reads console input and passes it to `Ui`. The UI and command classes use `Parser` to interpret the input, then perform the requested operation and display feedback. `EduReserve` handles saving the booking data and ending the application.
+
 ### Overall class diagram
 
 The diagram below shows the main application classes, their inheritance relationships and
@@ -194,41 +217,85 @@ Examples:
 | `list r/lectures s/~alpha` |     Show all lectures sorted from Z to A      |
 |   `list r/exams s/time`    | Show all exams sorted from earliest to latest |
 
-Parser.parseViewList() validates the optional reason and sorting arguments, returning a ListOptions record. Ui passes these options to ListCommand.execute().
+Ui creates ListCommand(parser) and passes the complete user input to execute(). The command calls Parser.parseViewList(), which validates the optional reason and sorting arguments and returns a ListOptions record.
 
-The command clears lastShownList and populates it with all bookings or only those matching the requested reason. It then sorts this display list by name (s/alpha, s/~alpha) or date and time (s/time, s/~time). Without a sorting option, insertion order is preserved.
+ListCommand prints the heading, clears lastShownList, and fills it with all bookings or only exams or lectures. It sorts this display list alphabetically or chronologically, in either direction, before printing numbered results. Without a sorting option, insertion order is preserved. Time sorting is rejected if a selected booking lacks a valid date and time. The stored BookingList and its order remain unchanged.
 
-Finally, the command prints the selected bookings with consecutive numbers starting from 1. Sorting does not change the stored BookingList. Time sorting is rejected if a selected booking lacks a valid parsed date and time.
-
+The list sequence diagram illustrates this flow using list r/exams s/alpha.
 ![List command sequence diagram](UMLDiagrams/ListCommandSequenceDiagram.png)
+[Editable PlantUML source](UMLDiagrams/ListCommandSequenceDiagram.puml)
+
+
+Design considerations for listing
+
+Aspect: Where filtering and sorting are applied
+
+Use a separate display list(Current choice): Matching booking references are copied into lastShownList, which is then sorted. This preserves stored booking order and avoids changing application data during a read-only command. The additional list requires memory proportional to the number of displayed bookings.
+
+Sort the stored booking list(Alternative): This avoids a separate display list, but changes the original order merely because the administrator requested a different view.
+
+The separate display list was chosen to keep presentation changes independent of stored booking data.
+
 ### List available venues: free
 Displays a list of all available venues at a user specified time
 
-Format: `free t/TIMING`
+Format: `free t/TIMING` or
+`free v/VENUE d/DATE`
+
 
 - `TIMING` must use the `dd/MM/yyyy HH:mm` format
-- `TIMING` is the start of the one-hour slot being checked
+- `DATE` must use `dd/MM/yyyy`.
+- `VENUE` must exist in the preset catalog. Matching ignores capitalization.
+- For a venue search, `v/VENUE` must come before `d/DATE`.
+- Use lowercase field prefixes.
+- The first format lists venues available for the one-hour period starting
+  at `TIMING`.
+
+ - The second format lists available one-hour slots starting on each whole
+hour, from 00:00 through 23:00. The final slot ends at midnight the next day.
+It does not list slots starting between whole hours, such as 14:30.
 - The command searches preset venues and does not create a booking
 - A venue is excluded if an existing booking overlaps the requested hour
 - Bookings ending exactly when the requested slot starts are allowed
+
 Examples:
 
-|          Command          |                              Result                              |
-|:-------------------------:|:----------------------------------------------------------------:|
-| `free t/28/10/2026 14:00` | Show all available venues from 14:00 to 15:00 on 28 October 2026 |
+|          Command           |                              Result                              |
+|:--------------------------:|:----------------------------------------------------------------:|
+| `free t/28/10/2026 14:00`  | Show all available venues from 14:00 to 15:00 on 28 October 2026 |
+| `free v/LT19 d/02/11/2026` |   Lists available whole-hour slots at LT19 on 2 November 2026.   |
 
-Parser.parseFreeTime() validates the requested date and time. FreeCommand passes it to VenueCatalog.findAvailableVenues(), which checks each preset venue through BookingList.isVenueAvailable(). This method uses Booking.overlaps() to exclude venues with bookings overlapping the requested one-hour slot. Venue matching ignores capitalization, and adjacent slots are allowed. Results are numbered, and stored bookings remain unchanged.
 
+Ui creates FreeCommand(parser) and passes the complete input to execute(). Parser.parseFreeOptions() validates the input and returns a FreeOptions record identifying the search mode.
+
+For free t/TIMING, the command calls VenueCatalog.findAvailableVenues() to check each preset venue for the requested one-hour period. For free v/VENUE d/DATE, it calls VenueCatalog.findAvailableSlots() to check one-hour slots starting on each whole hour from 00:00 through 23:00 on the requested date.
+
+Both searches use BookingList.isVenueAvailable(), which checks existing bookings through Booking.overlaps(). Venue matching ignores capitalization, overlapping bookings are excluded, and adjacent slots are allowed. Results are numbered, or a message is displayed when none are available. Neither search changes stored bookings or undo/redo history.
+
+The main free sequence diagram shows command processing and venue lookup. Its FreeVenueSlots reference frame links to the second diagram, which expands the daily slot search.
 ![Free command sequence diagram](UMLDiagrams/FreeCommandSequenceDiagram.png)
+[Editable PlantUML source](UMLDiagrams/FreeCommandSequenceDiagram.puml)
+
+![Free venue slots sequence diagram ref](UMLDiagrams/FreeVenueSlotsSequenceDiagram.png)
+[Editable PlantUML source](UMLDiagrams/FreeVenueSlotsSequenceDiagram.puml)
+
+
+Aspect: Which start times the daily search considers
+
+Check whole-hour starts(Current choice): The search checks 24 candidate slots, starting from 00:00 through 23:00. This keeps the results predictable and easy to read while reusing the existing one-hour overlap rule.
+
+Check every minute(Alternative): This would include starts such as 14:30, but could produce up to 1,440 candidate slots and many overlapping results.
+
+Whole-hour starts keep the daily output manageable. The limitation is that an available slot beginning between whole hours is not included in this search.
 
 ### View booking: viewbooking
 Displays the details of the bookings under the same name, with optional time filtering
 
-Format: viewbooking [n/BOOKING_NAME] [s/time]
+Format: `viewbooking n/BOOKING_NAME [s/time]`
 
 Second argument is optional
 
-- BOOKING_NAME must be a valid name in the booking list
+- `BOOKING_NAME` must be a valid name in the booking list
 - Sorting compares booking timings
 - Omitting s/time shows the list with original booking orders preserved
 
@@ -619,13 +686,17 @@ Exam/room venue booking system for lecturers/School admins to easily avoid/resol
 * *`editbooking`* - Command that changes a booking's reason, name, venue, timing or attendees through a short
   selection step and an edit prompt. It can be abandoned with `abort`.
 * *`find`* - Command that lists every booking whose name contains a keyword, ignoring capitalization.
-* *`free`* - Command that lists the preset venues with no booking overlapping the one-hour slot that starts at the
-  given time.
+* *`free`* - Command that lists available preset venues for a requested one-hour period (`free t/TIMING`), or
+  available whole-hour slots at a preset venue on a date (`free v/VENUE d/DATE`). Availability is based on bookings
+  saved in EduReserve; searching does not create or modify bookings.
+* *`FreeOptions`* - The parser record identifying a free search. A time search contains a start time; a venue search
+  contains a venue and date. Fields belonging to the other search mode are null.
 * *Keyword* - The text given to `find n/KEYWORD`. A booking matches if its name contains the keyword anywhere,
   ignoring capitalization.
 * *Legacy booking* - A booking saved with an older timing that has no full `dd/MM/yyyy HH:mm` date and time, so its
   start time is null. Clash checks and the calendar skip legacy bookings because their time cannot be compared.
-* *`list`* - Command that shows bookings, optionally filtered by reason (`r/`) and sorted (`s/`) by name or time.
+* *`list`* - Command that shows bookings, optionally filtered by reason (`r/`) and sorted (`s/`) by name or date and
+  time. Filtering and sorting affect the display list without changing stored booking order.
 * *Overlap* - Two one-hour slots overlap when each starts before the other ends, as checked by `Booking#overlaps`.
   Slots that only touch at an end time do not overlap.
 * *Slot* - The one-hour period a booking occupies, starting at its start time. The end time is calculated from
@@ -636,9 +707,11 @@ Exam/room venue booking system for lecturers/School admins to easily avoid/resol
   session, and reapply it. History is cleared when the application exits.
 * *Username* - The single name entered the first time EduReserve runs and saved in `data/username.txt`.
 * *Venue* - The place being booked, such as `LT1`. Venue names are compared ignoring capitalization.
-* *`VenueCatalog`* - The preset list of venues that `free` searches through.
+* *`VenueCatalog`* - The fixed venue catalog and helper methods used to find available venues or daily slots.
 * *`viewbooking`* - Command that shows the purpose, venue and timing of every booking with a given full name,
   optionally sorted by time.
+* *Whole-hour slot* - A one-hour availability slot starting at minute 00, such as 14:00 to 15:00. The daily venue
+  search checks 24 candidate starts, from 00:00 through 23:00; the last slot ends at midnight the following day.
 
 ## Appendix E: Instructions for Manual Testing
 
@@ -745,6 +818,32 @@ second command removes it again, so the later tests are not affected.
    **Expected:** The bookings are displayed in alphabetical, reverse alphabetical, chronological, and reverse
    chronological order respectively. Sorting changes only the displayed order and does not change the stored order.
 
+5. Enter the following commands one at a time:
+
+   ```text
+   list r/lectures s/time
+   list s/time r/lectures
+   ```
+
+   **Expected:** Both commands show the same three lectures, in this order: `CS2100 Lecture`, `CS2113 Practice`,
+   and `CS2040S Revision`. Result numbering starts at 1.
+
+6. Enter the following commands one at a time:
+
+   ```text
+   list r/meetings
+   list s/unknown
+   list r/exams r/lectures
+   list s/alpha s/time
+   ```
+
+   **Expected:** Each command displays an error and command help. No stored booking is changed.
+
+7. Enter `list` again.
+
+   **Expected:** The same four sample bookings appear in their original insertion order, confirming that the
+   preceding filtering, sorting and invalid requests did not reorder or remove stored bookings.
+
 ### Finding bookings by keyword
 
 1. Enter `find n/2113`.
@@ -780,6 +879,79 @@ free t/15/11/2026 14:30
 
 **Expected:** EduReserve lists the preset venues available from 14:30 to 15:30. `MPSH1` is not included because
 its existing booking overlaps this period, while unused venues such as `COM1-0203` are included.
+
+### Checking available slots for a venue
+
+1. Enter:
+
+   ```text
+   free v/MPSH1 d/15/11/2026
+   ```
+
+   **Expected:** EduReserve displays 23 available one-hour slots, numbered from 1. The 14:00 to 15:00 slot is
+   excluded because `CS2113 Midterm` occupies it. The adjacent 13:00 to 14:00 and 15:00 to 16:00 slots are included.
+   The final result ends at `16/11/2026 00:00`. Only whole-hour starts are listed.
+
+2. Enter `free v/mpsh1 d/15/11/2026`.
+
+   **Expected:** The same slots are available because venue matching ignores capitalization.
+
+3. Create a temporary booking in an otherwise unused venue, then search its slots:
+
+   ```text
+   book r/lecture n/Availability Boundary Test v/LT19 t/15/11/2026 14:30
+   free v/LT19 d/15/11/2026
+   ```
+
+   **Expected:** The booking succeeds. The search shows 22 available slots. Starts at 14:00 and 15:00 are excluded
+   because both slots overlap the 14:30 to 15:30 booking. Starts at 13:00 and 16:00 remain available.
+
+4. Remove the temporary booking:
+
+   ```text
+   cancel n/Availability Boundary Test
+   free v/LT19 d/15/11/2026
+   ```
+
+   **Expected:** The cancellation succeeds and all 24 whole-hour slots at LT19 are available again. The four
+   original sample bookings remain unchanged.
+
+### Checking availability across midnight
+
+1. Enter the following commands one at a time:
+
+   ```text
+   book r/exam n/Availability Midnight Test v/LT19 t/15/11/2026 23:30
+   free v/LT19 d/16/11/2026
+   ```
+
+   **Expected:** The booking succeeds and lasts until `16/11/2026 00:30`. The daily search shows 23 available slots.
+   The 00:00 to 01:00 slot is excluded because it overlaps the previous day's booking. The first result starts at
+   `16/11/2026 01:00`; the final result runs from `16/11/2026 23:00` to `17/11/2026 00:00`.
+
+2. Enter `cancel n/Availability Midnight Test`.
+
+   **Expected:** The temporary booking is removed, leaving only the four original sample bookings for later tests.
+
+### Rejecting invalid availability requests
+
+Enter the following commands one at a time:
+
+```text
+free v/UNKNOWN-VENUE d/15/11/2026
+free v/LT19 d/31/02/2026
+free v/LT19
+free d/15/11/2026 v/LT19
+free t/15/11/2026 24:00
+```
+
+**Expected:** Each request displays an error and command help without printing availability results or changing
+stored bookings. Unknown venues, invalid dates/times, missing fields and reversed venue/date fields are rejected.
+
+Enter `free v/LT19 d/15/11/2026`, followed by `list`.
+
+**Expected:** The valid search still works and shows all 24 whole-hour slots at LT19. The listing still contains the
+four original sample bookings in their original order. Continue with the editing tests below.
 
 ### Editing a booking
 

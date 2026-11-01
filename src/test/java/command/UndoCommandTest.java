@@ -29,7 +29,8 @@ class UndoCommandTest {
         String bookingInput = "book r/exam n/Midterm v/LT1 t/05/10/2026 14:00";
         String clashingInput = "book r/exam n/Clash v/LT1 t/05/10/2026 14:00";
         undo.executeAndRecord("book", bookingInput, bookings, () -> book.execute(bookings, bookingInput));
-        undo.executeAndRecord("list", "list", bookings, () -> new ListCommand().execute(bookings, "bookings"));
+        undo.executeAndRecord("list", "list", bookings,
+                () -> new ListCommand(new Parser()).execute(bookings, "list"));
         assertThrows(InvalidCommandException.class,
                 () -> undo.executeAndRecord("book", clashingInput, bookings,
                         () -> book.execute(bookings, clashingInput)));

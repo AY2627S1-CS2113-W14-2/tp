@@ -36,10 +36,10 @@ with usage examples and UML diagrams.
 ### New feature: Finding available venues (`free`)
 
 - **What it does:** Lists preset venues available for a one-hour slot starting at the date and time specified by
-  `free t/dd/MM/yyyy HH:mm`. Displays numbered results or a message when no venues are available.
-- **Justification:** Helps administrators choose a venue before creating a booking, rather than checking each
+  `free t/dd/MM/yyyy HH:mm` or lists the available time slots for a venue on a particular date specified by `free v/VENUE d/DATE`. Displays numbered results or a message when no venues are available.
+- **Justification:** Helps administrators choose an available venue or timeslot before creating a booking, rather than checking each
   existing booking manually.
-- **Highlights:** Implemented `FreeCommand`, date/time parsing, UI dispatch and `VenueCatalog`. The catalog contains
+- **Highlights:** Implemented `FreeCommand`, date/time and venue/date parsing, UI dispatch and `VenueCatalog`. The catalog contains
   computing seminar rooms and labs, lecture theatres and MPSH venues. Availability searches leave stored bookings
   unchanged. Updated `BookingList.isVenueAvailable` to reuse the existing `Booking.overlaps` helper so availability
   follows the same one-hour rule as booking clash prevention. The overlap helper and clash prevention feature were
@@ -76,15 +76,15 @@ with usage examples and UML diagrams.
 - Wrote the corresponding implementation explanations in the [Developer Guide](../DeveloperGuide.md) and updated
   the user stories for listing, sorting and venue availability.
 - Created and refined the [list sequence diagram](../UMLDiagrams/ListCommandSequenceDiagram.puml) and
-  [free sequence diagram](../UMLDiagrams/FreeCommandSequenceDiagram.puml), showing parsing, command execution,
+  [free sequence diagram](../UMLDiagrams/FreeCommandSequenceDiagram.puml), along with the [free venue sequence diagram](../UMLDiagrams/FreeVenueSlotsSequenceDiagram.puml) showing parsing, command execution,
   filtering or availability checks, and output to the user.
 - Created the [architecture diagram](../UMLDiagrams/ArchitectureDiagram.puml) and simplified it to show the main
   application, UI, command, model and storage dependencies.
-- Added a linked table of contents to the Developer Guide to make its sections easier to navigate.
+- Added a linked table of contents to the Developer Guide to make its sections easier to navigate along with the acknowledgements
 
 ### Integration and code quality
 
 - Resolved merge conflicts while retaining teammates' tests and preserving their author attribution in Git history.
 - Fixed coding style and Javadoc issues identified by CI and integrated listing and availability commands with the
   existing command handling structure.
-- Built and verified jar file for milestone 1 submission
+- Built and verified jar file for milestone 1 and 2 submission

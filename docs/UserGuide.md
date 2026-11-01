@@ -97,21 +97,34 @@ Examples:
 | `list r/lectures s/~alpha` |     Show all lectures sorted from Z to A      |
 |   `list r/exams s/time`    | Show all exams sorted from earliest to latest |
 
-### List available venues: `free`
+### List available venues: free
 Displays a list of all available venues at a user specified time
 
-Format: `free t/TIMING`
+Format: `free t/TIMING` or
+`free v/VENUE d/DATE`
 
-- `TIMING` must use the `dd/MM/yyyy HH:mm` format.
-- `TIMING` is the start of the one-hour slot being checked.
-- A venue is excluded if an existing booking overlaps the requested hour.
-- Bookings ending exactly when the requested slot starts are allowed.
+
+- `TIMING` must use the `dd/MM/yyyy HH:mm` format
+- `DATE` must use `dd/MM/yyyy`.
+- `VENUE` must exist in the preset catalog. Matching ignores capitalization.
+- For a venue search, `v/VENUE` must come before `d/DATE`.
+- Use lowercase field prefixes.
+- The first format lists venues available for the one-hour period starting
+  at `TIMING`.
+
+- The second format lists available one-hour slots starting on each whole
+  hour, from 00:00 through 23:00. The final slot ends at midnight the next day.
+  It does not list slots starting between whole hours, such as 14:30.
+- The command searches preset venues and does not create a booking
+- A venue is excluded if an existing booking overlaps the requested hour
+- Bookings ending exactly when the requested slot starts are allowed
 
 Examples:
 
-|          Command          |                              Result                              |
-|:-------------------------:|:----------------------------------------------------------------:|
-| `free t/28/10/2026 14:00` | Show all available venues from 14:00 to 15:00 on 28 October 2026 |
+|          Command           |                              Result                              |
+|:--------------------------:|:----------------------------------------------------------------:|
+| `free t/28/10/2026 14:00`  | Show all available venues from 14:00 to 15:00 on 28 October 2026 |
+| `free v/LT19 d/02/11/2026` |   Lists available whole-hour slots at LT19 on 2 November 2026.   |
 
 ### Viewing a booking: `viewbooking`
 
@@ -355,7 +368,7 @@ Examples, assuming `book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 12:00` alrea
 
 | Action                         | Command                                                                           |
 |--------------------------------|-----------------------------------------------------------------------------------|
-| Create a booking               | `book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING [a/ATTENDEES]`                 |
+| Create a booking               | `book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING [a/ATTENDEES]`             |
 | Undo a booking or cancellation | `/undo`                                                                           |
 | Redo an undone command         | `/redo`                                                                           |
 | View a booking                 | `viewbooking n/BOOKING_NAME [s/time]`                                             |
@@ -363,8 +376,9 @@ Examples, assuming `book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 12:00` alrea
 | Edit a booking                 | `editbooking n/BOOKING_NAME`, then enter the fields to change at the edit prompt. |
 | Cancel a pending edit          | `abort` (during selection or editing)                                             |
 | List bookings                  | `list [r/REASON] [s/SORT_ORDER]`                                                  |
-| Find available venues          | `free t/dd/MM/yyyy 
+| Find available venues          | `free t/dd/MM/yyyy HH:mm`                                                         |
+| Find available venue slots     | `free v/VENUE d/dd/MM/yyyy`                                                       |
 | Cancel a booking               | `cancel n/BOOKING_NAME`                                                           |
 | Find bookings by name          | `find n/KEYWORD`                                                                  |
-| View today's bookings          | `calendar`                                                                        |HH:mm`                                                         |
+| View today's bookings          | `calendar`                                                                        |   
 

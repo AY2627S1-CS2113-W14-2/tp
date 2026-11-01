@@ -39,8 +39,14 @@ public final class HelpText {
                 e.g list r/exams s/alpha
             free t/TIMING:
                 TIMING must use dd/MM/yyyy HH:mm.
-                Limited to check bookings free for 1 hr within the start time.
+                Lists preset venues available for the requested 1-hour slot.
                 e.g free t/06/10/2026 14:00
+
+            free v/VENUE d/DATE:
+                Lists available 1-hour slots starting on each whole hour, from 00:00 to 23:00.
+                VENUE must exist in the preset catalog; DATE must use dd/MM/yyyy.
+                Availability is based on bookings stored in EduReserve.
+                e.g. free v/LT19 d/02/11/2026
 
             checksize: shows the largest recorded attendee count for each venue.
                 Bookings without an attendee count are ignored.
