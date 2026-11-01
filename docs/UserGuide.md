@@ -220,6 +220,7 @@ Examples:
 |---------|--------|
 | `cancel n/CS2113 Midterm` | Cancels the booking named "CS2113 Midterm". |
 | `cancel n/cs2113 midterm` | Cancels the same booking, as capitalization is ignored. |
+| `cancel n/Unknown Name` | Displays `No booking found with the name: Unknown Name`. Your bookings are unchanged. |
 
 ### Undoing a command: `/undo`
 
@@ -291,6 +292,7 @@ Examples, assuming bookings named "CS2113 Midterm" and "CS2445 Final Exam" exist
 | `find n/CS2` | Shows both "CS2113 Midterm" and "CS2445 Final Exam". |
 | `find n/CS2113` | Shows only "CS2113 Midterm". |
 | `find n/final exam` | Shows only "CS2445 Final Exam". |
+| `find n/no such module` | Displays `No bookings found matching: no such module`. |
 
 ### Viewing today's bookings: `calendar`
 
@@ -312,6 +314,14 @@ Calendar for 05/10/2026:
 1. 09:00 - lecture - Week 1 Lecture (venue: LT2)
 2. 14:00 - exam - CS2113 Midterm (venue: LT1)
 ```
+
+Examples:
+
+| Command | Result |
+|---------|--------|
+| `calendar` | Shows today's bookings, earliest first. |
+| `calendar` on a day with no bookings | Displays `No bookings on dd/MM/yyyy.` |
+| `calendar tomorrow` | Rejected, because `calendar` takes no extra words. Use `calendar` on its own. |
 
 ### Avoiding booking clashes
 
@@ -353,5 +363,8 @@ Examples, assuming `book r/exam n/CS2113 Midterm v/LT1 t/05/10/2026 12:00` alrea
 | Edit a booking                 | `editbooking n/BOOKING_NAME`, then enter the fields to change at the edit prompt. |
 | Cancel a pending edit          | `abort` (during selection or editing)                                             |
 | List bookings                  | `list [r/REASON] [s/SORT_ORDER]`                                                  |
-| Find available venues          | `free t/dd/MM/yyyy HH:mm`                                                         |
+| Find available venues          | `free t/dd/MM/yyyy 
+| Cancel a booking               | `cancel n/BOOKING_NAME`                                                           |
+| Find bookings by name          | `find n/KEYWORD`                                                                  |
+| View today's bookings          | `calendar`                                                                        |HH:mm`                                                         |
 

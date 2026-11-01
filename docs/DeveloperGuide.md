@@ -700,6 +700,25 @@ book r/lecture n/Clashing Lecture v/MPSH1 t/15/11/2026 14:30
 **Expected:** The booking is rejected with a booking clash message because `MPSH1` is already occupied by
 `CS2113 Midterm` from 14:00 to 15:00. `Clashing Lecture` is not added.
 
+Enter:
+
+```text
+book r/lecture n/Early Clash v/MPSH1 t/15/11/2026 13:30
+```
+
+**Expected:** The booking is rejected with a booking clash message, because 13:30 to 14:30 overlaps the 14:00 to
+15:00 booking. `Early Clash` is not added.
+
+To check that back-to-back bookings are allowed, enter the following two commands:
+
+```text
+book r/lecture n/Back To Back v/MPSH1 t/15/11/2026 15:00
+cancel n/Back To Back
+```
+
+**Expected:** The first command reports `Booking added`, because 15:00 starts exactly when the midterm ends. The
+second command removes it again, so the later tests are not affected.
+
 ### Listing and sorting bookings
 
 1. Enter `list`.
@@ -735,6 +754,10 @@ book r/lecture n/Clashing Lecture v/MPSH1 t/15/11/2026 14:30
 2. Enter `find n/no such module`.
 
    **Expected:** EduReserve reports that no matching bookings were found.
+
+3. Enter `find n/cs2113`.
+
+   **Expected:** The same bookings as step 1 are shown, because matching ignores capitalization.
 
 ### Viewing booking details
 
@@ -794,17 +817,25 @@ checksize
 1. Enter:
 
    ```text
+   cancel n/No Such Booking
+   ```
+
+   **Expected:** EduReserve reports `No booking found with the name: No Such Booking`. No booking is removed.
+
+2. Enter:
+
+   ```text
    cancel n/CS2113 Practice
    ```
 
    **Expected:** The updated `CS2113 Practice` booking is cancelled.
 
-2. Enter `/undo`, followed by `viewbooking n/CS2113 Practice`.
+3. Enter `/undo`, followed by `viewbooking n/CS2113 Practice`.
 
    **Expected:** EduReserve reports that the cancel command was undone. The booking is restored with venue
    `COM1-0203` and timing `15/11/2026 17:00`.
 
-3. Enter `/redo`, followed by `find n/CS2113 Practice`.
+4. Enter `/redo`, followed by `find n/CS2113 Practice`.
 
    **Expected:** EduReserve reports that the cancel command was redone, and the search finds no matching booking.
 

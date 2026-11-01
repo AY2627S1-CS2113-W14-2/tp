@@ -39,5 +39,11 @@ Java and saves each user's bookings to a file.
 
 * Wrote the sections for `cancel`, `find`, booking clash prevention and `calendar`, including examples and the
   implementation of each, and a design consideration for each of cancel, find and clash prevention.
-* Drew the sequence diagram for the `calendar`, `find`, `cancel`commands along with `clash prevention` too.
+* Drew the sequence diagram for the `calendar`, `find`, `cancel` commands along with `clash prevention` too.
 * Added the user stories for finding bookings, preventing clashes and the daily calendar.
+
+#### Contributions to the User Guide
+
+* Wrote the sections for `cancel`, `find`, `calendar` and booking clash prevention, each with its format, rules and
+  examples, and added them to the Command Summary.
+* Filled in the Developer Guide glossary for the whole project.
