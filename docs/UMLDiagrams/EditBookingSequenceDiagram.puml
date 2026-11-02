@@ -27,8 +27,8 @@ Edit -> Bookings: findAllByName("Midterm")
 activate Bookings
 Bookings --> Edit: matchingBookings
 deactivate Bookings
-Edit --> User: the filtered matches with numbers for selection
-Edit --> UI
+Edit --> UI: filtered matches and selection prompt
+UI --> User: filtered matches and selection prompt
 deactivate Edit
 deactivate UI
 
@@ -41,8 +41,8 @@ deactivate Edit
 UI -> Edit: processInput(bookings, "2")
 activate Edit
 Edit -> Edit: selectBooking(matches, 2)
-Edit --> User: the selected booking and edit prompt
-Edit --> UI
+Edit --> UI: selected booking and edit prompt
+UI --> User: selected booking and edit prompt
 deactivate Edit
 deactivate UI
 
@@ -76,8 +76,8 @@ else no clash
     activate Bookings
     Bookings --> Edit
     deactivate Bookings
-    Edit --> User: "Booking updated: ..."
-    Edit --> UI
+    Edit --> UI: "Booking updated: ..."
+    UI --> User: "Booking updated: ..."
 end
 
 deactivate Edit

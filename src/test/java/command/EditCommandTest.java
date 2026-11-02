@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
@@ -85,6 +86,18 @@ class EditCommandTest {
     }
 
     @Test
+    void processInput_unchangedVenueAndTime_doesNotReportSelfClash() {
+        addBooking("Midterm", "LT1");
+        command.execute(bookings, "Midterm");
+
+        command.processInput(bookings, "v/LT1 t/05/10/2026 14:00");
+
+        assertEquals("LT1", bookings.get(0).getVenue());
+        assertEquals("05/10/2026 14:00", bookings.get(0).getTiming());
+        assertFalse(command.isPending());
+    }
+
+    @Test
     void processInput_attendeeCountEdit_preservesUnchangedFields() {
         Booking original = new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00", 40);
         bookings.add(original);
@@ -100,6 +113,20 @@ class EditCommandTest {
         assertEquals("05/10/2026 14:00", edited.getTiming());
         assertEquals(80, edited.getAttendeeCount());
         assertFalse(command.isPending());
+    }
+
+    @Test
+    void processInput_attendeeOnlyEdit_reportsMissingEditableFieldAndKeepsBooking() {
+        Booking original = new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00", 40);
+        bookings.add(original);
+        command.execute(bookings, "Midterm");
+
+        LOGGER.log(System.Logger.Level.INFO, "Checking attendee-only input is rejected without changing the booking.");
+        assertThrows(InvalidCommandException.class, () -> command.processInput(bookings, "a/80"));
+
+        assertSame(original, bookings.get(0));
+        assertEquals(40, bookings.get(0).getAttendeeCount());
+        assertTrue(command.isPending());
     }
 
     @Test
@@ -134,6 +161,24 @@ class EditCommandTest {
         }
         command.processInput(bookings, "v/LT3");
         assertEquals("LT3", bookings.get(0).getVenue());
+        assertFalse(command.isPending());
+    }
+
+    @Test
+    void processInput_malformedFields_preservesOriginalAndAllowsRecovery() {
+        Booking original = addBooking("Midterm", "LT1");
+        command.execute(bookings, "Midterm");
+
+        for (String fields : new String[]{"", "v/LT2 v/LT3", "v/LT2 a/0", "v/LT2 a/not-a-number"}) {
+            assertThrows(InvalidCommandException.class,
+                    () -> command.processInput(bookings, fields), fields);
+            assertSame(original, bookings.get(0));
+            assertTrue(command.isPending());
+        }
+
+        LOGGER.log(System.Logger.Level.INFO, "Checking recovery after malformed booking field combinations.");
+        command.processInput(bookings, "v/LT2");
+        assertEquals("LT2", bookings.get(0).getVenue());
         assertFalse(command.isPending());
     }
 
@@ -233,6 +278,59 @@ class EditCommandTest {
 
         assertFalse(command.isPending());
         assertSame(original, bookings.get(0));
+    }
+
+    @Test
+    void execute_nullName_failsPrecondition() {
+        assertThrows(AssertionError.class, () -> command.execute(bookings, null));
+    }
+
+    @Test
+    void execute_lookupReturnsTooManyMatches_failsInvariant() {
+        BookingList invalidMatches = new BookingList() {
+            @Override
+            public ArrayList<Booking> findAllByName(String name) {
+                ArrayList<Booking> matches = new ArrayList<>();
+                Booking duplicate = new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00");
+                matches.add(duplicate);
+                matches.add(duplicate);
+                return matches;
+            }
+        };
+
+        LOGGER.log(System.Logger.Level.INFO, "Checking the match-count invariant for edit lookup.");
+        assertThrows(AssertionError.class, () -> command.execute(invalidMatches, "Midterm"));
+    }
+
+    @Test
+    void execute_lookupChangesBookingList_failsReadOnlyInvariant() {
+        BookingList changingBookings = new BookingList() {
+            @Override
+            public ArrayList<Booking> findAllByName(String name) {
+                ArrayList<Booking> matches = super.findAllByName(name);
+                add(new Booking("lecture", "Other", "LT2", "05/10/2026 15:00"));
+                return matches;
+            }
+        };
+        changingBookings.add(new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00"));
+
+        LOGGER.log(System.Logger.Level.INFO, "Checking edit lookup does not mutate the booking list.");
+        assertThrows(AssertionError.class, () -> command.execute(changingBookings, "Midterm"));
+    }
+
+    @Test
+    void processInput_invalidPreconditions_failFast() {
+        EditCommand freshCommand = new EditCommand();
+        assertThrows(AssertionError.class, () -> freshCommand.execute(null, "Midterm"));
+        assertThrows(AssertionError.class, () -> freshCommand.execute(new BookingList(), " "));
+        assertThrows(AssertionError.class,
+                () -> freshCommand.processInput(new BookingList(), "v/LT1"));
+
+        addBooking("Midterm", "LT1");
+        freshCommand.execute(bookings, "Midterm");
+        assertThrows(AssertionError.class, () -> freshCommand.processInput(bookings, null));
+        assertThrows(AssertionError.class, () -> freshCommand.processInput(null, "v/LT2"));
+        assertTrue(freshCommand.isPending());
     }
 
     /** Adds a booking at the shared test time, with a distinct venue when needed. */
