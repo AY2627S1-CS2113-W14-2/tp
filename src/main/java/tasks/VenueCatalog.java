@@ -1,5 +1,6 @@
 package tasks;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,8 +68,29 @@ public final class VenueCatalog {
             //Computing-area lecture theatres
             "LT17",
             "LT19",
-            "I3-LT38"
-    );
+            "I3-LT38",
+            "COM3-MPH",
+            "SR_LT19",
+
+            //U town lecture theaters
+            "UT-AUD1",
+            "UT-AUD2",
+            "UT-AUD3",
+            "UTSRC-GLR",
+            "UTSRC-LT50",
+            "UTSRC-LT51",
+            "UTSRC-LT52",
+            "UTSRC-LT53",
+            "UTSRC-SR1",
+            "UTSRC-SR2",
+            "UTSRC-SR3",
+            "UTSRC-SR4",
+            "UTSRC-SR5",
+            "UTSRC-SR6",
+            "UTSRC-SR7",
+            "UTSRC-SR8",
+            "UTSRC-SR9"
+            );
 
     /**
      * Creates a list of all available venues at the specified time
@@ -89,6 +111,32 @@ public final class VenueCatalog {
             }
         }
 
+        return available;
+    }
+
+    /**
+     * Finds available one-hour slots starting on each whole hour of a date.
+     * The final slot ends at midnight on the following day.
+     *
+     * @param bookings existing bookings
+     * @param venue preset venue to check
+     * @param date date to search
+     * @return available start times in chronological order
+     */
+    public static List<LocalDateTime> findAvailableSlots(
+            BookingList bookings, String venue, LocalDate date) {
+        assert bookings != null : "Booking list cannot be null";
+        assert venue != null && !venue.isBlank() : "Venue cannot be blank";
+        assert date != null : "Requested date cannot be null";
+        assert findVenueInCatalog(venue) : "Venue must exist in the catalog";
+
+        List<LocalDateTime> available = new ArrayList<>();
+        for (int hour = 0; hour < 24; hour++) {
+            LocalDateTime start = date.atTime(hour, 0);
+            if (bookings.isVenueAvailable(venue, start)) {
+                available.add(start);
+            }
+        }
         return available;
     }
 

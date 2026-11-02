@@ -3,13 +3,17 @@ skinparam sequenceMessageAlign center
 hide footbox
 
 actor User
-
 participant ":Ui" as UI
-
 participant ":Parser" as Parser
 
-User -> UI: processCommand("free t/28/10/2026 14:00")
+User -> UI: processCommand(userInput)
 activate UI
+
+note over User, UI
+Example inputs:
+free t/02/11/2026 14:00
+free v/LT19 d/02/11/2026
+end note
 
 UI -> Parser: parseCommand(userInput)
 activate Parser
@@ -19,54 +23,72 @@ deactivate Parser
 create participant ":FreeCommand" as Free
 UI -> Free: new FreeCommand(parser)
 
-participant "VenueCatalog" as Catalog
-participant "available:List<String>" as Available
+participant "<> VenueCatalog" as Catalog
 participant ":BookingList" as Bookings
 
 UI -> Free: execute(bookingList, userInput)
 activate Free
 
-Free -> Parser: parseFreeTime(userInput)
+Free -> Parser: parseFreeOptions(userInput)
 activate Parser
-Parser --> Free: startTime
+
+note right of Parser
+Validate the time,
+or the venue and date.
+end note
+
+Parser --> Free: options:FreeOptions
 deactivate Parser
 
-Free -> Catalog: findAvailableVenues(bookingList, startTime)
-activate Catalog
+alt options.venue() == null
+    Free -> Free: printAvailableVenues(bookingList, startTime)
+    activate Free
 
-loop For each preset venue
-    Catalog -> Bookings: isVenueAvailable(venue, startTime)
-    activate Bookings
+    Free -> Catalog: findAvailableVenues(bookingList, startTime)
+    activate Catalog
 
-    note right of Bookings
-    Check the same venue (ignoring case)
-    for overlapping one-hour slots.
-    Adjacent slots are allowed.
-    end note
+    loop for each preset venue
+        Catalog -> Bookings: isVenueAvailable(venue, startTime)
+        activate Bookings
 
-    Bookings --> Catalog: available
-    deactivate Bookings
+        note right of Bookings
+        Check for overlapping one-hour bookings
+        at the same venue, ignoring capitalization.
+        Adjacent slots are allowed.
+        end note
 
-    opt available
-        Catalog -> Available: add(venue)
-        note right of Available: Add venue to the available list
+        Bookings --> Catalog: isAvailable
+        deactivate Bookings
+
+        opt isAvailable
+            note right of Catalog: Add venue to the result list
+        end
     end
+
+    Catalog --> Free: venues
+    deactivate Catalog
+
+    Free --> User: requested one-hour time range
+
+    alt venues is empty
+        Free --> User: "No venues are available at specified time"
+    else venues is not empty
+        Free --> User: numbered available venues
+        note right of Free: Number results starting at 1
+    end
+
+    deactivate Free
+
+else options.venue() != null
+    ref over User, Bookings
+        FreeVenueSlots(bookingList, venue, date)
+    end ref
 end
 
-Catalog --> Free: venues
-deactivate Catalog
-
-alt venues is empty
-    Free --> User: no availability message
-    note right of Free: Print no availability message
-else venues is not empty
-    loop For each available venue
-        Free --> User: display number and venue
-        note right of Free: Print numbered available venues
-    end
-end
-
+Free --> UI
 deactivate Free
 
+UI --> User: separator
 deactivate UI
+
 @enduml

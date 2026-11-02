@@ -3,9 +3,7 @@ skinparam sequenceMessageAlign center
 hide footbox
 
 actor User
-
 participant ":Ui" as UI
-
 participant ":Parser" as Parser
 
 User -> UI: processCommand("list r/exams s/alpha")
@@ -16,56 +14,78 @@ activate Parser
 Parser --> UI: "list"
 deactivate Parser
 
-UI -> Parser: parseViewList(userInput)
-activate Parser
-Parser --> UI: ListOptions("exams", ALPHABETIC)
-deactivate Parser
-
-UI --> User: the listing heading
-note right of UI: Print the listing heading
-
 create participant ":ListCommand" as List
-UI -> List: new ListCommand()
+UI -> List: new ListCommand(parser)
+
 participant "lastShownList:ArrayList<Booking>" as Shown
 participant ":BookingList" as Bookings
 
-UI -> List: execute(bookingList, "exams", ALPHABETIC)
+UI -> List: execute(bookingList, userInput)
 activate List
+
+List -> Parser: parseViewList(userInput)
+activate Parser
+Parser --> List: ListOptions("exams", ALPHABETIC)
+deactivate Parser
+
+List --> User: listing heading
+note right of List: Print the selected filter and sort order
+
+List -> List: execute(bookingList, "exams", ALPHABETIC)
+activate List
+
+List -> List: populateLastShownList(bookingList, "exams")
+activate List
+
+note right of List : Map "exams" to the booking reason "exam"
+
+List -> Shown: clear()
+note right of Shown: Clear the previous display list
 
 List -> Bookings: size()
 activate Bookings
 Bookings --> List: listSize
 deactivate Bookings
 
-List -> Shown: clear()
-note right of Shown: Clear lastShownList
-
 loop i = 0 to listSize - 1
     List -> Bookings: get(i)
     activate Bookings
-    Bookings --> List: booking
+    Bookings --> List: element
     deactivate Bookings
 
-    opt booking.getReason().equals("exam")
-       List -> Shown: addLast(booking)
-       note right of Shown: Add booking to lastShownList
+    opt reason == null || reason.equals(element.getReason())
+        List -> Shown: addLast(element)
+        note right of Shown: Include only exam bookings
     end
 end
 
+deactivate List
+
 List -> List: sortLastShownList(ALPHABETIC)
 activate List
+
+note right of List
+Sort the display list by name,
+ignoring capitalization.
+Stored booking order is preserved.
+end note
+
 deactivate List
 
 List -> List: printLastShownList()
 activate List
+
 List --> User: numbered bookings in alphabetical order
-note right of List
-Print numbered bookings
-in alphabetical order
-end note
-deactivate List
+note right of List: Number results starting at 1
 
 deactivate List
 
+deactivate List
+
+List --> UI
+deactivate List
+
+UI --> User: separator
 deactivate UI
+
 @enduml

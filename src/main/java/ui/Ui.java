@@ -69,10 +69,8 @@ public class Ui {
                 System.out.println(LINE_BREAK);
                 break;
             case "list":
-                ui.Parser.ListOptions listOptions = parser.parseViewList(userInput);
-                System.out.println("Ok, here is the list of " + listOptions.item() +" in "
-                        + listOptions.sortOrder().toString() + " order");
-                new ListCommand().execute(bookingList, listOptions.item(), listOptions.sortOrder());
+                new ListCommand(parser).execute(bookingList, userInput);
+                System.out.println(LINE_BREAK);
                 break;
             case "cancel":
                 undoCommand.executeAndRecord(command, userInput, bookingList, () -> cancelBooking(userInput));

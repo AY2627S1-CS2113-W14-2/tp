@@ -1,5 +1,6 @@
 package ui;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
@@ -8,6 +9,7 @@ import java.util.regex.Pattern;
 
 import exceptions.InvalidCommandException;
 import tasks.Booking;
+import tasks.VenueCatalog;
 import command.SortOrder;
 
 /**
@@ -15,6 +17,10 @@ import command.SortOrder;
  * @author Maxkedd
  */
 public class Parser {
+    /** Recognises a venue followed by the date whose available slots should be listed. */
+    private static final Pattern FREE_VENUE_PATTERN = Pattern.compile(
+            "^v/(.+?)\\s+d/(\\d{2}/\\d{2}/\\d{4})$");
+
     private static final Pattern TRAILING_ATTENDEE_FIELD =
             Pattern.compile("(?s)^(.*?)[\\p{javaWhitespace}]+a/([^\\p{javaWhitespace}]*)\\s*$");
 
@@ -390,11 +396,12 @@ public class Parser {
     }
 
     /**
-     * Parses the date and time for an exact start time availability search.
+     * Parses the start of the one-hour slot for an availability search.
      * @author Kytersaurus
      * @param input string command input from user
      */
     public LocalDateTime parseFreeTime(String input) {
+        assert input != null : "Free command input cannot be null";
         String[] parts = separateInput(input);
 
         if (!parseCommand(input).equalsIgnoreCase("free") || parts.length < 2
@@ -409,6 +416,50 @@ public class Parser {
         } catch (DateTimeParseException e) {
             throw new InvalidCommandException("Timing must use t/dd/MM/yyyy HH:mm format");
         }
+    }
+
+    /**
+     * Parses a start-time search or a venue's daily availability search.
+     *
+     * @param input complete free command
+     * @return validated availability search options
+     * @throws InvalidCommandException if the syntax, venue or date is invalid
+     */
+    public FreeOptions parseFreeOptions(String input) {
+        assert input != null : "Free command input cannot be null";
+        String[] parts = separateInput(input);
+        if (!parseCommand(input).equals("free") || parts.length < 2) {
+            throw new InvalidCommandException("Please use: free t/dd/MM/yyyy HH:mm"
+                    + " or free v/VENUE d/dd/MM/yyyy");
+        }
+
+        String arguments = parts[1].strip();
+        if (arguments.startsWith("t/")) {
+            return new FreeOptions(parseFreeTime(input), null, null);
+        }
+
+        Matcher matcher = FREE_VENUE_PATTERN.matcher(arguments);
+        if (!matcher.matches()) {
+            throw new InvalidCommandException("Please use: free v/VENUE d/dd/MM/yyyy");
+        }
+        String venue = matcher.group(1).strip();
+        if (!VenueCatalog.findVenueInCatalog(venue)) {
+            throw new InvalidCommandException("Unknown preset venue: " + venue);
+        }
+
+        try {
+            LocalDate date = Booking.parseStartTime(matcher.group(2) + " 00:00").toLocalDate();
+            return new FreeOptions(null, venue, date);
+        } catch (DateTimeParseException e) {
+            throw new InvalidCommandException("Date must be a valid date in dd/MM/yyyy format");
+        }
+    }
+
+    /**
+     * Holds a time search or a venue-and-date search.
+     * Time searches have null venue and date fields; venue searches have a null startTime.
+     */
+    public record FreeOptions(LocalDateTime startTime, String venue, LocalDate date) {
     }
 
     /**

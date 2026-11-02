@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,55 @@ import command.SortOrder;
  */
 class ParserTest {
     private final Parser parser = new Parser();
+
+    @Test
+    void parseFreeOptions_timeSearch_preservesExistingSyntax() {
+        Parser.FreeOptions options = parser.parseFreeOptions("free t/28/10/2026 14:30");
+        assertEquals(LocalDateTime.of(2026, 10, 28, 14, 30), options.startTime());
+        assertNull(options.venue());
+        assertNull(options.date());
+    }
+
+    @Test
+    void parseFreeOptions_venueSearch_acceptsCaseWhitespaceAndLeapDay() {
+        Parser.FreeOptions options = parser.parseFreeOptions("  FrEe\tv/ lt19 \td/29/02/2028  ");
+        assertEquals("lt19", options.venue());
+        assertEquals(LocalDate.of(2028, 2, 29), options.date());
+        assertNull(options.startTime());
+    }
+
+    @Test
+    void parseFreeOptions_venueSearch_preservesBuildingCodesAndYearBoundaryDate() {
+        for (String venue : new String[]{"COM1-0201", "COM4SR31", "I3-LT38"}) {
+            Parser.FreeOptions options = parser.parseFreeOptions("free v/" + venue + " d/31/12/2026");
+            assertEquals(venue, options.venue(), venue);
+            assertEquals(LocalDate.of(2026, 12, 31), options.date(), venue);
+            assertNull(options.startTime(), venue);
+        }
+    }
+
+    @Test
+    void parseFreeOptions_incompleteFieldsUppercasePrefixesOrMixedModes_areRejected() {
+        for (String input : new String[]{"free v/LT19 d/", "free v/LT19 d/2/11/2026",
+            "free v/LT19 d/02/11/26", "free V/LT19 d/02/11/2026", "free v/LT19 D/02/11/2026",
+            "free v/LT19 d/02/11/2026 14:00", "free v/LT19 d/02/11/2026 t/02/11/2026 14:00",
+            "free t/02/11/2026 14:00 d/02/11/2026", "free t/02/11/2026 24:00"}) {
+            assertThrows(InvalidCommandException.class, () -> parser.parseFreeOptions(input), input);
+        }
+    }
+
+    @Test
+    void parseFreeOptions_invalidVenueDateOrSyntax_throws() {
+        for (String input : new String[]{"free", "free v/UNKNOWN d/28/10/2026",
+            "free v/LT19", "free d/28/10/2026 v/LT19", "free v/ d/28/10/2026",
+            "free v/LT19 d/31/02/2026", "free v/LT19 d/29/02/2025",
+            "free v/LT19 d/2026-10-28", "free v/LT19 d/28/10/2026 extra",
+            "free v/LT19 d/28/10/2026 d/29/10/2026", "free v/LT19 v/LT17 d/28/10/2026",
+            "free t/28/10/2026 14:00 v/LT19", "list v/LT19 d/28/10/2026"}) {
+            assertThrows(InvalidCommandException.class, () -> parser.parseFreeOptions(input), input);
+        }
+        assertThrows(AssertionError.class, () -> parser.parseFreeOptions(null));
+    }
 
     @Test
     void parseFreeTime_validInput_returnsExactDateAndTime() {

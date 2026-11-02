@@ -20,6 +20,71 @@ import tasks.BookingList;
  */
 class UiTest {
     @Test
+    void processCommand_freeVenueSearch_preservesRedoAfterValidAndInvalidRequests() {
+        BookingList bookings = new BookingList();
+        Ui ui = new Ui(bookings);
+        captureListOutput(ui, "book r/exam n/Midterm v/LT19 t/28/10/2026 14:00");
+        Booking original = bookings.get(0);
+        captureListOutput(ui, "/undo");
+        assertTrue(bookings.isEmpty());
+
+        for (String input : new String[]{"free v/LT19 d/31/02/2026", "free v/UNKNOWN d/28/10/2026"}) {
+            String invalid = captureListOutput(ui, input);
+            assertTrue(invalid.contains(HelpText.COMMAND_LIST), input);
+            assertTrue(bookings.isEmpty(), input);
+        }
+        String available = captureListOutput(ui, "free v/LT19 d/28/10/2026");
+        assertTrue(available.contains(". 28/10/2026 14:00 to 28/10/2026 15:00"));
+
+        String redone = captureListOutput(ui, "/redo");
+        assertTrue(redone.contains("Redid command:"));
+        assertEquals(1, bookings.size());
+        assertEquals(original, bookings.get(0));
+        String occupied = captureListOutput(ui, "free v/LT19 d/28/10/2026");
+        assertFalse(occupied.contains(". 28/10/2026 14:00 to"));
+    }
+
+    @Test
+    void processCommand_freeVenueSearch_reflectsCancellationAndItsUndo() {
+        BookingList bookings = new BookingList();
+        Ui ui = new Ui(bookings);
+        captureListOutput(ui, "book r/exam n/Midterm v/LT19 t/28/10/2026 14:30");
+        captureListOutput(ui, "cancel n/Midterm");
+        String freed = captureListOutput(ui, "free v/LT19 d/28/10/2026");
+        assertTrue(freed.contains(". 28/10/2026 14:00 to 28/10/2026 15:00"));
+        assertTrue(freed.contains(". 28/10/2026 15:00 to 28/10/2026 16:00"));
+        assertTrue(bookings.isEmpty());
+
+        captureListOutput(ui, "/undo");
+        String restored = captureListOutput(ui, "free v/LT19 d/28/10/2026");
+        assertFalse(restored.contains(". 28/10/2026 14:00 to"));
+        assertFalse(restored.contains(". 28/10/2026 15:00 to"));
+        assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void processCommand_freeVenueSearch_recoversFromErrorsAndPreservesUndoHistory() {
+        BookingList bookings = new BookingList();
+        Ui ui = new Ui(bookings);
+        captureListOutput(ui, "book r/exam n/Midterm v/LT19 t/28/10/2026 14:00");
+        String invalid = captureListOutput(ui, "free v/UNKNOWN d/28/10/2026");
+        assertTrue(invalid.contains("Unknown preset venue"));
+        assertTrue(invalid.contains(HelpText.COMMAND_LIST));
+
+        String response = captureListOutput(ui, "free v/LT19 d/28/10/2026");
+        assertTrue(response.contains("Available one-hour slots for LT19 on 28/10/2026"));
+        assertFalse(response.contains(". 28/10/2026 14:00 to"));
+        assertTrue(response.contains(". 28/10/2026 15:00 to 28/10/2026 16:00"));
+        assertFalse(response.contains(HelpText.COMMAND_LIST));
+        assertEquals(1, bookings.size());
+
+        captureListOutput(ui, "/undo");
+        assertTrue(bookings.isEmpty());
+        String restored = captureListOutput(ui, "free v/LT19 d/28/10/2026");
+        assertTrue(restored.contains(". 28/10/2026 14:00 to 28/10/2026 15:00"));
+    }
+
+    @Test
     void processCommand_free_excludesOccupiedVenueWithoutFallthroughOrMutation() {
         BookingList bookings = new BookingList();
         Booking occupied = new Booking("exam", "Occupied", "lt19", "28/10/2026 14:00", 80);
