@@ -18,6 +18,7 @@ import tasks.BookingList;
 
 /** Checks filtered selection, safe replacement, and recovery during interactive editing. */
 class EditCommandTest {
+    private static final System.Logger LOGGER = System.getLogger(EditCommandTest.class.getName());
     private final BookingList bookings = new BookingList();
     private final EditCommand command = new EditCommand();
 
@@ -81,6 +82,24 @@ class EditCommandTest {
         assertEquals("New Name", bookings.get(0).getName());
         assertEquals(original.getVenue(), bookings.get(0).getVenue());
         assertEquals(original.getTiming(), bookings.get(0).getTiming());
+    }
+
+    @Test
+    void processInput_attendeeCountEdit_preservesUnchangedFields() {
+        Booking original = new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00", 40);
+        bookings.add(original);
+        command.execute(bookings, "Midterm");
+
+        LOGGER.log(System.Logger.Level.INFO, "Checking attendee-count edit preserves existing booking fields.");
+        command.processInput(bookings, "v/LT2 a/80");
+
+        Booking edited = bookings.get(0);
+        assertEquals("exam", edited.getReason());
+        assertEquals("Midterm", edited.getName());
+        assertEquals("LT2", edited.getVenue());
+        assertEquals("05/10/2026 14:00", edited.getTiming());
+        assertEquals(80, edited.getAttendeeCount());
+        assertFalse(command.isPending());
     }
 
     @Test
