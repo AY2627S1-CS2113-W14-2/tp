@@ -228,6 +228,7 @@ Ui creates ListCommand(parser) and passes the complete user input to execute(). 
 ListCommand prints the heading, clears lastShownList, and fills it with all bookings or only exams or lectures. It sorts this display list alphabetically or chronologically, in either direction, before printing numbered results. Without a sorting option, insertion order is preserved. Time sorting is rejected if a selected booking lacks a valid date and time. The stored BookingList and its order remain unchanged.
 
 The list sequence diagram illustrates this flow using list r/exams s/alpha.
+
 ![List command sequence diagram](UMLDiagrams/ListCommandSequenceDiagram.png)
 
 [Editable PlantUML source](UMLDiagrams/ListCommandSequenceDiagram.puml)
@@ -280,6 +281,7 @@ For free t/TIMING, the command calls VenueCatalog.findAvailableVenues() to check
 Both searches use BookingList.isVenueAvailable(), which checks existing bookings through Booking.overlaps(). Venue matching ignores capitalization, overlapping bookings are excluded, and adjacent slots are allowed. Results are numbered, or a message is displayed when none are available. Neither search changes stored bookings or undo/redo history.
 
 The main free sequence diagram shows command processing and venue lookup. Its FreeVenueSlots reference frame links to the second diagram, which expands the daily slot search.
+
 ![Free command sequence diagram](UMLDiagrams/FreeCommandSequenceDiagram.png)
 
 [Editable PlantUML source](UMLDiagrams/FreeCommandSequenceDiagram.puml)
@@ -446,6 +448,7 @@ Design consideration: cancelling by name instead of by list number. `viewbooking
 identify bookings by name, so `cancel` works the same way. A list number is risky because it changes whenever the list
 is filtered, sorted, cancelled from or undone, so a number read from an old `list` could cancel the wrong booking.
 The trade-off is that the full name must be typed, which is acceptable because `book` requires names to be unique.
+
 ![Cancel command sequence diagram](UMLDiagrams/CancelCommandSequenceDiagram.png)
 
 [Editable PlantUML source](UMLDiagrams/CancelCommandSequenceDiagram.puml)
@@ -476,6 +479,7 @@ Design consideration: partial, case-insensitive matching instead of matching the
 part of a booking name, such as the module code `CS2113`, and exact lookup by full name is already covered by
 `viewbooking`, `cancel` and `editbooking`. The trade-off is that a very short keyword can match many bookings, which is
 acceptable because the results are only displayed and the list is never changed.
+
 ![Find command sequence diagram](UMLDiagrams/FindCommandSequenceDiagram.png)
 
 [Editable PlantUML source](UMLDiagrams/FindCommandSequenceDiagram.puml)
@@ -517,6 +521,7 @@ and older saved bookings would need converting. With a fixed duration the end ti
 and `Booking.DEFAULT_DURATION` is the only value to change if the length ever changes. The trade-off is that a longer
 exam cannot block its venue for its full length. An optional duration field could be added later by storing it in
 `Booking` and using it in `Booking#getEndTime`.
+
 ![Book command sequence diagram](UMLDiagrams/BookCommandSequenceDiagram.png)
 
 [Editable PlantUML source](UMLDiagrams/BookCommandSequenceDiagram.puml)
