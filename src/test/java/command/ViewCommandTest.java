@@ -69,6 +69,41 @@ class ViewCommandTest {
     }
 
     @Test
+    void execute_withTimeSortAcrossDates_numbersResultsAndPrintsEveryDisplayedField() {
+        Booking nextDay = new Booking("lecture", "Midterm", "LT2", "06/10/2026 08:00");
+        Booking laterToday = new Booking("exam", "Midterm", "LT3", "05/10/2026 15:00");
+        BookingList bookings = new BookingList();
+        bookings.add(nextDay);
+        bookings.add(laterToday);
+
+        LOGGER.log(System.Logger.Level.INFO, "Checking date-boundary sorting, numbering and displayed fields.");
+        String response = captureOutput(() -> new ViewCommand().execute(bookings, "Midterm", true));
+
+        assertTrue(response.indexOf("Booking 1:") < response.indexOf("Booking 2:"), response);
+        assertTrue(response.indexOf("Booking purpose: exam") < response.indexOf("Booking purpose: lecture"), response);
+        assertTrue(response.indexOf("Booking venue: LT3") < response.indexOf("Booking venue: LT2"), response);
+        assertTrue(response.indexOf("Booking timing: 05/10/2026 15:00")
+                < response.indexOf("Booking timing: 06/10/2026 08:00"), response);
+        assertSame(nextDay, bookings.get(0));
+        assertSame(laterToday, bookings.get(1));
+    }
+
+    @Test
+    void execute_withTimeSort_keepsOriginalOrderForEqualStartTimes() {
+        Booking first = new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00");
+        Booking second = new Booking("lecture", "Midterm", "LT2", "05/10/2026 14:00");
+        BookingList bookings = new BookingList();
+        bookings.add(first);
+        bookings.add(second);
+
+        String response = captureOutput(() -> new ViewCommand().execute(bookings, "Midterm", true));
+
+        assertTrue(response.indexOf("Booking venue: LT1") < response.indexOf("Booking venue: LT2"), response);
+        assertSame(first, bookings.get(0));
+        assertSame(second, bookings.get(1));
+    }
+
+    @Test
     void execute_sortWithLegacyTiming_reportsErrorAndPreservesStoredOrder() {
         Booking valid = new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00");
         Booking legacy = new Booking("exam", "Midterm", "LT2", "14:00");
@@ -133,6 +168,12 @@ class ViewCommandTest {
     }
 
     @Test
+    void execute_nullName_failsPrecondition() {
+        assertThrows(AssertionError.class,
+                () -> new ViewCommand().execute(new BookingList(), null));
+    }
+
+    @Test
     void execute_bookingListReturnsNonMatchingBooking_failsInvariant() {
         BookingList bookings = new BookingList() {
             @Override
@@ -144,6 +185,22 @@ class ViewCommandTest {
 
         assertThrows(AssertionError.class,
                 () -> new ViewCommand().execute(bookings, "CS2113 Midterm", false));
+    }
+
+    @Test
+    void execute_bookingListChangedDuringLookup_failsReadOnlyInvariant() {
+        BookingList bookings = new BookingList() {
+            @Override
+            public ArrayList<Booking> findAllByName(String name) {
+                ArrayList<Booking> matches = super.findAllByName(name);
+                add(new Booking("lecture", "Other", "LT2", "05/10/2026 15:00"));
+                return matches;
+            }
+        };
+        bookings.add(new Booking("exam", "Midterm", "LT1", "05/10/2026 14:00"));
+
+        assertThrows(AssertionError.class,
+                () -> new ViewCommand().execute(bookings, "Midterm", false));
     }
 
     @Test
