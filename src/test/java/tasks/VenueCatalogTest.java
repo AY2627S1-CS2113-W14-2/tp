@@ -14,8 +14,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-/** Checks preset venue lookup and independent availability results.
- *  @author Kytersaurus
+/**
+ * Checks preset venue lookup and independent availability results.
+ *
+ * @author Kytersaurus
  */
 class VenueCatalogTest {
     private static final LocalDateTime REQUESTED_TIME = LocalDateTime.of(2026, 10, 28, 14, 0);
