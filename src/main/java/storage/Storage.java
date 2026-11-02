@@ -16,6 +16,7 @@ import tasks.BookingList;
  */
 public class Storage {
     private static final String DELIMITER = " | ";
+    private static final String RESERVED_STORAGE_CHARACTER = "|";
     private static final String FILE_NAME = "bookings.txt";
     private static final String USER_NAME_FILE = "username.txt";
 
@@ -146,6 +147,12 @@ public class Storage {
 
         for (int i = 0; i < bookings.size(); i++) {
             Booking booking = bookings.get(i);
+
+            if (booking.getName().contains(RESERVED_STORAGE_CHARACTER)
+                    || booking.getVenue().contains(RESERVED_STORAGE_CHARACTER)) {
+                throw new IOException(
+                        "Booking name and venue must not contain |.");
+            }
 
             String line = bookingToLine(booking);
 

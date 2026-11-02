@@ -83,6 +83,32 @@ class EduReserveTest {
     }
 
     @Test
+    void main_storageSeparatorIsRejectedAndValidBookingLoadsAfterRestart() throws Exception {
+        String response = runApplication("James\n"
+                + "book r/exam n/A | B v/LT1 t/05/10/2026 14:00\n"
+                + "book r/exam n/Midterm v/LT2 t/06/10/2026 14:00\n"
+                + "bye\n");
+
+        assertTrue(
+                response.contains(
+                        "The | character is reserved for storage and cannot be used in commands."),
+                response);
+        assertEquals(
+                "B | exam | Midterm | LT2 | 06/10/2026 14:00 | \n",
+                Files.readString(workingDirectory.resolve("data/bookings.txt"))
+                        .replace("\r\n", "\n"));
+
+        String restarted = runApplication("list\nbye\n");
+
+        assertFalse(
+                restarted.contains("Unable to load your bookings."),
+                restarted);
+        assertTrue(
+                restarted.contains("1. exam Title: Midterm"),
+                restarted);
+    }
+
+    @Test
     void main_invalidSavedData_reportsLoadFailureAndPreservesFile() throws Exception {
         Path dataFile = workingDirectory.resolve("data/bookings.txt");
         Files.createDirectories(dataFile.getParent());

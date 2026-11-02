@@ -16,6 +16,7 @@ import ui.Ui;
  * Runs the interactive EduReserve booking application.
  */
 public class EduReserve {
+    private static final String RESERVED_STORAGE_CHARACTER = "|";
     private static final DateTimeFormatter SAVE_TIME_FORMAT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
@@ -61,6 +62,12 @@ public class EduReserve {
                 String userInput = in.nextLine();
 
                 if (userInput.isBlank()) {
+                    continue;
+                }
+
+                if (userInput.contains(RESERVED_STORAGE_CHARACTER)) {
+                    System.out.println(
+                            "The | character is reserved for storage and cannot be used in commands.");
                     continue;
                 }
 

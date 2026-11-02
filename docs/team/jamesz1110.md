@@ -6,6 +6,10 @@ EduReserve is a Java command-line application for managing exam and lecture venu
 
 ## Summary of Contributions
 
+### Code contributed
+
+* [RepoSense code dashboard](https://nus-cs2113-ay2627-s1.github.io/tp-dashboard/?search=JamesZ1110&breakdown=true)
+
 ### New feature: Booking storage
 
 * **What it does:** Saves bookings to `data/bookings.txt` and loads them when EduReserve starts again.
@@ -46,3 +50,20 @@ EduReserve is a Java command-line application for managing exam and lecture venu
 * Created and updated the [storage sequence diagram](../UMLDiagrams/StorageSequenceDiagram.puml).
 * Updated the [User Guide](../UserGuide.md) and the Developer Guide's manual-testing instructions.
 * Main commits: `b4a1dc6`, `8522682`, `60fb13f`, `f62ec4b`.
+
+### Team-based contributions
+
+* Tracked the booking-storage work in [issue #38](https://github.com/AY2627S1-CS2113-W14-2/tp/issues/38)
+  and the saved-username and save-time work in
+  [issue #83](https://github.com/AY2627S1-CS2113-W14-2/tp/issues/83).
+* Added the shared manual-testing instructions and storage section in
+  [PR #94](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/94).
+
+### Review contributions
+
+* Reviewed team PRs
+  [#109](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/109),
+  [#82](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/82),
+  [#78](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/78),
+  [#16](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/16), and
+  [#1](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/1).
