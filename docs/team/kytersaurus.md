@@ -8,6 +8,8 @@ with usage examples and UML diagrams.
 
 ## Summary of contributions
 
+- Code contributed: [RepoSense link](https://nus-cs2113-ay2627-s1.github.io/tp-dashboard/?search=kytersaurus&breakdown=true)
+
 ### New feature: Listing bookings (`list`)
 
 - **What it does:** Displays all bookings or filters them by exam or lecture, with consecutive numbering starting at 1.
@@ -46,7 +48,7 @@ with usage examples and UML diagrams.
   implemented by a teammate; my contribution was integrating the rule into the availability search.
 - **Code:** [FreeCommand](../../src/main/java/command/FreeCommand.java),
   [VenueCatalog](../../src/main/java/tasks/VenueCatalog.java),
-  [BookingList](../../src/main/java/tasks/BookingList.java). Commit: `47bac08` introduced the free command.
+  [BookingList](../../src/main/java/tasks/BookingList.java). Commits: `47bac08`, `7a6c730`, `60a63ca`.
 
 ### Defensive programming and testing
 
@@ -62,13 +64,20 @@ with usage examples and UML diagrams.
   venues, empty results, invalid dates and times, case-insensitive venue matching and searches that preserve bookings
   and undo history.
 - Extended availability tests for the one-hour booking duration, covering
-    partial overlaps before and after an existing booking's start, adjacent
-    slots exactly one hour apart, and slots crossing midnight. Updated command
-    and UI tests to check the displayed time range and preservation of stored
-    bookings.
+  partial overlaps before and after an existing booking's start, adjacent
+  slots exactly one hour apart, and slots crossing midnight. Updated command
+  and UI tests to check the displayed time range and preservation of stored
+  bookings.
 ### Other functional contributions
 
 - Created the command abstract class and method for all other commands to inherit from and act as a template for all command functions
+
+### Integration and code quality
+
+- Resolved merge conflicts while retaining teammates' tests and preserving their author attribution in Git history.
+- Fixed coding style and Javadoc issues identified by CI and integrated listing and availability commands with the
+  existing command handling structure.
+- Built and verified jar file for milestone 1 and 2 submission
 
 ### Documentation and diagrams
 
@@ -82,9 +91,3 @@ with usage examples and UML diagrams.
   application, UI, command, model and storage dependencies. Helped to organize and explain the UI, parser, command and booking list and storage works and their interactions under the class diagram.
 - Added a linked table of contents to the Developer Guide to make its sections easier to navigate along with the acknowledgements
 
-### Integration and code quality
-
-- Resolved merge conflicts while retaining teammates' tests and preserving their author attribution in Git history.
-- Fixed coding style and Javadoc issues identified by CI and integrated listing and availability commands with the
-  existing command handling structure.
-- Built and verified jar file for milestone 1 and 2 submission
