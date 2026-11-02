@@ -46,6 +46,7 @@ EduReserve saves one username and all bookings automatically.
 - Enter your username on the first launch. The same username is used the next time EduReserve starts.
 - After every command, the bookings are saved and the latest save time is shown.
 - Run EduReserve from the same folder again to load the saved username and bookings.
+- The `|` character is reserved for storage and cannot be used in commands.
 
 ### Creating a booking: `book`
 
