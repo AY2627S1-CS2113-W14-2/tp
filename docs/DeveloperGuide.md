@@ -105,6 +105,9 @@ Gradle project. Allow Gradle to finish downloading dependencies.
 
 ![EduReserve Architecture Diagram](UMLDiagrams/ArchitectureDiagram-EduReserve_architecture.png)
 
+[Editable PlantUML source](UMLDiagrams/ArchitectureDiagram.puml)
+
+
 ### UI and parsing
 
 The `ui` package interprets user commands, coordinates their execution and displays feedback.
@@ -138,6 +141,9 @@ superclasses; directed solid lines show navigable associations, and dashed arrow
 
 ![EduReserve overall class diagram](UMLDiagrams/OverallClassDiagram.png)
 
+[Editable PlantUML source](UMLDiagrams/OverallClassDiagram.puml)
+
+
 `EduReserve` creates the UI and storage objects and passes the loaded `BookingList` to `Ui`.
 `Ui` uses `Parser` to interpret input and creates or retains concrete command objects to execute
 operations. All ten command classes extend `Command`; cancellation is handled directly in `Ui`.
@@ -154,12 +160,10 @@ types, sorting options, exceptions, private history records and Java library cla
 Parser fields in the command classes denote retained references; each concrete command overrides
 `execute(BookingList, String)`.
 
-[Editable PlantUML source](UMLDiagrams/OverallClassDiagram.puml)
-
 The command sequence diagrams below show the user calling `Ui` directly, with the application
 entry point omitted. Arrows back to the user represent console output. Loading and saving are
-shown separately in the storage diagram. Its `User` actor represents user-triggered application
-activity; `EduReserve` performs the actual storage calls and is omitted from the diagram.
+shown separately in the storage diagram, which includes `EduReserve` because it calls `Storage`
+directly and handles the corresponding user interaction.
 
 ### Creating a booking: book
 
@@ -185,12 +189,14 @@ confirmation. `Ui` prints the separator and returns `false` so the application c
 
 ![Book command sequence diagram](UMLDiagrams/BookingSequenceDiagram.png)
 
+[Editable PlantUML source](UMLDiagrams/BookingSequenceDiagram.puml)
+
 The diagram shows a successful booking; validation internals and storage are omitted for clarity.
 If validation fails, `Parser` throws `InvalidCommandException` before a booking is added.
 The exception propagates through `BookCommand` to `Ui`, which displays the error and command help.
 After `processCommand` returns, `EduReserve` saves the booking list using `Storage.saveBookings`.
 
-[Editable PlantUML source](UMLDiagrams/BookingSequenceDiagram.puml)
+
 
 ### Listing bookings: list
 Displays the bookings, with optional filtering and sorting by name or date and time
@@ -222,7 +228,9 @@ Ui creates ListCommand(parser) and passes the complete user input to execute(). 
 ListCommand prints the heading, clears lastShownList, and fills it with all bookings or only exams or lectures. It sorts this display list alphabetically or chronologically, in either direction, before printing numbered results. Without a sorting option, insertion order is preserved. Time sorting is rejected if a selected booking lacks a valid date and time. The stored BookingList and its order remain unchanged.
 
 The list sequence diagram illustrates this flow using list r/exams s/alpha.
+
 ![List command sequence diagram](UMLDiagrams/ListCommandSequenceDiagram.png)
+
 [Editable PlantUML source](UMLDiagrams/ListCommandSequenceDiagram.puml)
 
 
@@ -273,10 +281,13 @@ For free t/TIMING, the command calls VenueCatalog.findAvailableVenues() to check
 Both searches use BookingList.isVenueAvailable(), which checks existing bookings through Booking.overlaps(). Venue matching ignores capitalization, overlapping bookings are excluded, and adjacent slots are allowed. Results are numbered, or a message is displayed when none are available. Neither search changes stored bookings or undo/redo history.
 
 The main free sequence diagram shows command processing and venue lookup. Its FreeVenueSlots reference frame links to the second diagram, which expands the daily slot search.
+
 ![Free command sequence diagram](UMLDiagrams/FreeCommandSequenceDiagram.png)
+
 [Editable PlantUML source](UMLDiagrams/FreeCommandSequenceDiagram.puml)
 
 ![Free venue slots sequence diagram ref](UMLDiagrams/FreeVenueSlotsSequenceDiagram.png)
+
 [Editable PlantUML source](UMLDiagrams/FreeVenueSlotsSequenceDiagram.puml)
 
 
@@ -307,6 +318,8 @@ Examples:
 | `viewbooking n/mybooking s/time` | Show all bookings under the name "mybooking" in the order of timing |
 
 ![View command sequence diagram](UMLDiagrams/ViewCommandSequenceDiagram.png)
+
+[Editable PlantUML source](UMLDiagrams/ViewCommandSequenceDiagram.puml)
 
 ### Editing a booking: editbooking
 
@@ -341,6 +354,8 @@ validates a replacement using the same constraints as creating a booking. Clash 
 so it cannot clash with itself. `BookingList.replace` applies the change in its original position
 only after validation succeeds. The existing application loop saves the updated list.
 
+![Editable edit booking sequence diagram](UMLDiagrams/EditBookingSequenceDiagram.png)
+
 [Editable edit booking sequence diagram](UMLDiagrams/EditBookingSequenceDiagram.puml)
 
 ### Checking attendee counts: checksize
@@ -354,6 +369,9 @@ The command groups bookings by venue and prints the largest attendee count recor
 Bookings without `a/ATTENDEES` do not contribute to the results.
 
 ![Checksize sequence diagram](UMLDiagrams/CheckSizeSequenceDiagram.png)
+
+[Editable PlantUML source](UMLDiagrams/CheckSizeSequenceDiagram.puml)
+
 
 ### Saving and loading bookings: storage
 
@@ -400,10 +418,10 @@ files would no longer load.
 
 ![Storage sequence diagram](UMLDiagrams/StorageSequenceDiagram.png)
 
+[Editable PlantUML source](UMLDiagrams/StorageSequenceDiagram.puml)
+
 The diagram shows the loading and saving of bookings. File operations, validation details and
 exception handling are omitted for clarity.
-
-[Editable PlantUML source](UMLDiagrams/StorageSequenceDiagram.puml)
 
 ### Cancelling a booking: cancel
 Removes a booking so that its venue and time can be used again
@@ -430,7 +448,10 @@ Design consideration: cancelling by name instead of by list number. `viewbooking
 identify bookings by name, so `cancel` works the same way. A list number is risky because it changes whenever the list
 is filtered, sorted, cancelled from or undone, so a number read from an old `list` could cancel the wrong booking.
 The trade-off is that the full name must be typed, which is acceptable because `book` requires names to be unique.
+
 ![Cancel command sequence diagram](UMLDiagrams/CancelCommandSequenceDiagram.png)
+
+[Editable PlantUML source](UMLDiagrams/CancelCommandSequenceDiagram.puml)
 
 ### Finding bookings: find
 Shows every booking whose name contains a keyword
@@ -458,7 +479,11 @@ Design consideration: partial, case-insensitive matching instead of matching the
 part of a booking name, such as the module code `CS2113`, and exact lookup by full name is already covered by
 `viewbooking`, `cancel` and `editbooking`. The trade-off is that a very short keyword can match many bookings, which is
 acceptable because the results are only displayed and the list is never changed.
+
 ![Find command sequence diagram](UMLDiagrams/FindCommandSequenceDiagram.png)
+
+[Editable PlantUML source](UMLDiagrams/FindCommandSequenceDiagram.puml)
+
 
 ### Preventing booking clashes: book
 A new booking is rejected if its venue is already booked at an overlapping time
@@ -496,7 +521,11 @@ and older saved bookings would need converting. With a fixed duration the end ti
 and `Booking.DEFAULT_DURATION` is the only value to change if the length ever changes. The trade-off is that a longer
 exam cannot block its venue for its full length. An optional duration field could be added later by storing it in
 `Booking` and using it in `Booking#getEndTime`.
+
 ![Book command sequence diagram](UMLDiagrams/BookCommandSequenceDiagram.png)
+
+[Editable PlantUML source](UMLDiagrams/BookCommandSequenceDiagram.puml)
+
 
 ### Daily calendar: calendar
 Shows the bookings that start today, with their start times
@@ -524,6 +553,9 @@ asks `BookingList#findByDate` for the bookings starting on that date, sorted by 
 `LocalDate` version exists so that tests can check the output for a fixed date instead of depending on today's date.
 
 ![Calendar command sequence diagram](UMLDiagrams/CalendarCommandSequenceDiagram.png)
+
+[Editable PlantUML source](UMLDiagrams/CalendarCommandSequenceDiagram.puml)
+
 
 ### Undoing a command: /undo
 
@@ -555,10 +587,11 @@ current session. A save failure is reported by `EduReserve` as `Unable to save y
 
 ![Undo command sequence diagram](UMLDiagrams/UndoCommandSequenceDiagram.png)
 
+[Editable PlantUML source](UMLDiagrams/UndoCommandSequenceDiagram.puml)
+
 The diagram covers a valid `/undo` request, including empty history and the transfer to redo history.
 Validation details, separator output and persistence are omitted for clarity.
 
-[Editable PlantUML source](UMLDiagrams/UndoCommandSequenceDiagram.puml)
 
 ### Redoing a command: /redo
 
@@ -579,12 +612,13 @@ option to redo C. A failed command or a read-only command such as `list` leaves 
 
 ![Redo command sequence diagram](UMLDiagrams/RedoCommandSequenceDiagram.png)
 
+[Editable PlantUML source](UMLDiagrams/RedoCommandSequenceDiagram.puml)
+
 The diagram covers a valid `/redo` request, including empty redo history and the transfer back to undo history.
 The two loops expand `restoreBookings`: first clear the current list, then restore the saved **after**
 state from `resultingBookings()`. Undo instead restores the **before** state from `previousBookings()`.
 Input validation, snapshot helper calls, separator output and persistence are omitted for clarity.
 
-[Editable PlantUML source](UMLDiagrams/RedoCommandSequenceDiagram.puml)
 
 ## Product scope
 ### Target user profile

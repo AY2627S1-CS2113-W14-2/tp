@@ -28,7 +28,6 @@ activate Parser
 Parser --> List: ListOptions("exams", ALPHABETIC)
 deactivate Parser
 
-List --> User: listing heading
 note right of List: Print the selected filter and sort order
 
 List -> List: execute(bookingList, "exams", ALPHABETIC)
@@ -75,17 +74,24 @@ deactivate List
 List -> List: printLastShownList()
 activate List
 
-List --> User: numbered bookings in alphabetical order
-note right of List: Number results starting at 1
+note right of List
+Print numbered bookings in alphabetical order,
+numbered starting at 1.
+end note
 
 deactivate List
-
 deactivate List
 
 List --> UI
 deactivate List
 
-UI --> User: separator
-deactivate UI
+UI --> User: listing output and separator
 
+note over User, UI
+ListCommand prints the heading and bookings.
+Ui prints the separators.
+This arrow summarises the console output.
+end note
+
+deactivate UI
 @enduml

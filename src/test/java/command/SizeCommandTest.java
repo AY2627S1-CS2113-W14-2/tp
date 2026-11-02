@@ -1,6 +1,7 @@
 package command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.ByteArrayOutputStream;
@@ -67,6 +68,34 @@ class SizeCommandTest {
                         + "LTZ: 30 attendees\n",
                 normalizeNewlines(output));
         assertEquals(3, bookings.size());
+    }
+
+    @Test
+    void execute_whitespaceAndCaseAroundCommandAreAcceptedWithoutChangingBookings() {
+        Booking first = new Booking("exam", "Midterm", "LT2", "05/10/2026 09:00", 30);
+        Booking second = new Booking("lecture", "Final", "LT1", "05/10/2026 10:00", 50);
+        BookingList bookings = new BookingList();
+        bookings.add(first);
+        bookings.add(second);
+
+        LOGGER.log(System.Logger.Level.INFO, "Checking checksize command normalization and read-only behavior.");
+        String output = captureOutput(() -> new SizeCommand().execute(bookings, "  CHECKSIZE  "));
+
+        assertEquals("Largest recorded attendee count by venue:\n"
+                        + "LT1: 50 attendees\n"
+                        + "LT2: 30 attendees\n",
+                normalizeNewlines(output));
+        assertEquals(2, bookings.size());
+        assertSame(first, bookings.get(0));
+        assertSame(second, bookings.get(1));
+    }
+
+    @Test
+    void execute_nullBookingListOrInput_failsPrecondition() {
+        SizeCommand command = new SizeCommand();
+
+        assertThrows(AssertionError.class, () -> command.execute(null, "checksize"));
+        assertThrows(AssertionError.class, () -> command.execute(new BookingList(), null));
     }
 
     @Test

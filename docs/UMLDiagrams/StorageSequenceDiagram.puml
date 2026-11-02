@@ -4,33 +4,40 @@ skinparam sequenceMessageAlign center
 hide footbox
 
 actor User
+participant ":EduReserve" as App
 participant ":Storage" as Storage
 participant ":BookingList" as Bookings
 participant ":Booking" as Booking
 
 
+User -> App: start application
+activate App
+
 group Load saved username
-    User -> Storage: loadUserName()
+    App -> Storage: loadUserName()
     activate Storage
 
-    Storage --> User: username or null
+    Storage --> App: username or null
     deactivate Storage
 
     alt no username is saved
-        User -> Storage: saveUserName(userName)
+        App -> User: "What is your name?"
+        User --> App: userName
+
+        App -> Storage: saveUserName(userName)
         activate Storage
-        Storage --> User
+        Storage --> App
         deactivate Storage
     end
 end
 
 group Load saved bookings
-    User -> Storage: loadBookings()
+    App -> Storage: loadBookings()
     activate Storage
 
     alt data file does not exist
         Storage -> Storage: createEmptyDataFile()
-        Storage --> User: empty booking list
+        Storage --> App: empty booking list
     else data file exists
         Storage -> Storage: read saved lines
 
@@ -59,19 +66,20 @@ group Load saved bookings
             deactivate Bookings
         end
 
-        Storage --> User: booking list
+        Storage --> App: booking list
     end
 
     deactivate Storage
 end
 
-note over User
-    A command is processed and may
-    change the current booking list.
+User -> App: enter command
+note right of App
+    Command processing is omitted.
+    It may change the booking list.
 end note
 
 group Save current bookings
-    User -> Storage: saveBookings(bookings)
+    App -> Storage: saveBookings(bookings)
     activate Storage
 
     loop for each booking
@@ -93,8 +101,11 @@ group Save current bookings
 
     Storage -> Storage: write lines to bookings.txt
     Storage -> Storage: getLastModifiedTime()
-    Storage --> User: last modified time
+    Storage --> App: last modified time
     deactivate Storage
+
+    App --> User: "Bookings saved at: " + formatted time
 end
 
+deactivate App
 @enduml

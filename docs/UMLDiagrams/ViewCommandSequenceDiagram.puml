@@ -43,10 +43,11 @@ opt sortByTime is true
 end
 
 loop each matching booking
-    View --> User: booking number, purpose, venue, and timing
+    View --> UI: booking number, purpose, venue, and timing
+    UI --> User: booking number, purpose, venue, and timing
 end
 
-View --> UI
+View --> UI: execute returns after all matches are displayed
 deactivate View
 
 deactivate UI

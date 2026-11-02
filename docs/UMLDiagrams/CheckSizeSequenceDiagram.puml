@@ -46,8 +46,8 @@ loop for each booking in the list
     end
 end
 
-Size --> User: Maximum attendee count for each venue
-Size --> UI
+Size --> UI: Maximum attendee count for each venue
+UI --> User: Maximum attendee count for each venue
 deactivate Size
 deactivate UI
 @enduml
