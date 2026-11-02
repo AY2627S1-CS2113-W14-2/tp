@@ -29,7 +29,6 @@ with usage examples and UML diagrams.
 - **Justification:** Lets administrators locate bookings by name and review upcoming bookings in time order.
 - **Highlights:** Added `SortOrder` and used comparators to sort the display list. Alphabetical comparisons ignore
   capitalization. Filtering and sorting can be combined, and the optional arguments can appear in either order.
-  The parser returns a `ListOptions` record containing both selections and rejects duplicate or unsupported options.
   Time sorting reports an error if a selected booking has an older timing value without a valid date and time.
 - **Code:** [ListCommand](../../src/main/java/command/ListCommand.java),
   [SortOrder](../../src/main/java/command/SortOrder.java), [Parser](../../src/main/java/ui/Parser.java).
@@ -44,8 +43,7 @@ with usage examples and UML diagrams.
 - **Highlights:** Implemented `FreeCommand`, date/time and venue/date parsing, UI dispatch and `VenueCatalog`. The catalog contains
   computing seminar rooms and labs, lecture theatres and MPSH venues. Availability searches leave stored bookings
   unchanged. Updated `BookingList.isVenueAvailable` to reuse the existing `Booking.overlaps` helper so availability
-  follows the same one-hour rule as booking clash prevention. The overlap helper and clash prevention feature were
-  implemented by a teammate; my contribution was integrating the rule into the availability search.
+  follows the same one-hour rule as booking clash prevention.
 - **Code:** [FreeCommand](../../src/main/java/command/FreeCommand.java),
   [VenueCatalog](../../src/main/java/tasks/VenueCatalog.java),
   [BookingList](../../src/main/java/tasks/BookingList.java). Commits: `47bac08`, `7a6c730`, `60a63ca`.
@@ -70,7 +68,7 @@ with usage examples and UML diagrams.
   bookings.
 ### Other functional contributions
 
-- Created the command abstract class and method for all other commands to inherit from and act as a template for all command functions
+- Created the command abstract class and method for all other commands to inherit from.
 
 ### Integration and code quality
 
