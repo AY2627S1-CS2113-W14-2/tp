@@ -1,6 +1,8 @@
-# About Us
+# EduReserve
 
-[User Guide](UserGuide.md) | [Developer Guide](DeveloperGuide.md) | **About Us**
+[Home](README.md) | [User Guide](UserGuide.md) | [Developer Guide](DeveloperGuide.md) | [**About Us**](AboutUs.md)
+
+# About Us
 
 We are the team behind **EduReserve**, a Java command-line application that helps school administrators
 manage lecture and exam venue bookings. This project is developed for CS2113 at the

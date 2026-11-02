@@ -171,6 +171,31 @@ class StorageTest {
         assertEquals(originalContents, Files.readString(dataFile));
     }
 
+    /**
+     * A rejected venue must not partially overwrite the file, even after a valid booking is processed.
+     */
+    @Test
+    void saveBookings_storageSeparatorInVenue_preservesExistingFile() throws IOException {
+        Storage storage = new Storage(tempDirectory);
+        BookingList original = new BookingList();
+        original.add(new Booking("exam", "Existing", "LT1", "05/10/2026 14:00"));
+        storage.saveBookings(original);
+        Path dataFile = tempDirectory.resolve("bookings.txt");
+        String originalContents = Files.readString(dataFile);
+
+        BookingList replacements = new BookingList();
+        replacements.add(new Booking("lecture", "Valid", "LT2", "06/10/2026 14:00"));
+        replacements.add(new Booking("exam", "Invalid venue", "LT3|LT4", "07/10/2026 14:00"));
+
+        IOException error = assertThrows(IOException.class, () -> storage.saveBookings(replacements));
+
+        assertEquals("Booking name and venue must not contain |.", error.getMessage());
+        assertEquals(originalContents, Files.readString(dataFile));
+        BookingList reloaded = storage.loadBookings();
+        assertEquals(1, reloaded.size());
+        assertEquals("Existing", reloaded.get(0).getName());
+    }
+
     @Test
     void loadBookings_nestedDirectory_createsParents() throws IOException {
         Path nested = tempDirectory.resolve("nested/data");

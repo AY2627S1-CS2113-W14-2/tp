@@ -8,8 +8,9 @@ sessions. My main contributions are the `editbooking`, `viewbooking` and `checks
 their tests and documentation.
 
 ## Summary of Contributions
+* **Code contributed**: [RepoSense link](https://nus-cs2113-ay2627-s1.github.io/tp-dashboard/?search=produdepunk&breakdown=true)
 
-### Features implemented
+### New features implemented
 
 #### Editing a booking: `editbooking`
 
