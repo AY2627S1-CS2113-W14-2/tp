@@ -24,7 +24,9 @@ import tasks.BookingList;
 import exceptions.InvalidCommandException;
 import ui.Parser;
 
-/** Checks command parsing, listing output and preservation of stored booking order. */
+/** Checks command parsing, listing output and preservation of stored booking order.
+ *  @author Kytersaurus
+ */
 class ListCommandTest {
     @Test
     void execute_fineLogging_recordsSelectionResultsAndRejectedTimeSorting() {

@@ -117,7 +117,7 @@ public final class VenueCatalog {
     /**
      * Finds available one-hour slots starting on each whole hour of a date.
      * The final slot ends at midnight on the following day.
-     *
+     * @author Kytersaurus
      * @param bookings existing bookings
      * @param venue preset venue to check
      * @param date date to search
