@@ -26,7 +26,7 @@ History --> Undo: empty
 deactivate History
 
 alt empty == true
-    Undo --> User: "No commands to undo."
+    note right of Undo: Console output: "No commands to undo."
 else history contains an undoable command
     Undo -> History: peek()
     activate History
@@ -58,7 +58,7 @@ else history contains an undoable command
 
     Undo -> RedoHistory: push(lastCommand)
 
-    Undo --> User: "Undid command: " + lastCommand.userInput()
+    note right of Undo: Console output: "Undid command: " + lastCommand.userInput()
 end
 
 Undo --> UI

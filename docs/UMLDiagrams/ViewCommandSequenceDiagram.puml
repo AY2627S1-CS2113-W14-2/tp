@@ -24,7 +24,7 @@ activate Parser
 Parser --> UI: ViewOptions("CS2113 Midterm", true)
 deactivate Parser
 
-UI --> User: the matching bookings heading
+note right of UI: Console output: the matching bookings heading
 
 create participant ":ViewCommand" as View
 UI -> View: new ViewCommand()
@@ -43,11 +43,10 @@ opt sortByTime is true
 end
 
 loop each matching booking
-    View --> UI: booking number, purpose, venue, and timing
-    UI --> User: booking number, purpose, venue, and timing
+    note right of View: Print booking number, purpose, venue, and timing
 end
 
-View --> UI: execute returns after all matches are displayed
+View --> UI
 deactivate View
 
 deactivate UI

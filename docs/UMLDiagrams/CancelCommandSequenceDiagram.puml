@@ -28,7 +28,7 @@ Bookings --> UI: index
 deactivate Bookings
 
 alt index == -1
-    UI --> User: No booking found with the name
+    note right of UI: Console output: No booking found with the name
 else booking found
     UI -> Bookings: get(index)
     activate Bookings
@@ -40,7 +40,7 @@ else booking found
     Bookings --> UI
     deactivate Bookings
 
-    UI --> User: "Booking cancelled: ..."
+    note right of UI: Console output: "Booking cancelled: ..."
 end
 
 deactivate UI

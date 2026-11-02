@@ -22,6 +22,14 @@ class ParserTest {
     private final Parser parser = new Parser();
 
     @Test
+    void parseBooking_fourFieldsWithIncorrectTimingPrefix_reportsUsage() {
+        InvalidCommandException error = assertThrows(InvalidCommandException.class,
+                () -> parser.parseBooking("book r/exam n/Midterm v/LT1 r/05/10/2026 14:00"));
+        assertEquals("Please use: book r/BOOKING_REASON n/BOOKING_NAME v/VENUE t/TIMING"
+                + " [a/ATTENDEES]", error.getMessage());
+    }
+
+    @Test
     void parseFreeOptions_timeSearch_preservesExistingSyntax() {
         Parser.FreeOptions options = parser.parseFreeOptions("free t/28/10/2026 14:30");
         assertEquals(LocalDateTime.of(2026, 10, 28, 14, 30), options.startTime());

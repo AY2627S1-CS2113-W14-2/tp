@@ -85,12 +85,12 @@ deactivate List
 List --> UI
 deactivate List
 
-UI --> User: listing output and separator
+note right of UI: Console output: listing output and separator
 
 note over User, UI
 ListCommand prints the heading and bookings.
 Ui prints the separators.
-This arrow summarises the console output.
+Console output is shown as notes, not return values.
 end note
 
 deactivate UI

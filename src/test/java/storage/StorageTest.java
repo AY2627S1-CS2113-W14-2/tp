@@ -25,6 +25,20 @@ class StorageTest {
     Path tempDirectory;
 
     @Test
+    void loadUserName_blankSavedName_returnsNull() throws IOException {
+        Files.writeString(tempDirectory.resolve("username.txt"), "  \t\n");
+        assertNull(new Storage(tempDirectory).loadUserName());
+    }
+
+    @Test
+    void saveUserName_nullName_preservesSavedName() throws IOException {
+        Storage storage = new Storage(tempDirectory);
+        storage.saveUserName("James");
+        assertThrows(IllegalArgumentException.class, () -> storage.saveUserName(null));
+        assertEquals("James", storage.loadUserName());
+    }
+
+    @Test
     void constructor_nullDirectory_rejectsInvalidConfiguration() {
         IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> new Storage(null));
         assertEquals("Storage directory must not be null", error.getMessage());

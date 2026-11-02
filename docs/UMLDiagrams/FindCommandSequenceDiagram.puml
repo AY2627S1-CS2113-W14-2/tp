@@ -34,9 +34,9 @@ Bookings --> Find: matches
 deactivate Bookings
 
 alt matches is empty
-    Find --> User: "No bookings found matching: CS2"
+    note right of Find: Console output: "No bookings found matching: CS2"
 else matches found
-    Find --> User: numbered matches in original order
+    note right of Find: Console output: numbered matches in original order
 end
 
 Find --> UI

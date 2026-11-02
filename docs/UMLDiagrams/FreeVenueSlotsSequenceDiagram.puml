@@ -8,11 +8,6 @@ participant ":FreeCommand" as Free
 participant "VenueCatalog" as Catalog <<class>>
 participant ":BookingList" as Bookings
 
-note over Free, Bookings
-Expands FreeVenueSlots(bookingList, venue, date).
-Example: venue = "LT19", date = 02/11/2026.
-end note
-
 Free -> Free: printAvailableSlots(bookingList, venue, date)
 activate Free
 
