@@ -23,7 +23,7 @@ deactivate Parser
 create participant ":FreeCommand" as Free
 UI -> Free: new FreeCommand(parser)
 
-participant "<> VenueCatalog" as Catalog
+participant "VenueCatalog" as Catalog <<class>>
 participant ":BookingList" as Bookings
 
 UI -> Free: execute(bookingList, userInput)
@@ -68,19 +68,26 @@ alt options.venue() == null
     Catalog --> Free: venues
     deactivate Catalog
 
-    Free --> User: requested one-hour time range
+    note right of Free
+       Print the requested
+       one-hour time range.
+    end note
 
     alt venues is empty
-        Free --> User: "No venues are available at specified time"
+        note right of Free
+        Print "No venues are available at specified time"
+        end note
     else venues is not empty
-        Free --> User: numbered available venues
-        note right of Free: Number results starting at 1
+        note right of Free
+        Print available venues
+        numbered starting at 1
+        end note
     end
 
     deactivate Free
 
 else options.venue() != null
-    ref over User, Bookings
+    ref over Free, Bookings
         FreeVenueSlots(bookingList, venue, date)
     end ref
 end
@@ -88,7 +95,14 @@ end
 Free --> UI
 deactivate Free
 
-UI --> User: separator
-deactivate UI
+UI --> User: availability output and separator
 
+note over User, UI
+FreeCommand prints the heading and results.
+Ui prints the separators.
+This arrow summarises the console output.
+end note
+
+
+deactivate UI
 @enduml

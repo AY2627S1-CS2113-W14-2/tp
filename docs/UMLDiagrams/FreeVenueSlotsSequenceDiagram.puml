@@ -1,12 +1,11 @@
-@startuml FreeVenueSlots
+@startuml
 mainframe sd FreeVenueSlots(bookingList, venue, date)
 
 skinparam sequenceMessageAlign center
 hide footbox
 
-actor User
 participant ":FreeCommand" as Free
-participant "<> VenueCatalog" as Catalog
+participant "VenueCatalog" as Catalog <<class>>
 participant ":BookingList" as Bookings
 
 note over Free, Bookings
@@ -47,20 +46,18 @@ end
 Catalog --> Free: slots
 deactivate Catalog
 
-Free --> User: venue, date and whole-hour search heading
-
 alt slots is empty
-    Free --> User: "No one-hour slots are available"
+    note right of Free: Print "No one-hour slots are available"
 else slots is not empty
-    Free --> User: numbered start and end dates/times
+    note right of Free: Print numbered start and end dates/times
 
     note right of Free
     Number results starting at 1.
+
     The 23:00 slot ends at midnight
     on the following day.
     end note
 end
 
 deactivate Free
-
 @enduml

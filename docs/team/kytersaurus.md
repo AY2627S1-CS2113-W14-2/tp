@@ -79,7 +79,7 @@ with usage examples and UML diagrams.
   [free sequence diagram](../UMLDiagrams/FreeCommandSequenceDiagram.puml), along with the [free venue sequence diagram](../UMLDiagrams/FreeVenueSlotsSequenceDiagram.puml) showing parsing, command execution,
   filtering or availability checks, and output to the user.
 - Created the [architecture diagram](../UMLDiagrams/ArchitectureDiagram.puml) and simplified it to show the main
-  application, UI, command, model and storage dependencies.
+  application, UI, command, model and storage dependencies. Explained how the UI, parser works and their interactions.
 - Added a linked table of contents to the Developer Guide to make its sections easier to navigate along with the acknowledgements
 
 ### Integration and code quality
