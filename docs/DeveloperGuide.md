@@ -6,9 +6,15 @@
 - [Setup](#setting-up-getting-started)
   - [Prerequisites](#prerequisites)
   - [Setting up the project](#setting-up-the-project)
-- [Design & implementation](#design--implementation)
+- [Design](#design)
+  - [Architecture](#architecture)
   - [Overall class diagram](#overall-class-diagram)
+  - [UI and parsing](#UI-and-parsing)
+  - [Commands](#commands)
   - [Command class diagram](#command-class-diagram)
+  - [Booking model](#booking-model)
+  - [Storage](#storage)
+- [Implementation](#implementation)
   - [Creating a booking: book](#creating-a-booking-book)
   - [Listing bookings: list](#listing-bookings-list)
   - [List available venues: free](#list-available-venues-free)
@@ -102,35 +108,15 @@ Gradle project. Allow Gradle to finish downloading dependencies.
 - [Checkstyle](https://checkstyle.org/): Used to check Java source code against the project's coding standards.
 - [NUSMods](https://nusmods.com/venues): Referenced when compiling the preset venue names in VenueCatalog.
 
-## Design & implementation
+## Design
+
+### Architecture
+
+Architecture diagram for EduReserve
 
 ![EduReserve Architecture Diagram](UMLDiagrams/ArchitectureDiagram-EduReserve_architecture.png)
 
 [Editable PlantUML source](UMLDiagrams/ArchitectureDiagram.puml)
-
-
-### UI and parsing
-
-The `ui` package interprets user commands, coordinates their execution and displays feedback.
-
-**Ui**
-
-`Ui` receives command text from `EduReserve` and routes it to the appropriate operation. It holds the shared booking list and coordinates ongoing interactions, including editing and undo/redo. It displays command results and handles invalid input by showing an error and usage guidance.
-
-**Parser**
-
-`Parser` recognises command names, extracts arguments and validates their syntax and values. It returns the information needed to execute the requested operation. It does not display output or modify stored bookings.
-
-For commands with multiple options or search modes, the parser groups the validated arguments into records:
-
-- `parseViewList()` returns a `ListOptions` record containing the booking filter and sorting order.
-- `parseFreeOptions()` returns a `FreeOptions` record containing either a start time for finding available venues, or a venue and date for finding available daily slots.
-
-The command classes use these records to select the requested behaviour without parsing the input themselves.
-
-**Interaction**
-
-`EduReserve` reads console input and passes it to `Ui`. The UI and command classes use `Parser` to interpret the input, then perform the requested operation and display feedback. `EduReserve` handles saving the booking data and ending the application.
 
 ### Overall class diagram
 
@@ -144,21 +130,44 @@ superclasses; directed solid lines show navigable associations, and dashed arrow
 
 [Editable PlantUML source](UMLDiagrams/OverallClassDiagram.puml)
 
-
-`EduReserve` creates the UI and storage objects and passes the loaded `BookingList` to `Ui`.
-`Ui` uses `Parser` to interpret input and creates or retains concrete command objects to execute
-operations. The generic `Command` represents those concrete commands in this overview;
-their inheritance relationships are shown separately below. Cancellation is handled directly in `Ui`.
-
-`BookingList` holds references to `Booking` objects, which inherit their reason (the `description`
-field) from `Task`. `Storage` loads and saves these bookings, while `VenueCatalog` supplies the
-preset venues and checks their availability against the booking list. The plain association
-between `BookingList` and `Booking` allows the same immutable booking objects to also appear
-in search results and undo/redo snapshots.
-
-For readability, only selected members and relationships are shown. Help text, parsing option
+The colours identify the different parts of EduReserve: yellow represents the application entry point, blue the ui package, purple the command package, green the tasks package, and pink the storage package. Start with EduReserve at the top and follow its dependencies to Ui and Storage. The command hierarchy appears on the left, while the booking model appears on the lower right. For readability, only selected members and relationships are shown. Help text, parsing option
 types, sorting options, exceptions, private history records and Java library classes are omitted.
-`Storage.saveBookings` returns the saved file's modification time as a `FileTime`.
+Parser fields in the command classes denote retained references.
+
+### UI and parsing
+
+The `ui` package interprets user commands, coordinates their execution and displays feedback.
+
+**Ui**
+
+`Ui` receives command text from `EduReserve` and routes it to the appropriate operation. It holds the shared booking list and coordinates ongoing interactions, including editing and undo/redo. It coordinates command execution and user feedback.
+
+**Parser**
+
+`Parser` recognises command names, extracts arguments and validates their syntax and values. It returns the information needed to execute the requested operation. It does not display output or modify stored bookings.
+
+For commands with multiple options or search modes, the parser groups the validated arguments into records:
+
+- `parseViewList()` returns a `ListOptions` record containing the booking filter and sorting order.
+- `parseFreeOptions()` returns a `FreeOptions` record containing either a start time for finding available venues, or a venue and date for finding available daily slots.
+
+The command classes use these records to select the requested behavior without parsing the input themselves.
+
+**Interaction**
+
+`EduReserve` creates a `Storage` object, loads the saved `BookingList`, and passes it to a new `Ui` object. It then reads console input and passes each nonblank command to `Ui.processCommand()`.
+
+The UI and command classes use `Parser` to interpret input, execute the requested operation and display feedback. `EduReserve` saves the booking list after command processing and ends the command loop when an exit is requested.
+
+### Commands
+
+All ten command classes extend `Command`; cancellation is handled directly in `Ui`; each concrete command overrides
+`execute(BookingList, String)`. 
+`RedoCommand` refers to the same `UndoCommand` retained by `Ui`, so both use one session history.
+The command sequence diagrams below show the user calling `Ui` directly, with the application
+entry point omitted. Arrows back to the user represent console output. 
+The generic `Command` represents those concrete commands in this overview;
+their inheritance relationships are shown separately below. Cancellation is handled directly in `Ui`.
 
 ### Command class diagram
 
@@ -177,6 +186,25 @@ returns from command execution carry no value because `execute` returns `void`. 
 is shown in notes, not as return arrows to the user. Loading and saving are
 shown separately in the storage diagram, which includes `EduReserve` because it calls `Storage`
 directly and handles the corresponding user interaction.
+
+### Booking model
+
+`BookingList` holds references to `Booking` objects, which inherit their reason (the `description`
+field) from `Task`. `VenueCatalog` supplies the
+preset venues and checks their availability against the booking list. The plain association
+between `BookingList` and `Booking` allows the same immutable booking objects to also appear
+in search results and undo/redo snapshots.
+
+For readability, only selected members and relationships are shown. Help text, parsing option
+types, sorting options, exceptions, private history records and Java library classes are omitted.
+`Storage.saveBookings` returns the saved file's modification time as a `FileTime`.
+
+### Storage
+
+`Storage` loads and saves bookings and the stored username. Loading and saving are
+shown separately in the storage diagram. `EduReserve` coordinates these operations, loading data at startup and saving the booking list after command processing. The detailed file format and loading behaviour are explained in the Implementation section.
+
+## Implementation
 
 ### Creating a booking: book
 
