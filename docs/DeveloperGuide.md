@@ -158,8 +158,8 @@ Parser fields in the command classes denote retained references; each concrete c
 
 The command sequence diagrams below show the user calling `Ui` directly, with the application
 entry point omitted. Arrows back to the user represent console output. Loading and saving are
-shown separately in the storage diagram. Its `User` actor represents user-triggered application
-activity; `EduReserve` performs the actual storage calls and is omitted from the diagram.
+shown separately in the storage diagram, which includes `EduReserve` because it calls `Storage`
+directly and handles the corresponding user interaction.
 
 ### Creating a booking: book
 
