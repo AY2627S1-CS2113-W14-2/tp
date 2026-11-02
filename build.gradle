@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'checkstyle'
+    id 'jacoco'
     id 'com.gradleup.shadow' version '9.5.1'
 }
 
@@ -55,6 +56,50 @@ shadowJar {
 checkstyle {
     toolVersion = '14.1.0'
 }
+
+jacoco {
+    toolVersion = '0.8.14'
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+// Keep the booking/history commands and persistence fully exercised, including lazy log messages.
+jacocoTestCoverageVerification {
+    dependsOn test
+    violationRules {
+        rule {
+            element = 'CLASS'
+            includes = ['command.BookCommand', 'command.UndoCommand*', 'command.RedoCommand', 'storage.Storage']
+            ['INSTRUCTION', 'LINE', 'BRANCH'].each { metric ->
+                limit {
+                    counter = metric
+                    minimum = 1.0
+                }
+            }
+        }
+        // Shared classes also serve unrelated commands; enforce only the methods used by this flow.
+        rule {
+            element = 'METHOD'
+            includes = ['ui.Parser.parseBooking*', 'ui.Parser.parseCommand*', 'ui.Parser.separateInput*',
+                        'ui.Parser.extractTrailingAttendeeField*', 'ui.Parser.parsePositiveAttendeeCount*',
+                        'EduReserve.main*', 'EduReserve.printSaveTime*']
+            ['INSTRUCTION', 'LINE', 'BRANCH'].each { metric ->
+                limit {
+                    counter = metric
+                    minimum = 1.0
+                }
+            }
+        }
+    }
+}
+
+check.dependsOn jacocoTestCoverageVerification
 
 run {
     enableAssertions = true

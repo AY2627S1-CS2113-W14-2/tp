@@ -220,7 +220,7 @@ public class Storage {
                 -1);
 
         if (parts.length != 5 && parts.length != 6) {
-            throwInvalidDataError(lineNumber);
+            throw invalidDataError(lineNumber);
         }
 
         String type = parts[0];
@@ -238,33 +238,33 @@ public class Storage {
                 try {
                     attendeeCount = Integer.parseInt(attendeeText);
                 } catch (NumberFormatException e) {
-                    throwInvalidDataError(lineNumber);
+                    throw invalidDataError(lineNumber);
                 }
 
                 if (attendeeCount <= 0) {
-                    throwInvalidDataError(lineNumber);
+                    throw invalidDataError(lineNumber);
                 }
             }
         }
 
         if (!type.equals("B")) {
-            throwInvalidDataError(lineNumber);
+            throw invalidDataError(lineNumber);
         }
 
         if (!isValidReason(reason)) {
-            throwInvalidDataError(lineNumber);
+            throw invalidDataError(lineNumber);
         }
 
         if (name.isBlank()) {
-            throwInvalidDataError(lineNumber);
+            throw invalidDataError(lineNumber);
         }
 
         if (venue.isBlank()) {
-            throwInvalidDataError(lineNumber);
+            throw invalidDataError(lineNumber);
         }
 
         if (timing.isBlank()) {
-            throwInvalidDataError(lineNumber);
+            throw invalidDataError(lineNumber);
         }
 
         Booking booking = new Booking(
@@ -296,16 +296,15 @@ public class Storage {
     }
 
     /**
-     * Reports a bad line in the data file.
+     * Creates an error identifying a bad line in the data file.
      *
      * @param lineNumber the bad line number
-     * @throws IOException for invalid saved data
+     * @return the error for invalid saved data
      */
-    private void throwInvalidDataError(int lineNumber)
-            throws IOException {
+    private IOException invalidDataError(int lineNumber) {
         String message = "Invalid booking data at line "
                 + lineNumber;
 
-        throw new IOException(message);
+        return new IOException(message);
     }
 }

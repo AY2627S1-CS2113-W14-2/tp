@@ -43,7 +43,7 @@ Book -> Booking: toString()
 activate Booking
 Booking --> Book: booking text
 deactivate Booking
-Book --> User: "Booking added: " + booking text
+note right of Book: Console output: "Booking added: " + booking text
 Book --> UI
 deactivate Book
 

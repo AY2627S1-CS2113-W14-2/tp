@@ -21,8 +21,8 @@ group Load saved username
     deactivate Storage
 
     alt no username is saved
-        App -> User: "What is your name?"
-        User --> App: userName
+        note right of App: Console output: "What is your name?"
+        User -> App: enter userName
 
         App -> Storage: saveUserName(userName)
         activate Storage
@@ -104,7 +104,7 @@ group Save current bookings
     Storage --> App: last modified time
     deactivate Storage
 
-    App --> User: "Bookings saved at: " + formatted time
+    note right of App: Console output: "Bookings saved at: " + formatted time
 end
 
 deactivate App

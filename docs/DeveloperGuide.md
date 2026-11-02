@@ -11,6 +11,7 @@
   - [Overall class diagram](#overall-class-diagram)
   - [UI and parsing](#UI-and-parsing)
   - [Commands](#commands)
+  - [Command class diagram](#command-class-diagram)
   - [Booking model](#booking-model)
   - [Storage](#storage)
 - [Implementation](#implementation)
@@ -161,10 +162,30 @@ The UI and command classes use `Parser` to interpret input, execute the requeste
 ### Commands
 
 All ten command classes extend `Command`; cancellation is handled directly in `Ui`; each concrete command overrides
-`execute(BookingList, String)`.
+`execute(BookingList, String)`. 
 `RedoCommand` refers to the same `UndoCommand` retained by `Ui`, so both use one session history.
 The command sequence diagrams below show the user calling `Ui` directly, with the application
-entry point omitted. Arrows back to the user represent console output.
+entry point omitted. Arrows back to the user represent console output. 
+The generic `Command` represents those concrete commands in this overview;
+their inheritance relationships are shown separately below. Cancellation is handled directly in `Ui`.
+
+### Command class diagram
+
+All ten concrete command classes extend `Command` and override `execute(BookingList, String)`.
+The diagram omits repeated overrides and most implementation details to focus on inheritance.
+Parser fields denote retained references. `EditCommand` also handles input across multiple commands.
+`RedoCommand` refers to the same `UndoCommand` retained by `Ui`, so both use one session history.
+
+![Command component class diagram](UMLDiagrams/CommandClassDiagram.png)
+
+[Editable PlantUML source](UMLDiagrams/CommandClassDiagram.puml)
+
+The command sequence diagrams below show the user calling `Ui` directly, with the application
+entry point omitted. Dashed return arrows go back to the object that made the call; unlabelled
+returns from command execution carry no value because `execute` returns `void`. Console output
+is shown in notes, not as return arrows to the user. Loading and saving are
+shown separately in the storage diagram, which includes `EduReserve` because it calls `Storage`
+directly and handles the corresponding user interaction.
 
 ### Booking model
 
@@ -173,6 +194,10 @@ field) from `Task`. `VenueCatalog` supplies the
 preset venues and checks their availability against the booking list. The plain association
 between `BookingList` and `Booking` allows the same immutable booking objects to also appear
 in search results and undo/redo snapshots.
+
+For readability, only selected members and relationships are shown. Help text, parsing option
+types, sorting options, exceptions, private history records and Java library classes are omitted.
+`Storage.saveBookings` returns the saved file's modification time as a `FileTime`.
 
 ### Storage
 
