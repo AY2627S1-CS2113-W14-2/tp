@@ -15,6 +15,8 @@ import tasks.BookingList;
 
 /** Checks that checksize reports the maximum recorded attendee count for each venue. */
 class SizeCommandTest {
+    private static final System.Logger LOGGER = System.getLogger(SizeCommandTest.class.getName());
+
     @Test
     void execute_checksizePrintsPerVenueMaximumAndIgnoresUnknownCounts() {
         BookingList bookings = new BookingList();
@@ -40,6 +42,31 @@ class SizeCommandTest {
         String output = captureOutput(() -> new SizeCommand().execute(bookings, "checksize"));
 
         assertEquals("No bookings include an attendee count.\n", normalizeNewlines(output));
+    }
+
+    @Test
+    void execute_emptyBookingList_reportsNoAttendeeCounts() {
+        LOGGER.log(System.Logger.Level.INFO, "Checking empty-booking output for attendee counts.");
+        String output = captureOutput(() -> new SizeCommand().execute(new BookingList(), "checksize"));
+
+        assertEquals("No bookings include an attendee count.\n", normalizeNewlines(output));
+    }
+
+    @Test
+    void execute_unsortedCaseVariants_groupsCountsAndPrintsVenuesAlphabetically() {
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking("exam", "Zulu Booking", "LTZ", "05/10/2026 09:00", 30));
+        bookings.add(new Booking("lecture", "Alpha Booking", "lta", "05/10/2026 10:00", 45));
+        bookings.add(new Booking("exam", "Largest Alpha", "LTA", "05/10/2026 11:00", 90));
+
+        LOGGER.log(System.Logger.Level.INFO, "Checking venue grouping, maximum selection and alphabetical output.");
+        String output = captureOutput(() -> new SizeCommand().execute(bookings, "checksize"));
+
+        assertEquals("Largest recorded attendee count by venue:\n"
+                        + "lta: 90 attendees\n"
+                        + "LTZ: 30 attendees\n",
+                normalizeNewlines(output));
+        assertEquals(3, bookings.size());
     }
 
     @Test
