@@ -3,6 +3,7 @@ package command;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -22,6 +23,11 @@ class RedoCommandTest {
     private static final String SECOND = "book r/exam n/Second v/LT2 t/05/10/2026 14:00";
     private static final String THIRD = "book r/exam n/Third v/LT3 t/05/10/2026 14:00";
     private static final String FOURTH = "book r/exam n/Fourth v/LT4 t/05/10/2026 14:00";
+
+    @Test
+    void constructor_missingSharedHistory_failsPrecondition() {
+        assertThrows(AssertionError.class, () -> new RedoCommand(null));
+    }
 
     /**
      * Redoes commands in reverse undo order and makes each redone command undoable again.

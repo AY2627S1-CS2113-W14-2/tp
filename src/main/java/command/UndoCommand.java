@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.logging.Logger;
 
 import exceptions.InvalidCommandException;
 import tasks.Booking;
@@ -14,6 +15,9 @@ import tasks.BookingList;
  * @author Maxkedd
  */
 public class UndoCommand extends Command {
+    /** Records diagnostic details about shared undo/redo history and state restoration. */
+    private static final Logger LOGGER = Logger.getLogger(UndoCommand.class.getName());
+
     /** Most recent successful command is at the top of the stack. */
     private final Deque<UndoEntry> history = new ArrayDeque<>();
     /** Most recently undone command is the next command available for redo. */
@@ -53,6 +57,8 @@ public class UndoCommand extends Command {
         action.run();
         history.push(new UndoEntry(userInput.strip(), previousBookings, copyBookings(bookings)));
         redoHistory.clear();
+        LOGGER.fine(() -> "Undo history recorded: command=" + command
+                + ", undo count=" + history.size() + ", redo history cleared");
     }
 
     /**
@@ -64,9 +70,11 @@ public class UndoCommand extends Command {
     @Override
     public void execute(BookingList bookings, String item) {
         if (!item.strip().equalsIgnoreCase("/undo")) {
+            LOGGER.fine(() -> "Undo rejected: expected /undo without arguments");
             throw new InvalidCommandException("Please use: /undo");
         }
         if (history.isEmpty()) {
+            LOGGER.fine(() -> "Undo skipped: no commands to undo");
             System.out.println("No commands to undo.");
             return;
         }
@@ -75,6 +83,9 @@ public class UndoCommand extends Command {
         restoreBookings(bookings, lastCommand.previousBookings());
         history.pop();
         redoHistory.push(lastCommand);
+        LOGGER.fine(() -> "Undo completed: command=" + lastCommand.userInput()
+                + ", stored count=" + bookings.size() + ", undo count=" + history.size()
+                + ", redo count=" + redoHistory.size());
         System.out.println("Undid command: " + lastCommand.userInput());
     }
 
@@ -85,6 +96,7 @@ public class UndoCommand extends Command {
      */
     void redo(BookingList bookings) {
         if (redoHistory.isEmpty()) {
+            LOGGER.fine(() -> "Redo skipped: no commands to redo");
             System.out.println("No commands to redo.");
             return;
         }
@@ -93,6 +105,9 @@ public class UndoCommand extends Command {
         restoreBookings(bookings, lastUndone.resultingBookings());
         redoHistory.pop();
         history.push(lastUndone);
+        LOGGER.fine(() -> "Redo completed: command=" + lastUndone.userInput()
+                + ", stored count=" + bookings.size() + ", undo count=" + history.size()
+                + ", redo count=" + redoHistory.size());
         System.out.println("Redid command: " + lastUndone.userInput());
     }
 
