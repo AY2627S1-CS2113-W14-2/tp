@@ -8,7 +8,7 @@ what is happening today, while the app stops two classes from using the same ven
 Java and saves each user's bookings to a file.
 
 ### Summary of Contributions
-* **Code contributed**: [RepoSense link] (https://nus-cs2113-ay2627-s1.github.io/tp-dashboard/?search=pratham-tech&breakdown=true)
+* **Code contributed**: [RepoSense link](https://nus-cs2113-ay2627-s1.github.io/tp-dashboard/?search=pratham-tech&breakdown=true)
 
 #### Contributions to team-based tasks
 
