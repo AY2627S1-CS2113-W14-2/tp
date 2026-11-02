@@ -8,6 +8,28 @@ what is happening today, while the app stops two classes from using the same ven
 Java and saves each user's bookings to a file.
 
 ### Summary of Contributions
+* **Code contributed**: [RepoSense link] (https://nus-cs2113-ay2627-s1.github.io/tp-dashboard/?search=pratham-tech&breakdown=true)
+
+#### Contributions to team-based tasks
+
+* **Merged teammates' pull requests** into `master`, checking that the build and Checkstyle still passed after
+  each merge.
+* **Coordinated with the team** on who owned which commands and files, and on shared rules between commands.
+* **Helped teammates with their implementations**, including their questions and ideas related to their commands and tasks.
+* **Contributed ideas during brainstorming**, including the design considerations for the features.
+* **Wrote the Developer Guide glossary for the whole project**, covering all commands and key terms, not only my
+  own features.
+
+* Review/ mentoring contributions: 
+* Reviewed PR [#113](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/113) Fixed DG formatting issues
+* Reviewed PR [#96](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/96) Fixed class diagram and added functions in user guide
+* Reviewed PR [#86](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/86) Class diagram, standardised sequence diagrams and PPP
+* Reviewed PR [#69](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/69) Added sorting by time in list command
+* Reviewed PR [#57](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/57) Updated developer guide user stories
+* Reviewed PR [#41](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/41) Implemented additional sort option for multiple bookings under same name
+* Reviewed PR [#30](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/30) Added assertions for view booking features
+* Reviewed PR [#27](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/27) Assertions - Add Bookings
+* Reviewed PR [#3](https://github.com/AY2627S1-CS2113-W14-2/tp/pull/3) changed the about us
 
 #### Features implemented
 
