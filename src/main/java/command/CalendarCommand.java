@@ -3,6 +3,7 @@ package command;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import tasks.Booking;
 import tasks.BookingList;
@@ -12,6 +13,7 @@ import tasks.BookingList;
  * @author Pratham-tech
  */
 public class CalendarCommand extends Command {
+    private static final Logger LOGGER = Logger.getLogger(CalendarCommand.class.getName());
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/uuuu");
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
 
@@ -41,6 +43,7 @@ public class CalendarCommand extends Command {
 
         ArrayList<Booking> dayBookings = bookings.findByDate(date);
         String dateText = date.format(DATE_FORMAT);
+        LOGGER.fine(() -> "Calendar for " + dateText + ": bookings starting that day=" + dayBookings.size());
 
         if (dayBookings.isEmpty()) {
             System.out.println("No bookings on " + dateText + ".");

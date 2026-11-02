@@ -59,7 +59,7 @@ You can reach us by [opening an issue in our project repository](https://github.
 
 <img src="https://github.com/Pratham-tech.png?size=160" width="160" alt="Pratham Dang's GitHub profile image">
 
-[[GitHub](https://github.com/Pratham-tech)] [[Portfolio](team/Pratham-tech.md)]
+[[GitHub](https://github.com/Pratham-tech)] [[Portfolio](team/pratham-tech.md)]
 
 * Role: Developer
 * Responsibilities: Booking cancellation, keyword search, clash prevention and the daily calendar.

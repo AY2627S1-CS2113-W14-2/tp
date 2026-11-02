@@ -2,6 +2,7 @@ package command;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 import tasks.Booking;
 import tasks.BookingList;
@@ -11,6 +12,7 @@ import tasks.BookingList;
  * @author Pratham-tech
  */
 public class FindCommand extends Command {
+    private static final Logger LOGGER = Logger.getLogger(FindCommand.class.getName());
     /**
      * Prints every booking whose name contains the keyword, ignoring case, in their original order.
      * @author Pratham-tech
@@ -22,9 +24,11 @@ public class FindCommand extends Command {
         assert bookings != null : "Booking list cannot be null";
         assert item != null && !item.isBlank() : "Find keyword must already be validated";
         int listSize = bookings.size();
+        LOGGER.fine(() -> "Finding bookings: keyword=" + item + ", stored count=" + listSize);
 
         ArrayList<Booking> matches = bookings.findByKeyword(item);
         assert matches.size() <= listSize : "Cannot find more bookings than exist";
+        LOGGER.fine(() -> "Find completed: keyword=" + item + ", match count=" + matches.size());
 
         if (matches.isEmpty()) {
             System.out.println("No bookings found matching: " + item);
