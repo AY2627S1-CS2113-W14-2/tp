@@ -36,11 +36,10 @@ You can reach us by [opening an issue in our project repository](https://github.
 
 <img src="https://github.com/JamesZ1110.png?size=160" width="160" alt="Peiyi Zhou's GitHub profile image">
 
-[[GitHub](https://github.com/JamesZ1110)]
+[[GitHub](https://github.com/JamesZ1110)] [[Portfolio](team/jamesz1110.md)]
 
 * Role: Developer
 * Responsibilities: Booking data storage, saved usernames and save-time reporting.
-* Portfolio: Coming soon.
 
 ---
 
