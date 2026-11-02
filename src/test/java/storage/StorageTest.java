@@ -175,7 +175,7 @@ class StorageTest {
      * A rejected venue must not partially overwrite the file, even after a valid booking is processed.
      */
     @Test
-    void saveBookings_storageSeparatorInVenue_preservesExistingFile() throws IOException {
+    void saveBookings_invalidVenueAfterValidBooking_preservesExistingFile() throws IOException {
         Storage storage = new Storage(tempDirectory);
         BookingList original = new BookingList();
         original.add(new Booking("exam", "Existing", "LT1", "05/10/2026 14:00"));
