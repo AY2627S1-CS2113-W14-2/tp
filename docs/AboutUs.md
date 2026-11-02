@@ -23,7 +23,7 @@ You can reach us by [opening an issue in our project repository](https://github.
 
 ### Kyle Lee
 
-<img src= "pics/kytersaurus.jpeg" width="160" >
+<img src="pics/kytersaurus.jpeg" width="160" alt="Kyle Lee">
 
 [[GitHub](https://github.com/Kytersaurus)] [[Portfolio](team/kytersaurus.md)]
 
