@@ -26,6 +26,7 @@ import tasks.VenueCatalog;
 import ui.Parser;
 
 /** Checks one-hour venue searches, printed numbering and preservation of bookings.
+ *
  *  @author Kytersaurus
  */
 class FreeCommandTest {

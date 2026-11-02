@@ -25,6 +25,7 @@ import exceptions.InvalidCommandException;
 import ui.Parser;
 
 /** Checks command parsing, listing output and preservation of stored booking order.
+ *
  *  @author Kytersaurus
  */
 class ListCommandTest {
