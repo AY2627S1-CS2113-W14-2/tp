@@ -9,6 +9,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.junit.jupiter.api.Test;
 
@@ -86,5 +91,45 @@ class FindCommandTest {
         assertThrows(AssertionError.class, () -> new FindCommand().execute(bookings, " "));
         assertThrows(AssertionError.class, () -> new FindCommand().execute(bookings, null));
         assertThrows(AssertionError.class, () -> new FindCommand().execute(null, "CS2"));
+    }
+
+    @Test
+    void execute_fineLogging_recordsKeywordAndMatchCount() {
+        Logger logger = Logger.getLogger(FindCommand.class.getName());
+        Level originalLevel = logger.getLevel();
+        boolean originalParentHandlers = logger.getUseParentHandlers();
+        List<LogRecord> records = new ArrayList<>();
+        Handler handler = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                records.add(record);
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        handler.setLevel(Level.FINE);
+        try {
+            logger.setUseParentHandlers(false);
+            logger.setLevel(Level.FINE);
+            logger.addHandler(handler);
+
+            runFind(createBookings(), "CS2113");
+
+            assertTrue(records.stream().anyMatch(record -> record.getMessage().contains(
+                    "Finding bookings: keyword=CS2113, stored count=3")));
+            assertTrue(records.stream().anyMatch(record -> record.getMessage().contains(
+                    "Find completed: keyword=CS2113, match count=1")));
+        } finally {
+            logger.removeHandler(handler);
+            logger.setLevel(originalLevel);
+            logger.setUseParentHandlers(originalParentHandlers);
+            handler.close();
+        }
     }
 }

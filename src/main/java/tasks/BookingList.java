@@ -5,12 +5,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 /**
  * Owns booking list and provides operations for managing them.
  * @author Maxkedd
  */
 public class BookingList {
+    private static final Logger LOGGER = Logger.getLogger(BookingList.class.getName());
     private final ArrayList<Booking> bookings = new ArrayList<>();
 
     /**
@@ -136,6 +138,8 @@ public class BookingList {
         assert newBooking.getStartTime() != null : "Booking to check for a clash must have a start time";
         for (Booking existing : bookings) {
             if (existing.overlaps(newBooking.getVenue(), newBooking.getStartTime())) {
+                LOGGER.fine(() -> "Clash found: " + newBooking.getName() + " overlaps " + existing.getName()
+                        + " in " + existing.getVenue());
                 return existing;
             }
         }

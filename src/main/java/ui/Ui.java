@@ -15,11 +15,13 @@ import command.FreeCommand;
 import exceptions.InvalidCommandException;
 import tasks.Booking;
 import tasks.BookingList;
+import java.util.logging.Logger;
 
 /**
  * Executes commands and displays booking confirmations or input errors.
  */
 public class Ui {
+    private static final Logger LOGGER = Logger.getLogger(Ui.class.getName());
 
     private final BookingList bookingList;
     private final Parser parser = new Parser();
@@ -123,11 +125,13 @@ public class Ui {
         String name = parser.parseCancel(userInput);
         int index = bookingList.findByName(name);
         if (index == -1) {
+            LOGGER.fine(() -> "Cancel rejected: no booking named " + name);
             throw new InvalidCommandException("No booking found with the name: " + name);
         }
         Booking cancelled = bookingList.get(index);
         bookingList.remove(index);
         assert cancelled.getName().equalsIgnoreCase(name) : "Cancelled booking must match the name";
+        LOGGER.fine(() -> "Cancelled booking: " + cancelled.getName() + ", bookings left=" + bookingList.size());
         System.out.println("Booking cancelled: " + cancelled);
     }
 }
