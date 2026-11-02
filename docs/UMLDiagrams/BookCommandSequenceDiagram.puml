@@ -30,14 +30,14 @@ Bookings --> UI: clash
 deactivate Bookings
 
 alt clash != null
-    UI --> User: Booking clash: venue is already booked
+    note right of UI: Console output: Booking clash: venue is already booked
 else no clash
     UI -> Bookings: add(booking)
     activate Bookings
     Bookings --> UI
     deactivate Bookings
 
-    UI --> User: "Booking added: ..."
+    note right of UI: Console output: "Booking added: ..."
 end
 
 deactivate UI

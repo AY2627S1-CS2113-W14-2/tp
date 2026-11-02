@@ -37,9 +37,9 @@ Bookings --> Calendar: dayBookings
 deactivate Bookings
 
 alt dayBookings is empty
-    Calendar --> User: "No bookings on dd/MM/yyyy."
+    note right of Calendar: Console output: "No bookings on dd/MM/yyyy."
 else bookings found
-    Calendar --> User: numbered bookings with start time, earliest first
+    note right of Calendar: Console output: numbered bookings with start time, earliest first
 end
 
 deactivate Calendar

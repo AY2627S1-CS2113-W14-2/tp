@@ -29,7 +29,7 @@ RedoHistory --> Undo: empty
 deactivate RedoHistory
 
 alt empty == true
-    Undo --> User: "No commands to redo."
+    note right of Undo: Console output: "No commands to redo."
 else redo history contains an undone command
     Undo -> RedoHistory: peek()
     activate RedoHistory
@@ -61,7 +61,7 @@ else redo history contains an undone command
 
     Undo -> History: push(lastUndone)
 
-    Undo --> User: "Redid command: " + lastUndone.userInput()
+    note right of Undo: Console output: "Redid command: " + lastUndone.userInput()
 end
 
 Undo --> Redo

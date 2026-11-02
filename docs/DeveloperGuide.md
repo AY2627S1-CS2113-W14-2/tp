@@ -8,6 +8,7 @@
   - [Setting up the project](#setting-up-the-project)
 - [Design & implementation](#design--implementation)
   - [Overall class diagram](#overall-class-diagram)
+  - [Command class diagram](#command-class-diagram)
   - [Creating a booking: book](#creating-a-booking-book)
   - [Listing bookings: list](#listing-bookings-list)
   - [List available venues: free](#list-available-venues-free)
@@ -146,8 +147,8 @@ superclasses; directed solid lines show navigable associations, and dashed arrow
 
 `EduReserve` creates the UI and storage objects and passes the loaded `BookingList` to `Ui`.
 `Ui` uses `Parser` to interpret input and creates or retains concrete command objects to execute
-operations. All ten command classes extend `Command`; cancellation is handled directly in `Ui`.
-`RedoCommand` refers to the same `UndoCommand` retained by `Ui`, so both use one session history.
+operations. The generic `Command` represents those concrete commands in this overview;
+their inheritance relationships are shown separately below. Cancellation is handled directly in `Ui`.
 
 `BookingList` holds references to `Booking` objects, which inherit their reason (the `description`
 field) from `Task`. `Storage` loads and saves these bookings, while `VenueCatalog` supplies the
@@ -157,11 +158,23 @@ in search results and undo/redo snapshots.
 
 For readability, only selected members and relationships are shown. Help text, parsing option
 types, sorting options, exceptions, private history records and Java library classes are omitted.
-Parser fields in the command classes denote retained references; each concrete command overrides
-`execute(BookingList, String)`.
+`Storage.saveBookings` returns the saved file's modification time as a `FileTime`.
+
+### Command class diagram
+
+All ten concrete command classes extend `Command` and override `execute(BookingList, String)`.
+The diagram omits repeated overrides and most implementation details to focus on inheritance.
+Parser fields denote retained references. `EditCommand` also handles input across multiple commands.
+`RedoCommand` refers to the same `UndoCommand` retained by `Ui`, so both use one session history.
+
+![Command component class diagram](UMLDiagrams/CommandClassDiagram.png)
+
+[Editable PlantUML source](UMLDiagrams/CommandClassDiagram.puml)
 
 The command sequence diagrams below show the user calling `Ui` directly, with the application
-entry point omitted. Arrows back to the user represent console output. Loading and saving are
+entry point omitted. Dashed return arrows go back to the object that made the call; unlabelled
+returns from command execution carry no value because `execute` returns `void`. Console output
+is shown in notes, not as return arrows to the user. Loading and saving are
 shown separately in the storage diagram, which includes `EduReserve` because it calls `Storage`
 directly and handles the corresponding user interaction.
 

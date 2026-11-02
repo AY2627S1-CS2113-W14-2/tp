@@ -1,0 +1,50 @@
+@startuml CommandClassDiagram
+title Command component inheritance
+left to right direction
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam nodesep 18
+skinparam ranksep 35
+hide empty members
+hide circle
+
+package command #E1D5E7 {
+  abstract class "Command\n{abstract}" as Command {
+    {abstract} +execute(bookings: BookingList, item: String): void <U+007B>abstract<U+007D>
+  }
+  class BookCommand {
+    -parser: Parser
+  }
+  class EditCommand {
+    -parser: Parser
+    +isPending(): boolean
+    +processInput(bookings: BookingList, input: String): void
+  }
+  class FreeCommand {
+    -parser: Parser
+  }
+  class ListCommand
+  class ViewCommand
+  class FindCommand
+  class CalendarCommand
+  class SizeCommand
+  class UndoCommand {
+    ~redo(bookings: BookingList): void
+  }
+  class RedoCommand
+
+  Command <|-- BookCommand
+  Command <|-- EditCommand
+  Command <|-- FreeCommand
+  Command <|-- ListCommand
+  Command <|-- ViewCommand
+  Command <|-- FindCommand
+  Command <|-- CalendarCommand
+  Command <|-- SizeCommand
+  Command <|-- UndoCommand
+  Command <|-- RedoCommand
+  RedoCommand --> "1" UndoCommand : undoCommand
+}
+
+@enduml
