@@ -172,6 +172,30 @@ class StorageTest {
     }
 
     @Test
+    void saveBookings_storageSeparatorInVenue_preservesExistingFile() throws IOException {
+        Path dataFile = tempDirectory.resolve("bookings.txt");
+        String originalContents =
+                "B | exam | Existing | LT1 | 05/10/2026 14:00 | \n";
+        Files.writeString(dataFile, originalContents);
+
+        BookingList bookings = new BookingList();
+        bookings.add(new Booking(
+                "exam",
+                "Midterm",
+                "LT | 2",
+                "06/10/2026 14:00"));
+
+        IOException error = assertThrows(
+                IOException.class,
+                () -> new Storage(tempDirectory).saveBookings(bookings));
+
+        assertEquals(
+                "Booking name and venue must not contain |.",
+                error.getMessage());
+        assertEquals(originalContents, Files.readString(dataFile));
+    }
+
+    @Test
     void loadBookings_nestedDirectory_createsParents() throws IOException {
         Path nested = tempDirectory.resolve("nested/data");
 
