@@ -24,7 +24,7 @@ public class ListCommand extends Command {
 
     /**
      * Creates a listing command with its input parser.
-     *
+     * @author Kytersaurus
      * @param parser parser used to validate listing options
      */
     public ListCommand(Parser parser) {

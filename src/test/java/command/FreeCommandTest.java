@@ -25,7 +25,11 @@ import tasks.BookingList;
 import tasks.VenueCatalog;
 import ui.Parser;
 
-/** Checks one-hour venue searches, printed numbering and preservation of bookings. */
+/**
+ * Checks one-hour venue searches, printed numbering and preservation of bookings.
+ *
+ * @author Kytersaurus
+ */
 class FreeCommandTest {
     private static final LocalDateTime REQUESTED_TIME = LocalDateTime.of(2026, 10, 28, 14, 0);
     private final FreeCommand command = new FreeCommand(new Parser());

@@ -1,5 +1,8 @@
 package command;
 
+/**
+ * @author Kytersaurus
+ */
 public enum SortOrder {
     ORIGINAL,
     ALPHABETIC,

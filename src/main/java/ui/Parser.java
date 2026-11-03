@@ -420,7 +420,7 @@ public class Parser {
 
     /**
      * Parses a start-time search or a venue's daily availability search.
-     *
+     * @author Kytersaurus
      * @param input complete free command
      * @return validated availability search options
      * @throws InvalidCommandException if the syntax, venue or date is invalid
@@ -458,6 +458,7 @@ public class Parser {
     /**
      * Holds a time search or a venue-and-date search.
      * Time searches have null venue and date fields; venue searches have a null startTime.
+     * @author Kytersaurus
      */
     public record FreeOptions(LocalDateTime startTime, String venue, LocalDate date) {
     }
